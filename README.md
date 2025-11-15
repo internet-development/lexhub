@@ -17,3 +17,7 @@ A hub for aggregating and searching through AT (Authenticated Transfer) Protocol
     ```
 
 Open [http://localhost:10000](http://localhost:10000) with your browser to see the result.
+
+### Contact
+
+If you have questions ping me on Bluesky, [@caidan.dev](https://bsky.app/profile/caidan.dev). Or you can ping [@internetstudio.bsky.social](https://bsky.app/profile/internetstudio.bsky.social).
