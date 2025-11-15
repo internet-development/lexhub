@@ -1,0 +1,42 @@
+:root {
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+  }
+}
+
+:root {
+  --color-white: rgba(255, 255, 255, 1);
+  --color-black: rgba(0, 0, 0, 1);
+
+  --font-family:
+    -apple-system, BlinkMacSystemFont, helvetica neue, helvetica, sans-serif;
+  --font-family-serif: Georgia, Times New Roman, serif;
+
+  --theme-background: var(--color-white);
+  --theme-text: var(--color-black);
+
+  @media (prefers-color-scheme: dark) {
+    --theme-background: var(--color-black);
+    --theme-text: var(--color-white);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+body {
+  background: var(--theme-background);
+  color: var(--theme-text);
+  font-family: var(--font-family);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
