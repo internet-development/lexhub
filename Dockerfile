@@ -6,13 +6,13 @@ RUN apk add --no-cache libc6-compat
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files first for better caching
 COPY package.json package-lock.json* ./
 
 # Install dependencies
 RUN npm ci
 
-# Copy source code
+# Copy all source files (filtered by .dockerignore)
 COPY . .
 
 # Set environment to production
@@ -21,6 +21,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build the application
 RUN npm run build
+
 
 # Production stage
 FROM node:20-alpine AS runner
