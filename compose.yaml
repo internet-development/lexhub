@@ -29,8 +29,23 @@ services:
 
       # Delivery options
       - NEXUS_DISABLE_ACKS=false
-      # - NEXUS_WEBHOOK_URL=
+      # - NEXUS_WEBHOOK_URL=http://lexhub:3000/api/deliver-event
       # - NEXUS_OUTBOX_ONLY=false
 
       # Logging
       - NEXUS_LOG_LEVEL=info
+    # Note: Health check is defined in the Dockerfile
+
+  lexhub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lexhub
+    restart: unless-stopped
+    depends_on:
+      - nexus
+    ports:
+      - "10000:10000"
+    environment:
+      - NODE_ENV=production
+      - NEXUS_URL=http://nexus:8080
