@@ -1,4 +1,18 @@
 services:
+  lexhub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lexhub
+    restart: unless-stopped
+    depends_on:
+      - nexus
+    ports:
+      - "10000:10000"
+    environment:
+      - NODE_ENV=production
+      - NEXUS_URL=http://nexus:8080
+
   nexus:
     build:
       context: .
@@ -34,17 +48,3 @@ services:
 
       # Logging
       - NEXUS_LOG_LEVEL=info
-
-  lexhub:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: lexhub
-    restart: unless-stopped
-    depends_on:
-      - nexus
-    ports:
-      - "10000:10000"
-    environment:
-      - NODE_ENV=production
-      - NEXUS_URL=http://nexus:8080
