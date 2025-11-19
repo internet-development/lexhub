@@ -6,15 +6,20 @@ interface PageProps {
   }>;
 }
 
-function isValidLexiconId(id: string): boolean {
-  const reverseDnsPattern = /^[a-zA-Z][a-zA-Z0-9]*(\.[a-zA-Z][a-zA-Z0-9]*)+$/;
-  return reverseDnsPattern.test(id);
+/**
+ * Validates Namespaced Identifiers (NSIDs) according to AT Protocol spec
+ * https://atproto.com/specs/nsid
+ */
+const SPEC_NSID_REGEX =
+  /^[a-zA-Z]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+(\.[a-zA-Z]([a-zA-Z0-9]{0,62})?)$/;
+function isValidLexiconNSID(nsid: string): boolean {
+  return SPEC_NSID_REGEX.test(nsid);
 }
 
 export default async function Page({ params }: PageProps) {
   const { id } = await params;
 
-  if (!isValidLexiconId(id)) {
+  if (!isValidLexiconNSID(id)) {
     notFound();
   }
 
