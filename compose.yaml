@@ -6,12 +6,21 @@ services:
     container_name: lexhub
     restart: unless-stopped
     depends_on:
-      - nexus
+      postgres:
+        condition: service_healthy
+      nexus:
+        condition: service_started
     ports:
       - "10000:10000"
     environment:
       - NODE_ENV=production
       - NEXUS_URL=http://nexus:8080
+      - DATABASE_URL=postgresql://lexhub:lexhub_password@postgres:5432/lexhub
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=lexhub
+      - POSTGRES_PASSWORD=lexhub_password
+      - POSTGRES_DB=lexhub
 
   nexus:
     build:
@@ -48,3 +57,42 @@ services:
 
       # Logging
       - NEXUS_LOG_LEVEL=info
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=lexhub
+      - POSTGRES_PASSWORD=lexhub_password
+      - POSTGRES_DB=lexhub
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_preload_libraries=pg_stat_statements"
+      - "-c"
+      - "pg_stat_statements.track=all"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "effective_cache_size=1GB"
+      - "-c"
+      - "work_mem=16MB"
+      - "-c"
+      - "maintenance_work_mem=128MB"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lexhub -d lexhub"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
