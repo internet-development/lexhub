@@ -29,12 +29,11 @@ services:
 
       # Delivery options
       - NEXUS_DISABLE_ACKS=false
-      # - NEXUS_WEBHOOK_URL=http://lexhub:3000/api/ingest
+      - NEXUS_WEBHOOK_URL=http://lexhub:10000/api/ingest
       # - NEXUS_OUTBOX_ONLY=false
 
       # Logging
       - NEXUS_LOG_LEVEL=info
-    # Note: Health check is defined in the Dockerfile
 
   lexhub:
     build:
