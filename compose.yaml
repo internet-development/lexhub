@@ -30,8 +30,8 @@ services:
     restart: unless-stopped
     ports:
       - "8080:8080"
-    # volumes:
-    #   - ./data:/app/data
+    volumes:
+      - nexus_data:/app/data
     environment:
       # Relay configuration
       - NEXUS_RELAY_URL=https://relay1.us-east.bsky.network
@@ -94,5 +94,7 @@ services:
       retries: 5
 
 volumes:
+  nexus_data:
+    driver: local
   postgres_data:
     driver: local
