@@ -1,0 +1,51 @@
+services:
+  nexus:
+    build:
+      context: .
+      dockerfile: nexus.Dockerfile
+    container_name: nexus
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    # volumes:
+    #   - ./data:/app/data
+    environment:
+      # Relay configuration
+      - NEXUS_RELAY_URL=https://relay1.us-east.bsky.network
+
+      # Performance tuning
+      - NEXUS_FIREHOSE_PARALLELISM=10
+      - NEXUS_RESYNC_PARALLELISM=5
+      - NEXUS_OUTBOX_PARALLELISM=5
+
+      # Cursor and timeout settings
+      - NEXUS_CURSOR_SAVE_INTERVAL=5s
+      # - NEXUS_REPO_FETCH_TIMEOUT=180s
+
+      # Network and filtering options
+      - NEXUS_FULL_NETWORK_MODE=false
+      - NEXUS_SIGNAL_COLLECTION=com.atproto.lexicon.schema
+      - NEXUS_COLLECTION_FILTERS=com.atproto.lexicon.schema
+
+      # Delivery options
+      - NEXUS_DISABLE_ACKS=false
+      # - NEXUS_WEBHOOK_URL=http://lexhub:3000/api/ingest
+      # - NEXUS_OUTBOX_ONLY=false
+
+      # Logging
+      - NEXUS_LOG_LEVEL=info
+    # Note: Health check is defined in the Dockerfile
+
+  lexhub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lexhub
+    restart: unless-stopped
+    depends_on:
+      - nexus
+    ports:
+      - "10000:10000"
+    environment:
+      - NODE_ENV=production
+      - NEXUS_URL=http://nexus:8080
