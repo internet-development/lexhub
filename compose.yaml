@@ -29,7 +29,7 @@ services:
 
       # Delivery options
       - NEXUS_DISABLE_ACKS=false
-      # - NEXUS_WEBHOOK_URL=http://lexhub:3000/api/deliver-event
+      # - NEXUS_WEBHOOK_URL=http://lexhub:3000/api/ingest
       # - NEXUS_OUTBOX_ONLY=false
 
       # Logging
