@@ -19,8 +19,8 @@ RUN CGO_ENABLED=1 GOOS=linux go build -o nexus ./cmd/nexus
 # Runtime stage
 FROM alpine:latest
 
-# Install ca-certificates and sqlite support for runtime
-RUN apk --no-cache add ca-certificates sqlite-libs
+# Install ca-certificates, sqlite support, and curl for health checks
+RUN apk --no-cache add ca-certificates sqlite-libs curl
 
 WORKDIR /app
 
@@ -30,11 +30,18 @@ COPY --from=builder /build/nexus .
 # Create data directory for database persistence
 RUN mkdir -p /app/data
 
+# Declare volume for database persistence
+VOLUME ["/app/data"]
+
 # Set default database path to the data directory
 ENV NEXUS_DB_PATH=/app/data/nexus.db
 
-# Declare volume for database persistence
-VOLUME ["/app/data"]
+# Expose default HTTP port
+EXPOSE 8080
+
+# Health check to verify service is running
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl --fail http://localhost:8080/ || exit 1
 
 # Run the binary
 ENTRYPOINT ["./nexus"]
