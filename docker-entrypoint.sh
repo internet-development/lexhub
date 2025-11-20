@@ -15,7 +15,5 @@ echo "PostgreSQL is ready!"
 echo "Running database migrations..."
 npm run db:migrate
 
-echo "Migrations complete! Starting application..."
-
 # Start the Next.js application
-exec node .next/standalone/server.js
+exec node server.js
