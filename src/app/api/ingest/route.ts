@@ -9,7 +9,16 @@ interface UserEvent {
 interface RecordEvent {
   id: number;
   type: "record";
-  record: object;
+  record: {
+    did: string;
+    rev: string;
+    collection: string;
+    rkey: string;
+    action: "create" | "update" | "delete";
+    cid: string;
+    record: object;
+    live: boolean;
+  };
 }
 
 type NexusEvent = UserEvent | RecordEvent;
@@ -31,6 +40,24 @@ function isNexusEvent(obj: any): obj is NexusEvent {
   );
 }
 
+/**
+ * Acknowledges receipt of a Nexus event.
+ * Nexus considers events 'acked' when it receives a 200 response.
+ */
+function ackEvent(body?: BodyInit) {
+  return new NextResponse(body, { status: 200 });
+}
+
+/**
+ * Signals to Nexus that the event should be sent again later.
+ * Nexus will retry events that receive any response other than 200.
+ *
+ * This should be used sparingly to avoid excessive retries.
+ */
+function retryEvent(body?: BodyInit) {
+  return new NextResponse(body, { status: 500 });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -41,29 +68,17 @@ export async function POST(request: NextRequest) {
      * We only want to process 'record' events.
      */
     if (!isNexusEvent(body) || isUserEvent(body)) {
-      return new NextResponse(null, { status: 200 });
+      return ackEvent("Event type not desired");
     }
 
     // TODO(@elijaharita)
     console.log("Received data:", body);
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Data ingested successfully",
-        data: body,
-      },
-      { status: 200 },
-    );
+    return ackEvent("Event ingested successfully");
   } catch (error) {
     console.error("Error processing ingest request:", error);
 
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to process request",
-      },
-      { status: 400 },
-    );
+    // Always acknowledge events that cause unknown errors to prevent potential loops
+    return ackEvent("Failed to process request");
   }
 }
