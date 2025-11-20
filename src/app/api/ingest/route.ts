@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { db } from "@/db";
+import { lexicons } from "@/db/schema";
+
 interface UserEvent {
   id: number;
   type: "user";
@@ -16,8 +19,11 @@ interface RecordEvent {
     rkey: string;
     action: "create" | "update" | "delete";
     cid: string;
-    record: object;
     live: boolean;
+    record: {
+      id: string;
+      [key: string]: any;
+    };
   };
 }
 
@@ -71,8 +77,33 @@ export async function POST(request: NextRequest) {
       return ackEvent("Event type not desired");
     }
 
-    // TODO(@elijaharita)
-    console.log("Received data:", body);
+    const event = body.record;
+    const { cid, record: lexiconRecord } = event;
+
+    // NOTE(caidanw): most lexicon records use 'id', but I've encountered ones using 'nsid'
+    const nsid = lexiconRecord.id ?? lexiconRecord.nsid;
+
+    // Insert or update the lexicon record in the database
+    await db
+      .insert(lexicons)
+      .values({
+        id: nsid,
+        cid: cid,
+        data: lexiconRecord,
+      })
+      .onConflictDoUpdate({
+        target: [lexicons.id, lexicons.cid],
+        set: {
+          data: lexiconRecord,
+        },
+      });
+
+    console.log("Record event ingested:", {
+      id: body.id,
+      nsid: nsid,
+      cid: cid,
+      action: event.action,
+    });
 
     return ackEvent("Event ingested successfully");
   } catch (error) {
