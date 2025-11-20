@@ -8,7 +8,10 @@
     "start": "next start"
   },
   "dependencies": {
+    "drizzle-kit": "^0.31.7",
+    "drizzle-orm": "^0.44.7",
     "next": "16.0.3",
+    "postgres": "^3.4.7",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
