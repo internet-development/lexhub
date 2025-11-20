@@ -35,6 +35,7 @@ Dockerfile
 .dockerignore
 docker-compose.yml
 compose.yaml
+!docker-entrypoint.sh
 
 # Git
 .git

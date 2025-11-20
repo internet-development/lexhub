@@ -1,44 +1,32 @@
-# Build stage
-FROM node:20-alpine AS builder
-
-# Install dependencies needed for build
-RUN apk add --no-cache libc6-compat
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files first for better caching
+# Install runtime dependencies (changes rarely, cache this layer)
+RUN apk add --no-cache libc6-compat curl postgresql-client
+
+# Copy package files first (for better caching)
 COPY package.json package-lock.json* ./
 
-# Install dependencies
+# Install dependencies (cached unless package files change)
 RUN npm ci
 
-# Copy all source files (filtered by .dockerignore)
+# Copy source files (changes often, so do this after deps)
 COPY . .
 
-# Set environment to production
+# Make entrypoint script executable
+RUN chmod +x /app/docker-entrypoint.sh
+
+# Set environment variables
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build the application
 RUN npm run build
 
-
-# Production stage
-FROM node:20-alpine AS runner
-
-WORKDIR /app
-
-# Install runtime dependencies
-RUN apk add --no-cache curl
-
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
-
-# Copy necessary files from builder
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
 
 # Set ownership to nextjs user
 RUN chown -R nextjs:nodejs /app
@@ -46,11 +34,10 @@ RUN chown -R nextjs:nodejs /app
 # Switch to non-root user
 USER nextjs
 
-# Expose the port the app runs on
+# Expose the port
 EXPOSE 10000
 
 # Set environment variables
-ENV NODE_ENV=production
 ENV PORT=10000
 ENV HOSTNAME="0.0.0.0"
 
@@ -58,5 +45,5 @@ ENV HOSTNAME="0.0.0.0"
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:10000/ || exit 1
 
-# Start the application
-CMD ["node", "server.js"]
+# Use entrypoint script to run migrations before starting the app
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
