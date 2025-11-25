@@ -12,6 +12,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@atproto/lexicon": "^0.5.2",
     "@atproto/lexicon-resolver": "^0.2.4",
     "@atproto/syntax": "^0.4.1",
     "drizzle-kit": "^0.31.7",
