@@ -1,61 +1,58 @@
 # Build stage
 FROM node:20-alpine AS builder
 
-# Install dependencies needed for build
-RUN apk add --no-cache libc6-compat
-
 WORKDIR /app
 
-# Copy package files
-COPY package.json package-lock.json* ./
-
 # Install dependencies
+RUN apk add --no-cache libc6-compat
+COPY package.json package-lock.json* ./
 RUN npm ci
 
-# Copy source code
+# Copy source and build
 COPY . .
-
-# Set environment to production
-ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-
-# Build the application
 RUN npm run build
 
-# Production stage
+# Runtime stage
 FROM node:20-alpine AS runner
 
 WORKDIR /app
 
 # Install runtime dependencies
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl postgresql-client
 
-# Create a non-root user
+# Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copy necessary files from builder
-COPY --from=builder /app/public ./public
+# Copy standalone output and static files
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
 
-# Set ownership to nextjs user
+# Copy migration files and dependencies for drizzle-kit
+COPY --from=builder /app/drizzle ./drizzle
+COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
+COPY --from=builder /app/src/db ./src/db
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+
+# Copy entrypoint script
+COPY --from=builder /app/docker-entrypoint.sh ./docker-entrypoint.sh
+RUN chmod +x ./docker-entrypoint.sh
+
+# Set ownership
 RUN chown -R nextjs:nodejs /app
 
-# Switch to non-root user
 USER nextjs
 
-# Expose the port the app runs on
 EXPOSE 10000
 
-# Set environment variables
 ENV NODE_ENV=production
 ENV PORT=10000
 ENV HOSTNAME="0.0.0.0"
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:10000/ || exit 1
 
-# Start the application
-CMD ["node", "server.js"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
