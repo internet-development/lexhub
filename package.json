@@ -20,7 +20,8 @@
     "next": "16.0.3",
     "postgres": "^3.4.7",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@types/node": "^20",
