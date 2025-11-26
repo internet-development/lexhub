@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/db";
 import { lexicons } from "@/db/schema";
+import { isLexiconSchemaRecord, LexiconSchemaRecord } from "@/util/lexicon";
+import { resolveLexiconDidAuthority } from "@atproto/lexicon-resolver";
 
 interface UserEvent {
   id: number;
@@ -20,10 +22,7 @@ interface RecordEvent {
     action: "create" | "update" | "delete";
     cid: string;
     live: boolean;
-    record: {
-      id: string;
-      [key: string]: any;
-    };
+    record: LexiconSchemaRecord;
   };
 }
 
@@ -77,11 +76,20 @@ export async function POST(request: NextRequest) {
       return ackEvent("Event type not desired");
     }
 
-    const event = body.record;
-    const { cid, record: lexiconRecord } = event;
+    const commit = body.record;
+    const { cid, record: lexiconRecord } = commit;
 
-    // NOTE(caidanw): most lexicon records use 'id', but I've encountered ones using 'nsid'
-    const nsid = lexiconRecord.id ?? lexiconRecord.nsid;
+    if (!isLexiconSchemaRecord(lexiconRecord)) {
+      return ackEvent("Not a valid lexicon schema record");
+    }
+
+    const nsid = lexiconRecord.id;
+    const did = await resolveLexiconDidAuthority(nsid);
+
+    // Ensure the DID authority from the NSID matches the record's DID to prevent spoofing
+    if (did === undefined || did !== commit.did) {
+      return ackEvent("NSID DID authority does not match record DID");
+    }
 
     // Insert or update the lexicon record in the database
     await db
@@ -102,7 +110,7 @@ export async function POST(request: NextRequest) {
       id: body.id,
       nsid: nsid,
       cid: cid,
-      action: event.action,
+      action: commit.action,
     });
 
     return ackEvent("Event ingested successfully");
