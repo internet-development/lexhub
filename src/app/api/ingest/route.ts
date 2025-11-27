@@ -3,7 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { lexicons } from "@/db/schema";
 import { isLexiconSchemaRecord, LexiconSchemaRecord } from "@/util/lexicon";
+import { LexiconDoc, parseLexiconDoc } from "@atproto/lexicon";
 import { resolveLexiconDidAuthority } from "@atproto/lexicon-resolver";
+import z from "zod";
 
 interface UserEvent {
   id: number;
@@ -91,24 +93,40 @@ export async function POST(request: NextRequest) {
       return ackEvent("NSID DID authority does not match record DID");
     }
 
+    let lexiconDoc: LexiconDoc;
+    try {
+      lexiconDoc = parseLexiconDoc(lexiconRecord);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.warn(
+          "Lexicon record failed validation:\n",
+          JSON.stringify(error.issues, null, 2),
+        );
+        // TODO(caidanw): store the commit and lexicon record for further analysis, mark as invalid
+      } else {
+        console.error("Unknown error while parsing lexicon record:", error);
+      }
+      return ackEvent("Lexicon record failed to parse");
+    }
+
     // Insert or update the lexicon record in the database
     await db
       .insert(lexicons)
       .values({
-        id: nsid,
+        id: lexiconDoc.id,
         cid: cid,
-        data: lexiconRecord,
+        data: lexiconDoc,
       })
       .onConflictDoUpdate({
         target: [lexicons.id, lexicons.cid],
         set: {
-          data: lexiconRecord,
+          data: lexiconDoc,
         },
       });
 
     console.log("Record event ingested:", {
       id: body.id,
-      nsid: nsid,
+      nsid: lexiconDoc.id,
       cid: cid,
       action: commit.action,
     });
