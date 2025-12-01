@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/db";
-import { lexicons } from "@/db/schema";
+import { invalidLexicons, validLexicons } from "@/db/schema";
 import { isLexiconSchemaRecord, LexiconSchemaRecord } from "@/util/lexicon";
 import { LexiconDoc, parseLexiconDoc } from "@atproto/lexicon";
 import { resolveLexiconDidAuthority } from "@atproto/lexicon-resolver";
@@ -88,50 +88,61 @@ export async function POST(request: NextRequest) {
     const nsid = lexiconRecord.id;
     const did = await resolveLexiconDidAuthority(nsid);
 
-    // Ensure the DID authority from the NSID matches the record's DID to prevent spoofing
+    // DNS validation gate: Reject if DNS doesn't resolve or doesn't match the repo DID
+    // This helps prevents spoofing and DDOS attacks by only storing lexicons with valid DNS authority
     if (did === undefined || did !== commit.did) {
       return ackEvent("NSID DID authority does not match record DID");
     }
 
+    // Attempt to parse and validate the lexicon schema
     let lexiconDoc: LexiconDoc;
     try {
       lexiconDoc = parseLexiconDoc(lexiconRecord);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        console.warn(
-          "Lexicon record failed validation:\n",
-          JSON.stringify(error.issues, null, 2),
-        );
-        // TODO(caidanw): store the commit and lexicon record for further analysis, mark as invalid
-      } else {
-        console.error("Unknown error while parsing lexicon record:", error);
-      }
-      return ackEvent("Lexicon record failed to parse");
-    }
 
-    // Insert or update the lexicon record in the database
-    await db
-      .insert(lexicons)
-      .values({
-        id: lexiconDoc.id,
+      // Valid lexicon: store in valid_lexicons table
+      await db.insert(validLexicons).values({
+        nsid: nsid,
         cid: cid,
+        repoDid: commit.did,
+        repoRev: commit.rev,
         data: lexiconDoc,
-      })
-      .onConflictDoUpdate({
-        target: [lexicons.id, lexicons.cid],
-        set: {
-          data: lexiconDoc,
-        },
       });
 
-    console.log("Record event ingested:", {
-      id: body.id,
-      nsid: lexiconDoc.id,
-      cid: cid,
-      action: commit.action,
-    });
+      console.log("Valid lexicon ingested:", {
+        eventId: body.id,
+        nsid: nsid,
+        cid: cid,
+        repoDid: commit.did,
+        action: commit.action,
+      });
 
-    return ackEvent("Event ingested successfully");
+      return ackEvent("Valid lexicon ingested successfully");
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // Invalid lexicon: store in invalid_lexicons table for debugging
+        await db.insert(invalidLexicons).values({
+          nsid: nsid,
+          cid: cid,
+          repoDid: commit.did,
+          repoRev: commit.rev,
+          rawData: lexiconRecord,
+          validationErrors: error.issues,
+        });
+
+        console.warn("Invalid lexicon ingested:", {
+          eventId: body.id,
+          nsid: nsid,
+          cid: cid,
+          repoDid: commit.did,
+          errorCount: error.issues.length,
+        });
+
+        return ackEvent("Invalid lexicon stored for debugging");
+      } else {
+        console.error("Unknown error while parsing lexicon record:", error);
+        return ackEvent("Lexicon record failed to parse");
+      }
+    }
   } catch (error) {
     console.error("Error processing ingest request:", error);
 
