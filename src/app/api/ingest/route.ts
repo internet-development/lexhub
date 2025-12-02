@@ -121,7 +121,8 @@ export async function POST(request: NextRequest) {
 
       return ackEvent("Valid lexicon ingested successfully");
     } catch (error) {
-      if (error instanceof z.ZodError) {
+      // Check if error has ZodError shape (has 'issues' array)
+      if (error && typeof error === 'object' && 'issues' in error && Array.isArray(error.issues)) {
         // Invalid lexicon: store in invalid_lexicons table for debugging
         await db.insert(invalidLexicons).values({
           nsid: nsid,
@@ -130,7 +131,8 @@ export async function POST(request: NextRequest) {
           repoRev: commit.rev,
           rawData: lexiconRecord,
           validationErrors: error.issues,
-        });
+        })
+        .onConflictDoNothing();
 
         console.warn("Invalid lexicon ingested:", {
           eventId: body.id,
