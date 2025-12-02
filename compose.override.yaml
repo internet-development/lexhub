@@ -1,0 +1,51 @@
+# Development overrides for docker-compose
+# This file is automatically loaded by docker-compose and overrides compose.yaml
+# For production, use: docker-compose -f compose.yaml up
+#
+# In development, run lexhub locally with: npm run dev
+# Only nexus and postgres run in Docker for development
+
+services:
+  lexhub:
+    # Disable lexhub service in development
+    # Run it locally instead with: npm run dev
+    scale: 0
+
+  nexus:
+    restart: no
+    network_mode: host
+    ports: []
+    volumes: []
+    environment:
+      # Reduced parallelism for lighter resource usage
+      - NEXUS_FIREHOSE_PARALLELISM=5
+      - NEXUS_RESYNC_PARALLELISM=2
+      - NEXUS_OUTBOX_PARALLELISM=2
+      # Debug logging for development
+      - NEXUS_LOG_LEVEL=debug
+      - NEXUS_WEBHOOK_URL=http://host.docker.internal:10000/api/ingest
+
+  postgres:
+    restart: no
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_preload_libraries=pg_stat_statements"
+      - "-c"
+      - "pg_stat_statements.track=all"
+      # Reduced resources for development
+      - "-c"
+      - "max_connections=100"
+      - "-c"
+      - "shared_buffers=128MB"
+      - "-c"
+      - "effective_cache_size=512MB"
+      - "-c"
+      - "work_mem=8MB"
+      - "-c"
+      - "maintenance_work_mem=64MB"
+      # SQL query logging for debugging
+      - "-c"
+      - "log_statement=all"
+      - "-c"
+      - "log_duration=on"
