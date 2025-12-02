@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { invalidLexicons, validLexicons } from "@/db/schema";
 import { isLexiconSchemaRecord, LexiconSchemaRecord } from "@/util/lexicon";
-import { LexiconDoc, parseLexiconDoc } from "@atproto/lexicon";
+import { parseLexiconDoc } from "@atproto/lexicon";
 import { resolveLexiconDidAuthority } from "@atproto/lexicon-resolver";
 import z from "zod";
 
