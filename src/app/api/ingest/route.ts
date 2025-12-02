@@ -106,10 +106,9 @@ export async function POST(request: NextRequest) {
       return ackEvent("NSID DID authority does not match record DID");
     }
 
-    // Attempt to parse and validate the lexicon schema
-    let lexiconDoc: LexiconDoc;
     try {
-      lexiconDoc = parseLexiconDoc(lexiconRecord);
+      // Attempt to parse and validate the lexicon schema
+      const lexiconDoc = parseLexiconDoc(lexiconRecord);
 
       // Valid lexicon: store in valid_lexicons table
       await db
