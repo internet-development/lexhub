@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
 
     // DNS validation gate: Reject if DNS doesn't resolve or doesn't match the repo DID
     // This helps prevent spoofing and DDoS attacks by only storing lexicons with valid DNS authority
-    if (did === undefined || did !== commit.did) {
+    if (!did || did !== commit.did) {
       return ackEvent("NSID DID authority does not match record DID");
     }
 
