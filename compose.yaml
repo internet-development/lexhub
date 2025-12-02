@@ -68,7 +68,6 @@ services:
       - POSTGRES_USER=lexhub
       - POSTGRES_PASSWORD=lexhub_password
       - POSTGRES_DB=lexhub
-      - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
     command:
