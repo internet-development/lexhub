@@ -100,13 +100,16 @@ export async function POST(request: NextRequest) {
       lexiconDoc = parseLexiconDoc(lexiconRecord);
 
       // Valid lexicon: store in valid_lexicons table
-      await db.insert(validLexicons).values({
-        nsid: nsid,
-        cid: cid,
-        repoDid: commit.did,
-        repoRev: commit.rev,
-        data: lexiconDoc,
-      });
+      await db
+        .insert(validLexicons)
+        .values({
+          nsid: nsid,
+          cid: cid,
+          repoDid: commit.did,
+          repoRev: commit.rev,
+          data: lexiconDoc,
+        })
+        .onConflictDoNothing();
 
       console.log("Valid lexicon ingested:", {
         eventId: body.id,
