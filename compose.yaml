@@ -59,7 +59,7 @@ services:
       - NEXUS_LOG_LEVEL=info
 
   postgres:
-    image: postgres:17-alpine
+    image: postgres:18-alpine
     container_name: postgres
     restart: unless-stopped
     ports:
