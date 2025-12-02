@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     const did = await resolveLexiconDidAuthority(nsid);
 
     // DNS validation gate: Reject if DNS doesn't resolve or doesn't match the repo DID
-    // This helps prevents spoofing and DDOS attacks by only storing lexicons with valid DNS authority
+    // This helps prevent spoofing and DDoS attacks by only storing lexicons with valid DNS authority
     if (did === undefined || did !== commit.did) {
       return ackEvent("NSID DID authority does not match record DID");
     }
