@@ -1,12 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
-import { handleCorsPreFlight, withCors } from "@/util/cors";
 import { sql, gte } from "drizzle-orm";
-
-export async function OPTIONS() {
-  return handleCorsPreFlight();
-}
 
 export async function GET() {
   try {
@@ -80,13 +75,13 @@ export async function GET() {
     // Note: This is an approximation - some NSIDs may exist in both tables
     const uniqueNsids = Math.max(
       Number(uniqueNsidsValid[0].count),
-      Number(uniqueNsidsInvalid[0].count)
+      Number(uniqueNsidsInvalid[0].count),
     );
 
     // Combine unique repos from both tables
     const uniqueRepositories = Math.max(
       Number(uniqueReposValid[0].count),
-      Number(uniqueReposInvalid[0].count)
+      Number(uniqueReposInvalid[0].count),
     );
 
     const stats = {
@@ -101,23 +96,19 @@ export async function GET() {
       },
     };
 
-    return withCors(
-      NextResponse.json({
-        data: stats,
-      })
-    );
+    return NextResponse.json({
+      data: stats,
+    });
   } catch (error) {
     console.error("Error fetching stats:", error);
-    return withCors(
-      NextResponse.json(
-        {
-          error: {
-            code: "INTERNAL_ERROR",
-            message: "Failed to fetch statistics",
-          },
+    return NextResponse.json(
+      {
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Failed to fetch statistics",
         },
-        { status: 500 }
-      )
+      },
+      { status: 500 },
     );
   }
 }

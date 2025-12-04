@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
-import { handleCorsPreFlight, withCors } from "@/util/cors";
 import { desc, eq, sql } from "drizzle-orm";
 
 /**
@@ -11,13 +10,9 @@ function isValidDID(did: string): boolean {
   return /^did:[a-z]+:.+/.test(did);
 }
 
-export async function OPTIONS() {
-  return handleCorsPreFlight();
-}
-
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ repoDid: string }> }
+  { params }: { params: Promise<{ repoDid: string }> },
 ) {
   try {
     const { repoDid } = await params;
@@ -25,16 +20,14 @@ export async function GET(
 
     // Validate DID
     if (!isValidDID(repoDid)) {
-      return withCors(
-        NextResponse.json(
-          {
-            error: {
-              code: "INVALID_DID",
-              message: "The provided DID is not valid",
-            },
+      return NextResponse.json(
+        {
+          error: {
+            code: "INVALID_DID",
+            message: "The provided DID is not valid",
           },
-          { status: 400 }
-        )
+        },
+        { status: 400 },
       );
     }
 
@@ -42,36 +35,32 @@ export async function GET(
     const validParam = searchParams.get("valid");
     const limit = Math.min(
       parseInt(searchParams.get("limit") || "50", 10),
-      100
+      100,
     );
     const offset = parseInt(searchParams.get("offset") || "0", 10);
 
     // Validate parameters
     if (isNaN(limit) || limit < 1) {
-      return withCors(
-        NextResponse.json(
-          {
-            error: {
-              code: "INVALID_LIMIT",
-              message: "Limit must be a positive number",
-            },
+      return NextResponse.json(
+        {
+          error: {
+            code: "INVALID_LIMIT",
+            message: "Limit must be a positive number",
           },
-          { status: 400 }
-        )
+        },
+        { status: 400 },
       );
     }
 
     if (isNaN(offset) || offset < 0) {
-      return withCors(
-        NextResponse.json(
-          {
-            error: {
-              code: "INVALID_OFFSET",
-              message: "Offset must be a non-negative number",
-            },
+      return NextResponse.json(
+        {
+          error: {
+            code: "INVALID_OFFSET",
+            message: "Offset must be a non-negative number",
           },
-          { status: 400 }
-        )
+        },
+        { status: 400 },
       );
     }
 
@@ -148,35 +137,31 @@ export async function GET(
         ...invalidLexs.map((l) => ({ ...l, valid: false })),
       ].sort(
         (a, b) =>
-          new Date(b.ingestedAt).getTime() - new Date(a.ingestedAt).getTime()
+          new Date(b.ingestedAt).getTime() - new Date(a.ingestedAt).getTime(),
       );
 
       data = merged.slice(0, limit);
       total = Number(validCount[0].count) + Number(invalidCount[0].count);
     }
 
-    return withCors(
-      NextResponse.json({
-        data,
-        pagination: {
-          limit,
-          offset,
-          total,
-        },
-      })
-    );
+    return NextResponse.json({
+      data,
+      pagination: {
+        limit,
+        offset,
+        total,
+      },
+    });
   } catch (error) {
     console.error("Error fetching lexicons for repository:", error);
-    return withCors(
-      NextResponse.json(
-        {
-          error: {
-            code: "INTERNAL_ERROR",
-            message: "Failed to fetch lexicons for repository",
-          },
+    return NextResponse.json(
+      {
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Failed to fetch lexicons for repository",
         },
-        { status: 500 }
-      )
+      },
+      { status: 500 },
     );
   }
 }

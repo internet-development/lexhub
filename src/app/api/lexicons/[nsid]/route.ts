@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
-import { handleCorsPreFlight, withCors } from "@/util/cors";
 import { desc, eq, sql } from "drizzle-orm";
 
 /**
@@ -15,13 +14,9 @@ function isValidNSID(nsid: string): boolean {
   return SPEC_NSID_REGEX.test(nsid);
 }
 
-export async function OPTIONS() {
-  return handleCorsPreFlight();
-}
-
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ nsid: string }> }
+  { params }: { params: Promise<{ nsid: string }> },
 ) {
   try {
     const { nsid } = await params;
@@ -29,16 +24,14 @@ export async function GET(
 
     // Validate NSID
     if (!isValidNSID(nsid)) {
-      return withCors(
-        NextResponse.json(
-          {
-            error: {
-              code: "INVALID_NSID",
-              message: "The provided NSID is not valid",
-            },
+      return NextResponse.json(
+        {
+          error: {
+            code: "INVALID_NSID",
+            message: "The provided NSID is not valid",
           },
-          { status: 400 }
-        )
+        },
+        { status: 400 },
       );
     }
 
@@ -47,36 +40,32 @@ export async function GET(
     const latest = searchParams.get("latest") === "true";
     const limit = Math.min(
       parseInt(searchParams.get("limit") || "50", 10),
-      100
+      100,
     );
     const offset = parseInt(searchParams.get("offset") || "0", 10);
 
     // Validate parameters
     if (isNaN(limit) || limit < 1) {
-      return withCors(
-        NextResponse.json(
-          {
-            error: {
-              code: "INVALID_LIMIT",
-              message: "Limit must be a positive number",
-            },
+      return NextResponse.json(
+        {
+          error: {
+            code: "INVALID_LIMIT",
+            message: "Limit must be a positive number",
           },
-          { status: 400 }
-        )
+        },
+        { status: 400 },
       );
     }
 
     if (isNaN(offset) || offset < 0) {
-      return withCors(
-        NextResponse.json(
-          {
-            error: {
-              code: "INVALID_OFFSET",
-              message: "Offset must be a non-negative number",
-            },
+      return NextResponse.json(
+        {
+          error: {
+            code: "INVALID_OFFSET",
+            message: "Offset must be a non-negative number",
           },
-          { status: 400 }
-        )
+        },
+        { status: 400 },
       );
     }
 
@@ -93,11 +82,9 @@ export async function GET(
           .orderBy(desc(validLexicons.ingestedAt))
           .limit(1);
 
-        return withCors(
-          NextResponse.json({
-            data: lexicon[0] || null,
-          })
-        );
+        return NextResponse.json({
+          data: lexicon[0] || null,
+        });
       } else {
         const [lexicons, countResult] = await Promise.all([
           db
@@ -126,11 +113,9 @@ export async function GET(
           .orderBy(desc(invalidLexicons.ingestedAt))
           .limit(1);
 
-        return withCors(
-          NextResponse.json({
-            data: lexicon[0] || null,
-          })
-        );
+        return NextResponse.json({
+          data: lexicon[0] || null,
+        });
       } else {
         const [lexicons, countResult] = await Promise.all([
           db
@@ -177,11 +162,9 @@ export async function GET(
 
         const latest = validDate > invalidDate ? validLex[0] : invalidLex[0];
 
-        return withCors(
-          NextResponse.json({
-            data: latest || null,
-          })
-        );
+        return NextResponse.json({
+          data: latest || null,
+        });
       } else {
         const [validLexs, invalidLexs, validCount, invalidCount] =
           await Promise.all([
@@ -215,8 +198,7 @@ export async function GET(
           ...invalidLexs.map((l) => ({ ...l, valid: false })),
         ].sort(
           (a, b) =>
-            new Date(b.ingestedAt).getTime() -
-            new Date(a.ingestedAt).getTime()
+            new Date(b.ingestedAt).getTime() - new Date(a.ingestedAt).getTime(),
         );
 
         data = merged.slice(0, limit);
@@ -224,28 +206,24 @@ export async function GET(
       }
     }
 
-    return withCors(
-      NextResponse.json({
-        data,
-        pagination: {
-          limit,
-          offset,
-          total,
-        },
-      })
-    );
+    return NextResponse.json({
+      data,
+      pagination: {
+        limit,
+        offset,
+        total,
+      },
+    });
   } catch (error) {
     console.error("Error fetching lexicons for NSID:", error);
-    return withCors(
-      NextResponse.json(
-        {
-          error: {
-            code: "INTERNAL_ERROR",
-            message: "Failed to fetch lexicons",
-          },
+    return NextResponse.json(
+      {
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Failed to fetch lexicons",
         },
-        { status: 500 }
-      )
+      },
+      { status: 500 },
     );
   }
 }
