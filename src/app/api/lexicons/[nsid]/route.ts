@@ -2,17 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
-
-/**
- * Validates Namespaced Identifiers (NSIDs) according to AT Protocol spec
- * https://atproto.com/specs/nsid
- */
-const SPEC_NSID_REGEX =
-  /^[a-zA-Z]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+(\.[a-zA-Z]([a-zA-Z0-9]{0,62})?)$/;
-
-function isValidNSID(nsid: string): boolean {
-  return SPEC_NSID_REGEX.test(nsid);
-}
+import { isValidNsid } from "@atproto/syntax";
 
 export async function GET(
   request: NextRequest,
@@ -23,7 +13,7 @@ export async function GET(
     const { searchParams } = new URL(request.url);
 
     // Validate NSID
-    if (!isValidNSID(nsid)) {
+    if (!isValidNsid(nsid)) {
       return NextResponse.json(
         {
           error: {
