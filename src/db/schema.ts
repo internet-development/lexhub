@@ -8,19 +8,20 @@ import {
 } from "drizzle-orm/pg-core";
 
 /**
- * Lexicons table stores ATProto Lexicon files.
+ * Valid lexicons table stores ATProto Lexicon schemas that have passed both
+ * DNS validation and schema validation.
  *
- * Each row represents a specific version of a lexicon, identified by the combination
- * of NSID (id) and CID (content hash). This allows tracking lexicons over their lifetime.
+ * Primary key is [nsid, cid, repo_did] to handle migrations where the same
+ * lexicon content (same CID) is published from a different DID.
  */
-export const lexicons = pgTable(
-  "lexicons",
+export const validLexicons = pgTable(
+  "valid_lexicons",
   {
     /**
      * NSID - Namespaced Identifier (e.g., com.atproto.sync.subscribeRepos)
      * Max length: 317 characters per NSID spec
      */
-    id: varchar({ length: 317 }).notNull(),
+    nsid: varchar({ length: 317 }).notNull(),
 
     /**
      * CID - Content Identifier hash (e.g., bafyreidfayvfuwqa7qlnopdjiqrxzs6blmoeu4rujcjtnci5beludirz2a)
@@ -30,40 +31,112 @@ export const lexicons = pgTable(
     cid: varchar({ length: 100 }).notNull(),
 
     /**
-     * Full lexicon record in JSON format.
+     * Repository DID that published this lexicon version.
+     * DNS validation ensures this DID matches the NSID's DNS TXT record.
+     * Max length: 256 chars for DID identifiers
+     */
+    repoDid: varchar("repo_did", { length: 256 }).notNull(),
+
+    /**
+     * Repository revision at time of ingestion
+     */
+    repoRev: varchar("repo_rev", { length: 256 }).notNull(),
+
+    /**
+     * Validated, parsed LexiconDoc in JSON format.
      * Contains: id, $type, lexicon, defs, description
      */
     data: jsonb().notNull(),
 
     /**
-     * Timestamp when this lexicon record was first ingested
+     * Timestamp when this lexicon version was ingested
      */
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-
-    /**
-     * Timestamp when this lexicon record was last updated
-     */
-    updatedAt: timestamp("updated_at", { withTimezone: true })
+    ingestedAt: timestamp("ingested_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
   (table) => [
-    // Composite primary key: each NSID+CID combination is unique
-    primaryKey({ columns: [table.id, table.cid] }),
+    // Composite primary key includes repo_did to track migrations
+    primaryKey({ columns: [table.nsid, table.cid, table.repoDid] }),
 
-    // Index on id alone for quick lookup of all versions of a lexicon
-    index("lexicons_id_idx").on(table.id),
+    // Index on nsid for quick lookup of all versions of a lexicon
+    index("valid_lexicons_nsid_idx").on(table.nsid),
 
-    // Index on createdAt for chronological queries
-    index("lexicons_created_at_idx").on(table.createdAt),
+    // Index on repo_did to find all lexicons from a specific repository
+    index("valid_lexicons_repo_did_idx").on(table.repoDid),
 
-    // JSONB GIN index for efficient querying of the entire data field
-    // Useful for full-text searches and containment queries within the lexicon data
-    index("lexicons_data_gin_idx").using("gin", table.data),
+    // JSONB GIN index for efficient querying within lexicon content
+    index("valid_lexicons_data_gin_idx").using("gin", table.data),
   ],
 );
 
-export type Lexicon = typeof lexicons.$inferSelect;
-export type NewLexicon = typeof lexicons.$inferInsert;
+/**
+ * Invalid lexicons table stores lexicon records that passed DNS validation
+ * but failed schema validation. Used for debugging and helping developers
+ * identify why their lexicons are broken.
+ *
+ * Primary key is [nsid, cid, repo_did] matching valid_lexicons structure.
+ */
+export const invalidLexicons = pgTable(
+  "invalid_lexicons",
+  {
+    /**
+     * NSID - Namespaced Identifier
+     */
+    nsid: varchar({ length: 317 }).notNull(),
+
+    /**
+     * CID - Content Identifier hash
+     */
+    cid: varchar({ length: 100 }).notNull(),
+
+    /**
+     * Repository DID that published this invalid lexicon.
+     * DNS was validated, but schema validation failed.
+     */
+    repoDid: varchar("repo_did", { length: 256 }).notNull(),
+
+    /**
+     * Repository revision at time of ingestion
+     */
+    repoRev: varchar("repo_rev", { length: 256 }).notNull(),
+
+    /**
+     * Raw, unvalidated data that failed schema validation.
+     * May not conform to LexiconDoc structure.
+     */
+    rawData: jsonb("raw_data").notNull(),
+
+    /**
+     * Validation errors from Zod parser.
+     * Contains ZodError issues array with details about what failed.
+     */
+    validationErrors: jsonb("validation_errors").notNull(),
+
+    /**
+     * Timestamp when this invalid lexicon was ingested
+     */
+    ingestedAt: timestamp("ingested_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    // Composite primary key matches valid_lexicons
+    primaryKey({ columns: [table.nsid, table.cid, table.repoDid] }),
+
+    // Index on nsid for debugging specific lexicons
+    index("invalid_lexicons_nsid_idx").on(table.nsid),
+
+    // Index on repo_did to find all invalid lexicons from a repository
+    index("invalid_lexicons_repo_did_idx").on(table.repoDid),
+
+    // JSONB GIN index for searching validation errors
+    index("invalid_lexicons_raw_data_gin_idx").using("gin", table.rawData),
+  ],
+);
+
+export type ValidLexicon = typeof validLexicons.$inferSelect;
+export type NewValidLexicon = typeof validLexicons.$inferInsert;
+
+export type InvalidLexicon = typeof invalidLexicons.$inferSelect;
+export type NewInvalidLexicon = typeof invalidLexicons.$inferInsert;

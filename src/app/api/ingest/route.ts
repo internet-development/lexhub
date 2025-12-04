@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/db";
-import { lexicons } from "@/db/schema";
+import { invalidLexicons, validLexicons } from "@/db/schema";
+import { isLexiconSchemaRecord, LexiconSchemaRecord } from "@/util/lexicon";
+import { parseLexiconDoc } from "@atproto/lexicon";
+import { resolveLexiconDidAuthority } from "@atproto/lexicon-resolver";
+import z from "zod";
 
 interface UserEvent {
   id: number;
@@ -20,10 +24,7 @@ interface RecordEvent {
     action: "create" | "update" | "delete";
     cid: string;
     live: boolean;
-    record: {
-      id: string;
-      [key: string]: any;
-    };
+    record: LexiconSchemaRecord;
   };
 }
 
@@ -43,6 +44,18 @@ function isNexusEvent(obj: any): obj is NexusEvent {
     typeof obj === "object" &&
     typeof obj.id === "number" &&
     (obj.type === "user" || obj.type === "record")
+  );
+}
+
+function isZodError(error: any): error is z.ZodError {
+  if (error instanceof z.ZodError) return true;
+
+  // Check for ZodError shape, since instanceof may fail when ZodError is nested in another error
+  return (
+    error &&
+    typeof error === "object" &&
+    "issues" in error &&
+    Array.isArray(error.issues)
   );
 }
 
@@ -77,35 +90,76 @@ export async function POST(request: NextRequest) {
       return ackEvent("Event type not desired");
     }
 
-    const event = body.record;
-    const { cid, record: lexiconRecord } = event;
+    const commit = body.record;
+    const { cid, record: lexiconRecord } = commit;
 
-    // NOTE(caidanw): most lexicon records use 'id', but I've encountered ones using 'nsid'
-    const nsid = lexiconRecord.id ?? lexiconRecord.nsid;
+    if (!isLexiconSchemaRecord(lexiconRecord)) {
+      return ackEvent("Not a valid lexicon schema record");
+    }
 
-    // Insert or update the lexicon record in the database
-    await db
-      .insert(lexicons)
-      .values({
-        id: nsid,
+    const nsid = lexiconRecord.id;
+    const did = await resolveLexiconDidAuthority(nsid);
+
+    // DNS validation gate: Reject if DNS doesn't resolve or doesn't match the repo DID
+    // This helps prevent spoofing and DDoS attacks by only storing lexicons with valid DNS authority
+    if (!did || did !== commit.did) {
+      return ackEvent("NSID DID authority does not match record DID");
+    }
+
+    try {
+      // Attempt to parse and validate the lexicon schema
+      const lexiconDoc = parseLexiconDoc(lexiconRecord);
+
+      // Valid lexicon: store in valid_lexicons table
+      await db
+        .insert(validLexicons)
+        .values({
+          nsid: nsid,
+          cid: cid,
+          repoDid: commit.did,
+          repoRev: commit.rev,
+          data: lexiconDoc,
+        })
+        .onConflictDoNothing();
+
+      console.log("Valid lexicon ingested:", {
+        eventId: body.id,
+        nsid: nsid,
         cid: cid,
-        data: lexiconRecord,
-      })
-      .onConflictDoUpdate({
-        target: [lexicons.id, lexicons.cid],
-        set: {
-          data: lexiconRecord,
-        },
+        repoDid: commit.did,
+        action: commit.action,
       });
 
-    console.log("Record event ingested:", {
-      id: body.id,
-      nsid: nsid,
-      cid: cid,
-      action: event.action,
-    });
+      return ackEvent("Valid lexicon ingested successfully");
+    } catch (error) {
+      if (isZodError(error)) {
+        // Invalid lexicon: store in invalid_lexicons table for debugging
+        await db
+          .insert(invalidLexicons)
+          .values({
+            nsid: nsid,
+            cid: cid,
+            repoDid: commit.did,
+            repoRev: commit.rev,
+            rawData: lexiconRecord,
+            validationErrors: error.issues,
+          })
+          .onConflictDoNothing();
 
-    return ackEvent("Event ingested successfully");
+        console.warn("Invalid lexicon ingested:", {
+          eventId: body.id,
+          nsid: nsid,
+          cid: cid,
+          repoDid: commit.did,
+          errorCount: error.issues.length,
+        });
+
+        return ackEvent("Invalid lexicon stored for debugging");
+      } else {
+        console.error("Unknown error while parsing lexicon record:", error);
+        return ackEvent("Lexicon record failed to parse");
+      }
+    }
   } catch (error) {
     console.error("Error processing ingest request:", error);
 

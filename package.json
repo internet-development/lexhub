@@ -12,12 +12,16 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@atproto/lexicon": "^0.5.2",
+    "@atproto/lexicon-resolver": "^0.2.4",
+    "@atproto/syntax": "^0.4.1",
     "drizzle-kit": "^0.31.7",
     "drizzle-orm": "^0.44.7",
     "next": "16.0.3",
     "postgres": "^3.4.7",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@types/node": "^20",
