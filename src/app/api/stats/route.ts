@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
 import { sql, gte } from "drizzle-orm";
@@ -96,12 +95,12 @@ export async function GET() {
       },
     };
 
-    return NextResponse.json({
+    return Response.json({
       data: stats,
     });
   } catch (error) {
     console.error("Error fetching stats:", error);
-    return NextResponse.json(
+    return Response.json(
       {
         error: {
           code: "INTERNAL_ERROR",

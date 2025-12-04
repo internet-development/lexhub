@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
@@ -10,11 +10,11 @@ export async function GET(
 ) {
   try {
     const { nsid } = await params;
-    const { searchParams } = new URL(request.url);
+    const searchParams = request.nextUrl.searchParams;
 
     // Validate NSID
     if (!isValidNsid(nsid)) {
-      return NextResponse.json(
+      return Response.json(
         {
           error: {
             code: "INVALID_NSID",
@@ -36,7 +36,7 @@ export async function GET(
 
     // Validate parameters
     if (isNaN(limit) || limit < 1) {
-      return NextResponse.json(
+      return Response.json(
         {
           error: {
             code: "INVALID_LIMIT",
@@ -48,7 +48,7 @@ export async function GET(
     }
 
     if (isNaN(offset) || offset < 0) {
-      return NextResponse.json(
+      return Response.json(
         {
           error: {
             code: "INVALID_OFFSET",
@@ -72,7 +72,7 @@ export async function GET(
           .orderBy(desc(validLexicons.ingestedAt))
           .limit(1);
 
-        return NextResponse.json({
+        return Response.json({
           data: lexicon[0] || null,
         });
       } else {
@@ -103,7 +103,7 @@ export async function GET(
           .orderBy(desc(invalidLexicons.ingestedAt))
           .limit(1);
 
-        return NextResponse.json({
+        return Response.json({
           data: lexicon[0] || null,
         });
       } else {
@@ -152,7 +152,7 @@ export async function GET(
 
         const latest = validDate > invalidDate ? validLex[0] : invalidLex[0];
 
-        return NextResponse.json({
+        return Response.json({
           data: latest || null,
         });
       } else {
@@ -196,7 +196,7 @@ export async function GET(
       }
     }
 
-    return NextResponse.json({
+    return Response.json({
       data,
       pagination: {
         limit,
@@ -206,7 +206,7 @@ export async function GET(
     });
   } catch (error) {
     console.error("Error fetching lexicons for NSID:", error);
-    return NextResponse.json(
+    return Response.json(
       {
         error: {
           code: "INTERNAL_ERROR",

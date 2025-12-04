@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
 import { desc, eq, and, sql } from "drizzle-orm";
@@ -9,13 +9,13 @@ const idResolver = new IdResolver();
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const searchParams = request.nextUrl.searchParams;
 
     const uriParam = searchParams.get("uri");
     const cidParam = searchParams.get("cid");
 
     if (!uriParam) {
-      return NextResponse.json(
+      return Response.json(
         {
           error: {
             code: "MISSING_URI",
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     try {
       atUri = new AtUri(uriParam);
     } catch (error) {
-      return NextResponse.json(
+      return Response.json(
         {
           error: {
             code: "INVALID_AT_URI",
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 
     // Validate that we have collection and rkey (NSID)
     if (!atUri.collection || !atUri.rkey) {
-      return NextResponse.json(
+      return Response.json(
         {
           error: {
             code: "INVALID_AT_URI_PATH",
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       try {
         const resolvedDid = await idResolver.handle.resolve(repoDid);
         if (!resolvedDid) {
-          return NextResponse.json(
+          return Response.json(
             {
               error: {
                 code: "HANDLE_NOT_FOUND",
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
         repoDid = resolvedDid;
       } catch (error) {
         console.error("Error resolving handle:", error);
-        return NextResponse.json(
+        return Response.json(
           {
             error: {
               code: "HANDLE_RESOLUTION_ERROR",
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
         .limit(1);
 
       if (validLexicon.length > 0) {
-        return NextResponse.json({
+        return Response.json({
           data: validLexicon[0],
         });
       }
@@ -124,13 +124,13 @@ export async function GET(request: NextRequest) {
         .limit(1);
 
       if (invalidLexicon.length > 0) {
-        return NextResponse.json({
+        return Response.json({
           data: invalidLexicon[0],
         });
       }
 
       // Not found
-      return NextResponse.json(
+      return Response.json(
         {
           error: {
             code: "NOT_FOUND",
@@ -194,7 +194,7 @@ export async function GET(request: NextRequest) {
 
     const total = Number(validCount[0].count) + Number(invalidCount[0].count);
 
-    return NextResponse.json({
+    return Response.json({
       data: merged,
       pagination: {
         limit: merged.length,
@@ -204,7 +204,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error resolving AT URI:", error);
-    return NextResponse.json(
+    return Response.json(
       {
         error: {
           code: "INTERNAL_ERROR",

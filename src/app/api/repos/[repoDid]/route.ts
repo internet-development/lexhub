@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
@@ -10,13 +10,13 @@ export async function GET(
 ) {
   try {
     const { repoDid } = await params;
-    const { searchParams } = new URL(request.url);
+    const searchParams = request.nextUrl.searchParams;
 
     // Validate DID
     try {
       ensureValidDid(repoDid);
     } catch (error) {
-      return NextResponse.json(
+      return Response.json(
         {
           error: {
             code: "INVALID_DID",
@@ -34,7 +34,7 @@ export async function GET(
 
     // Validate parameters
     if (isNaN(limit) || limit < 1) {
-      return NextResponse.json(
+      return Response.json(
         {
           error: {
             code: "INVALID_LIMIT",
@@ -46,7 +46,7 @@ export async function GET(
     }
 
     if (isNaN(offset) || offset < 0) {
-      return NextResponse.json(
+      return Response.json(
         {
           error: {
             code: "INVALID_OFFSET",
@@ -137,7 +137,7 @@ export async function GET(
       total = Number(validCount[0].count) + Number(invalidCount[0].count);
     }
 
-    return NextResponse.json({
+    return Response.json({
       data,
       pagination: {
         limit,
@@ -147,7 +147,7 @@ export async function GET(
     });
   } catch (error) {
     console.error("Error fetching lexicons for repository:", error);
-    return NextResponse.json(
+    return Response.json(
       {
         error: {
           code: "INTERNAL_ERROR",
