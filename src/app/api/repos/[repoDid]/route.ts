@@ -2,13 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
-
-/**
- * Basic DID validation - checks if string starts with 'did:' and has method
- */
-function isValidDID(did: string): boolean {
-  return /^did:[a-z]+:.+/.test(did);
-}
+import { ensureValidDid } from "@atproto/syntax";
 
 export async function GET(
   request: NextRequest,
@@ -19,7 +13,9 @@ export async function GET(
     const { searchParams } = new URL(request.url);
 
     // Validate DID
-    if (!isValidDID(repoDid)) {
+    try {
+      ensureValidDid(repoDid);
+    } catch (error) {
       return NextResponse.json(
         {
           error: {
