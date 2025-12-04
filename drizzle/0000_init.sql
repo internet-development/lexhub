@@ -1,4 +1,3 @@
--- Create valid_lexicons table
 CREATE TABLE "valid_lexicons" (
 	"nsid" varchar(317) NOT NULL,
 	"cid" varchar(100) NOT NULL,
@@ -7,9 +6,11 @@ CREATE TABLE "valid_lexicons" (
 	"data" jsonb NOT NULL,
 	"ingested_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "valid_lexicons_nsid_cid_repo_did_pk" PRIMARY KEY("nsid","cid","repo_did")
-);
---> statement-breakpoint
--- Create invalid_lexicons table
+);--> statement-breakpoint
+CREATE INDEX "valid_lexicons_nsid_idx" ON "valid_lexicons" USING btree ("nsid");--> statement-breakpoint
+CREATE INDEX "valid_lexicons_repo_did_idx" ON "valid_lexicons" USING btree ("repo_did");--> statement-breakpoint
+CREATE INDEX "valid_lexicons_data_gin_idx" ON "valid_lexicons" USING gin ("data");--> statement-breakpoint
+
 CREATE TABLE "invalid_lexicons" (
 	"nsid" varchar(317) NOT NULL,
 	"cid" varchar(100) NOT NULL,
@@ -19,13 +20,7 @@ CREATE TABLE "invalid_lexicons" (
 	"validation_errors" jsonb NOT NULL,
 	"ingested_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "invalid_lexicons_nsid_cid_repo_did_pk" PRIMARY KEY("nsid","cid","repo_did")
-);
---> statement-breakpoint
--- Create indexes for valid_lexicons
-CREATE INDEX "valid_lexicons_nsid_idx" ON "valid_lexicons" USING btree ("nsid");--> statement-breakpoint
-CREATE INDEX "valid_lexicons_repo_did_idx" ON "valid_lexicons" USING btree ("repo_did");--> statement-breakpoint
-CREATE INDEX "valid_lexicons_data_gin_idx" ON "valid_lexicons" USING gin ("data");--> statement-breakpoint
--- Create indexes for invalid_lexicons
+);--> statement-breakpoint
 CREATE INDEX "invalid_lexicons_nsid_idx" ON "invalid_lexicons" USING btree ("nsid");--> statement-breakpoint
 CREATE INDEX "invalid_lexicons_repo_did_idx" ON "invalid_lexicons" USING btree ("repo_did");--> statement-breakpoint
 CREATE INDEX "invalid_lexicons_raw_data_gin_idx" ON "invalid_lexicons" USING gin ("raw_data");
