@@ -29,11 +29,8 @@ export async function GET(
 
     // Parse query parameters
     const validParam = searchParams.get("valid");
-    const limit = Math.min(
-      parseInt(searchParams.get("limit") || "50", 10),
-      100,
-    );
-    const offset = parseInt(searchParams.get("offset") || "0", 10);
+    const limit = Math.min(parseInt(searchParams.get("limit") ?? "50"), 100);
+    const offset = parseInt(searchParams.get("offset") ?? "0");
 
     // Validate parameters
     if (isNaN(limit) || limit < 1) {
