@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
 import { desc, eq, and, sql } from "drizzle-orm";
-import { AtUri } from "@atproto/syntax";
+import { AtUri, isValidHandle } from "@atproto/syntax";
 import { IdResolver } from "@atproto/identity";
 
 const idResolver = new IdResolver();
@@ -42,9 +42,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Validate that we have collection and rkey (NSID)
+    if (!atUri.collection || !atUri.rkey) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "INVALID_AT_URI_PATH",
+            message: "AT URI must include collection and record key",
+          },
+        },
+        { status: 400 },
+      );
+    }
+
     // Resolve handle to DID if necessary
     let repoDid = atUri.hostname;
-    if (!repoDid.startsWith("did:")) {
+    if (isValidHandle(repoDid)) {
       try {
         const resolvedDid = await idResolver.handle.resolve(repoDid);
         if (!resolvedDid) {
@@ -73,23 +86,8 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Extract NSID from path
-    // AT URI format: at://DID/com.atproto.lexicon/NSID
-    // We expect the NSID to be the last segment of the path
-    const pathSegments = atUri.pathname.split("/").filter(Boolean);
-    if (pathSegments.length < 2) {
-      return NextResponse.json(
-        {
-          error: {
-            code: "INVALID_AT_URI_PATH",
-            message: "AT URI must include collection and NSID in path",
-          },
-        },
-        { status: 400 },
-      );
-    }
-
-    const nsid = pathSegments[pathSegments.length - 1];
+    // Extract NSID from AT URI rkey
+    const nsid = atUri.rkey;
 
     // If CID is provided, return exact version
     if (cidParam) {
