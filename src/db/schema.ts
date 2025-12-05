@@ -14,7 +14,7 @@ import {
  * Primary key is [nsid, cid, repo_did] to handle migrations where the same
  * lexicon content (same CID) is published from a different DID.
  */
-export const validLexicons = pgTable(
+export const valid_lexicons = pgTable(
   "valid_lexicons",
   {
     /**
@@ -77,7 +77,7 @@ export const validLexicons = pgTable(
  *
  * Primary key is [nsid, cid, repo_did] matching valid_lexicons structure.
  */
-export const invalidLexicons = pgTable(
+export const invalid_lexicons = pgTable(
   "invalid_lexicons",
   {
     /**
@@ -135,8 +135,8 @@ export const invalidLexicons = pgTable(
   ],
 );
 
-export type ValidLexicon = typeof validLexicons.$inferSelect;
-export type NewValidLexicon = typeof validLexicons.$inferInsert;
+export type ValidLexicon = typeof valid_lexicons.$inferSelect;
+export type NewValidLexicon = typeof valid_lexicons.$inferInsert;
 
-export type InvalidLexicon = typeof invalidLexicons.$inferSelect;
-export type NewInvalidLexicon = typeof invalidLexicons.$inferInsert;
+export type InvalidLexicon = typeof invalid_lexicons.$inferSelect;
+export type NewInvalidLexicon = typeof invalid_lexicons.$inferInsert;

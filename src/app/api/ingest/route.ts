@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/db";
-import { invalidLexicons, validLexicons } from "@/db/schema";
+import { invalid_lexicons, valid_lexicons } from "@/db/schema";
 import { isLexiconSchemaRecord, LexiconSchemaRecord } from "@/util/lexicon";
 import { parseLexiconDoc } from "@atproto/lexicon";
 import { resolveLexiconDidAuthority } from "@atproto/lexicon-resolver";
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
 
       // Valid lexicon: store in valid_lexicons table
       await db
-        .insert(validLexicons)
+        .insert(valid_lexicons)
         .values({
           nsid: nsid,
           cid: cid,
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
       if (isZodError(error)) {
         // Invalid lexicon: store in invalid_lexicons table for debugging
         await db
-          .insert(invalidLexicons)
+          .insert(invalid_lexicons)
           .values({
             nsid: nsid,
             cid: cid,
