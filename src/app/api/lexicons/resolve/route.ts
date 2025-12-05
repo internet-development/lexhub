@@ -167,10 +167,7 @@ export async function GET(request: NextRequest) {
     const merged = [
       ...validLexicons_results.map((l) => ({ ...l, valid: true })),
       ...invalidLexicons_results.map((l) => ({ ...l, valid: false })),
-    ].sort(
-      (a, b) =>
-        new Date(b.ingestedAt).getTime() - new Date(a.ingestedAt).getTime(),
-    );
+    ].sort((a, b) => b.ingestedAt.getTime() - a.ingestedAt.getTime());
 
     const total = Number(validCount[0].count) + Number(invalidCount[0].count);
 
