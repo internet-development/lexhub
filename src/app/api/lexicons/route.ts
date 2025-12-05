@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
-import { desc, sql } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import {
   ValidationError,
   parseBooleanParam,
@@ -21,14 +21,14 @@ export async function GET(request: NextRequest) {
 
     const table = valid ? validLexicons : invalidLexicons;
 
-    const [lexicons, countResult] = await Promise.all([
+    const [lexicons, total] = await Promise.all([
       db
         .select()
         .from(table)
         .orderBy(desc(table.ingestedAt))
         .limit(limit)
         .offset(offset),
-      db.select({ count: sql<number>`count(*)` }).from(table),
+      db.$count(table),
     ]);
 
     return Response.json({
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       pagination: {
         limit,
         offset,
-        total: Number(countResult[0].count),
+        total,
       },
     });
   } catch (error) {

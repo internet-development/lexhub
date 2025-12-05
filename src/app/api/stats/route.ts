@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
-import { sql, gte } from "drizzle-orm";
+import { gte } from "drizzle-orm";
 
 export const revalidate = 60; // Cache the stats for 60 seconds
 
@@ -17,15 +17,12 @@ function countUniqueAcrossTables<T>(
 }
 
 async function fetchTotalCounts() {
-  const [validCount, invalidCount] = await Promise.all([
-    db.select({ count: sql<number>`count(*)` }).from(validLexicons),
-    db.select({ count: sql<number>`count(*)` }).from(invalidLexicons),
+  const [valid, invalid] = await Promise.all([
+    db.$count(validLexicons),
+    db.$count(invalidLexicons),
   ]);
 
-  return {
-    valid: Number(validCount[0].count),
-    invalid: Number(invalidCount[0].count),
-  };
+  return { valid, invalid };
 }
 
 async function fetchUniqueNsids() {
@@ -54,27 +51,15 @@ async function fetchRecentActivity() {
   const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
   const [valid24h, invalid24h, valid7d, invalid7d] = await Promise.all([
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(validLexicons)
-      .where(gte(validLexicons.ingestedAt, last24h)),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(invalidLexicons)
-      .where(gte(invalidLexicons.ingestedAt, last24h)),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(validLexicons)
-      .where(gte(validLexicons.ingestedAt, last7d)),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(invalidLexicons)
-      .where(gte(invalidLexicons.ingestedAt, last7d)),
+    db.$count(validLexicons, gte(validLexicons.ingestedAt, last24h)),
+    db.$count(invalidLexicons, gte(invalidLexicons.ingestedAt, last24h)),
+    db.$count(validLexicons, gte(validLexicons.ingestedAt, last7d)),
+    db.$count(invalidLexicons, gte(invalidLexicons.ingestedAt, last7d)),
   ]);
 
   return {
-    last24h: Number(valid24h[0].count) + Number(invalid24h[0].count),
-    last7d: Number(valid7d[0].count) + Number(invalid7d[0].count),
+    last24h: valid24h + invalid24h,
+    last7d: valid7d + invalid7d,
   };
 }
 

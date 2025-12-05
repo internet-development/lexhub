@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
-import { desc, eq, and, sql } from "drizzle-orm";
+import { desc, eq, and } from "drizzle-orm";
 import { AtUri, isValidHandle } from "@atproto/syntax";
 import { IdResolver } from "@atproto/identity";
 import { ValidationError } from "@/util/params";
@@ -101,21 +101,14 @@ async function queryAllVersions(nsid: string, repoDid: string) {
       )
       .orderBy(desc(invalidLexicons.ingestedAt))
       .limit(MAX_LEXICONS_LIMIT),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(validLexicons)
-      .where(
-        and(eq(validLexicons.nsid, nsid), eq(validLexicons.repoDid, repoDid)),
-      ),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(invalidLexicons)
-      .where(
-        and(
-          eq(invalidLexicons.nsid, nsid),
-          eq(invalidLexicons.repoDid, repoDid),
-        ),
-      ),
+    db.$count(
+      validLexicons,
+      and(eq(validLexicons.nsid, nsid), eq(validLexicons.repoDid, repoDid)),
+    ),
+    db.$count(
+      invalidLexicons,
+      and(eq(invalidLexicons.nsid, nsid), eq(invalidLexicons.repoDid, repoDid)),
+    ),
   ]);
 
   const merged = [
@@ -123,7 +116,7 @@ async function queryAllVersions(nsid: string, repoDid: string) {
     ...invalidLexicons_results.map((l) => ({ ...l, valid: false })),
   ].sort((a, b) => b.ingestedAt.getTime() - a.ingestedAt.getTime());
 
-  const total = Number(validCount[0].count) + Number(invalidCount[0].count);
+  const total = validCount + invalidCount;
 
   return { data: merged, total };
 }

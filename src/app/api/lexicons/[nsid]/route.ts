@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { isValidNsid } from "@atproto/syntax";
 import {
   ValidationError,
@@ -34,7 +34,7 @@ async function queryTable(
   limit: number,
   offset: number,
 ) {
-  const [records, countResult] = await Promise.all([
+  const [records, count] = await Promise.all([
     db
       .select()
       .from(table)
@@ -42,13 +42,10 @@ async function queryTable(
       .orderBy(desc(table.ingestedAt))
       .limit(limit)
       .offset(offset),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(table)
-      .where(eq(table.nsid, nsid)),
+    db.$count(table, eq(table.nsid, nsid)),
   ]);
 
-  return { records, count: Number(countResult[0].count) };
+  return { records, count };
 }
 
 async function queryLatest(
