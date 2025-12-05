@@ -48,31 +48,23 @@ async function resolveHostnameToDid(hostname: string): Promise<string> {
 
 async function querySingleLexicon(nsid: string, cid: string, repoDid: string) {
   const [validLexicon, invalidLexicon] = await Promise.all([
-    db
-      .select()
-      .from(validLexicons)
-      .where(
-        and(
-          eq(validLexicons.nsid, nsid),
-          eq(validLexicons.cid, cid),
-          eq(validLexicons.repoDid, repoDid),
-        ),
-      )
-      .limit(1),
-    db
-      .select()
-      .from(invalidLexicons)
-      .where(
-        and(
-          eq(invalidLexicons.nsid, nsid),
-          eq(invalidLexicons.cid, cid),
-          eq(invalidLexicons.repoDid, repoDid),
-        ),
-      )
-      .limit(1),
+    db.query.validLexicons.findFirst({
+      where: and(
+        eq(validLexicons.nsid, nsid),
+        eq(validLexicons.cid, cid),
+        eq(validLexicons.repoDid, repoDid),
+      ),
+    }),
+    db.query.invalidLexicons.findFirst({
+      where: and(
+        eq(invalidLexicons.nsid, nsid),
+        eq(invalidLexicons.cid, cid),
+        eq(invalidLexicons.repoDid, repoDid),
+      ),
+    }),
   ]);
 
-  return validLexicon[0] || invalidLexicon[0] || null;
+  return validLexicon ?? invalidLexicon ?? null;
 }
 
 async function queryAllVersions(nsid: string, repoDid: string) {
