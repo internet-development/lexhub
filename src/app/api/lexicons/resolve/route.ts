@@ -122,7 +122,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Without CID, return all versions from this repo + NSID
+    // Without CID, return all versions from this repo + NSID (hard limit: 1000)
+    const HARD_LIMIT = 1000;
     const [
       validLexicons_results,
       invalidLexicons_results,
@@ -135,7 +136,8 @@ export async function GET(request: NextRequest) {
         .where(
           and(eq(validLexicons.nsid, nsid), eq(validLexicons.repoDid, repoDid)),
         )
-        .orderBy(desc(validLexicons.ingestedAt)),
+        .orderBy(desc(validLexicons.ingestedAt))
+        .limit(HARD_LIMIT),
       db
         .select()
         .from(invalidLexicons)
@@ -145,7 +147,8 @@ export async function GET(request: NextRequest) {
             eq(invalidLexicons.repoDid, repoDid),
           ),
         )
-        .orderBy(desc(invalidLexicons.ingestedAt)),
+        .orderBy(desc(invalidLexicons.ingestedAt))
+        .limit(HARD_LIMIT),
       db
         .select({ count: sql<number>`count(*)` })
         .from(validLexicons)

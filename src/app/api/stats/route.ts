@@ -16,10 +16,10 @@ export async function GET() {
     const [
       validCount,
       invalidCount,
-      uniqueNsidsValid,
-      uniqueNsidsInvalid,
-      uniqueReposValid,
-      uniqueReposInvalid,
+      validNsids,
+      invalidNsids,
+      validRepos,
+      invalidRepos,
       valid24h,
       invalid24h,
       valid7d,
@@ -29,24 +29,14 @@ export async function GET() {
       db.select({ count: sql<number>`count(*)` }).from(validLexicons),
       db.select({ count: sql<number>`count(*)` }).from(invalidLexicons),
 
-      // Unique NSIDs
-      db
-        .select({ count: sql<number>`count(distinct ${validLexicons.nsid})` })
-        .from(validLexicons),
-      db
-        .select({ count: sql<number>`count(distinct ${invalidLexicons.nsid})` })
-        .from(invalidLexicons),
+      // Get all distinct NSIDs from both tables
+      db.selectDistinct({ nsid: validLexicons.nsid }).from(validLexicons),
+      db.selectDistinct({ nsid: invalidLexicons.nsid }).from(invalidLexicons),
 
-      // Unique repositories
+      // Get all distinct repositories from both tables
+      db.selectDistinct({ repoDid: validLexicons.repoDid }).from(validLexicons),
       db
-        .select({
-          count: sql<number>`count(distinct ${validLexicons.repoDid})`,
-        })
-        .from(validLexicons),
-      db
-        .select({
-          count: sql<number>`count(distinct ${invalidLexicons.repoDid})`,
-        })
+        .selectDistinct({ repoDid: invalidLexicons.repoDid })
         .from(invalidLexicons),
 
       // Last 24h activity
@@ -73,18 +63,19 @@ export async function GET() {
     const validLexiconsCount = Number(validCount[0].count);
     const invalidLexiconsCount = Number(invalidCount[0].count);
 
-    // Combine unique NSIDs from both tables
-    // Note: This is an approximation - some NSIDs may exist in both tables
-    const uniqueNsids = Math.max(
-      Number(uniqueNsidsValid[0].count),
-      Number(uniqueNsidsInvalid[0].count),
-    );
+    // Calculate truly unique NSIDs across both tables using a Set
+    const allNsids = new Set([
+      ...validNsids.map((row) => row.nsid),
+      ...invalidNsids.map((row) => row.nsid),
+    ]);
+    const uniqueNsids = allNsids.size;
 
-    // Combine unique repos from both tables
-    const uniqueRepositories = Math.max(
-      Number(uniqueReposValid[0].count),
-      Number(uniqueReposInvalid[0].count),
-    );
+    // Calculate truly unique repositories across both tables using a Set
+    const allRepos = new Set([
+      ...validRepos.map((row) => row.repoDid),
+      ...invalidRepos.map((row) => row.repoDid),
+    ]);
+    const uniqueRepositories = allRepos.size;
 
     const stats = {
       totalLexicons: validLexiconsCount + invalidLexiconsCount,
