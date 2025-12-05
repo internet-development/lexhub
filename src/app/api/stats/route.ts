@@ -58,8 +58,16 @@ async function fetchRecentActivity() {
   ]);
 
   return {
-    last24h: valid24h + invalid24h,
-    last7d: valid7d + invalid7d,
+    last24h: {
+      valid: valid24h,
+      invalid: invalid24h,
+      total: valid24h + invalid24h,
+    },
+    last7d: {
+      valid: valid7d,
+      invalid: invalid7d,
+      total: valid7d + invalid7d,
+    },
   };
 }
 
