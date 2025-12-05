@@ -4,6 +4,7 @@ import { validLexicons, invalidLexicons } from "@/db/schema";
 import { desc, eq, and, sql } from "drizzle-orm";
 import { AtUri, isValidHandle } from "@atproto/syntax";
 import { IdResolver } from "@atproto/identity";
+import { ValidationError } from "@/util/params";
 
 const idResolver = new IdResolver();
 
@@ -15,15 +16,7 @@ export async function GET(request: NextRequest) {
     const cidParam = searchParams.get("cid");
 
     if (!uriParam) {
-      return Response.json(
-        {
-          error: {
-            code: "MISSING_URI",
-            message: "URI parameter is required",
-          },
-        },
-        { status: 400 },
-      );
+      throw new ValidationError("MISSING_URI", "URI parameter is required");
     }
 
     // Parse AT URI
@@ -31,27 +24,14 @@ export async function GET(request: NextRequest) {
     try {
       atUri = new AtUri(uriParam);
     } catch (error) {
-      return Response.json(
-        {
-          error: {
-            code: "INVALID_AT_URI",
-            message: "Invalid AT URI format",
-          },
-        },
-        { status: 400 },
-      );
+      throw new ValidationError("INVALID_AT_URI", "Invalid AT URI format");
     }
 
     // Validate that we have collection and rkey (NSID)
     if (!atUri.collection || !atUri.rkey) {
-      return Response.json(
-        {
-          error: {
-            code: "INVALID_AT_URI_PATH",
-            message: "AT URI must include collection and record key",
-          },
-        },
-        { status: 400 },
+      throw new ValidationError(
+        "INVALID_AT_URI_PATH",
+        "AT URI must include collection and record key",
       );
     }
 
@@ -203,6 +183,14 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
+    // Handle validation errors
+    if (error instanceof ValidationError) {
+      return Response.json(
+        { error: { code: error.code, message: error.message } },
+        { status: 400 },
+      );
+    }
+
     console.error("Error resolving AT URI:", error);
     return Response.json(
       {

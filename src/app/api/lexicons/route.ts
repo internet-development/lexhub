@@ -2,118 +2,55 @@ import type { NextRequest } from "next/server";
 import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
 import { desc, sql } from "drizzle-orm";
+import {
+  ValidationError,
+  parseBooleanParam,
+  parseIntegerParam,
+} from "@/util/params";
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
 
-    // Parse query parameters
-    const validParam = searchParams.get("valid");
-    const limit = Math.min(
-      parseInt(searchParams.get("limit") || "50", 10),
-      100,
-    );
-    const offset = parseInt(searchParams.get("offset") || "0", 10);
+    // Parse query parameters with defaults
+    const valid = parseBooleanParam(searchParams, "valid", true);
+    const limit = parseIntegerParam(searchParams, "limit", 50, {
+      min: 1,
+      max: 100,
+    });
+    const offset = parseIntegerParam(searchParams, "offset", 0, { min: 0 });
 
-    // Validate parameters
-    if (isNaN(limit) || limit < 1) {
-      return Response.json(
-        {
-          error: {
-            code: "INVALID_LIMIT",
-            message: "Limit must be a positive number",
-          },
-        },
-        { status: 400 },
-      );
-    }
+    // Determine which table to query
+    const table = valid ? validLexicons : invalidLexicons;
 
-    if (isNaN(offset) || offset < 0) {
-      return Response.json(
-        {
-          error: {
-            code: "INVALID_OFFSET",
-            message: "Offset must be a non-negative number",
-          },
-        },
-        { status: 400 },
-      );
-    }
-
-    // Determine which table(s) to query
-    let data;
-    let total;
-
-    if (validParam === "true") {
-      // Query only valid lexicons
-      const [lexicons, countResult] = await Promise.all([
-        db
-          .select()
-          .from(validLexicons)
-          .orderBy(desc(validLexicons.ingestedAt))
-          .limit(limit)
-          .offset(offset),
-        db.select({ count: sql<number>`count(*)` }).from(validLexicons),
-      ]);
-
-      data = lexicons;
-      total = Number(countResult[0].count);
-    } else if (validParam === "false") {
-      // Query only invalid lexicons
-      const [lexicons, countResult] = await Promise.all([
-        db
-          .select()
-          .from(invalidLexicons)
-          .orderBy(desc(invalidLexicons.ingestedAt))
-          .limit(limit)
-          .offset(offset),
-        db.select({ count: sql<number>`count(*)` }).from(invalidLexicons),
-      ]);
-
-      data = lexicons;
-      total = Number(countResult[0].count);
-    } else {
-      // Query both tables and merge results
-      const [validLexs, invalidLexs, validCount, invalidCount] =
-        await Promise.all([
-          db
-            .select()
-            .from(validLexicons)
-            .orderBy(desc(validLexicons.ingestedAt))
-            .limit(limit)
-            .offset(offset),
-          db
-            .select()
-            .from(invalidLexicons)
-            .orderBy(desc(invalidLexicons.ingestedAt))
-            .limit(limit)
-            .offset(offset),
-          db.select({ count: sql<number>`count(*)` }).from(validLexicons),
-          db.select({ count: sql<number>`count(*)` }).from(invalidLexicons),
-        ]);
-
-      // Merge and sort by ingestedAt
-      const merged = [
-        ...validLexs.map((l) => ({ ...l, valid: true })),
-        ...invalidLexs.map((l) => ({ ...l, valid: false })),
-      ].sort(
-        (a, b) =>
-          new Date(b.ingestedAt).getTime() - new Date(a.ingestedAt).getTime(),
-      );
-
-      data = merged.slice(0, limit);
-      total = Number(validCount[0].count) + Number(invalidCount[0].count);
-    }
+    // Query the selected table
+    const [lexicons, countResult] = await Promise.all([
+      db
+        .select()
+        .from(table)
+        .orderBy(desc(table.ingestedAt))
+        .limit(limit)
+        .offset(offset),
+      db.select({ count: sql<number>`count(*)` }).from(table),
+    ]);
 
     return Response.json({
-      data,
+      data: lexicons,
       pagination: {
         limit,
         offset,
-        total,
+        total: Number(countResult[0].count),
       },
     });
   } catch (error) {
+    // Handle validation errors
+    if (error instanceof ValidationError) {
+      return Response.json(
+        { error: { code: error.code, message: error.message } },
+        { status: 400 },
+      );
+    }
+
     console.error("Error fetching lexicons:", error);
     return Response.json(
       {

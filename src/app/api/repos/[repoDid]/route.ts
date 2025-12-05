@@ -3,6 +3,11 @@ import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
 import { ensureValidDid } from "@atproto/syntax";
+import {
+  ValidationError,
+  parseBooleanParam,
+  parseIntegerParam,
+} from "@/util/params";
 
 export async function GET(
   request: NextRequest,
@@ -16,136 +21,52 @@ export async function GET(
     try {
       ensureValidDid(repoDid);
     } catch (error) {
-      return Response.json(
-        {
-          error: {
-            code: "INVALID_DID",
-            message: "The provided DID is not valid",
-          },
-        },
-        { status: 400 },
-      );
+      throw new ValidationError("INVALID_DID", "The provided DID is not valid");
     }
 
-    // Parse query parameters
-    const validParam = searchParams.get("valid");
-    const limit = Math.min(parseInt(searchParams.get("limit") ?? "50"), 100);
-    const offset = parseInt(searchParams.get("offset") ?? "0");
+    // Parse query parameters with defaults
+    const valid = parseBooleanParam(searchParams, "valid", true);
+    const limit = parseIntegerParam(searchParams, "limit", 50, {
+      min: 1,
+      max: 100,
+    });
+    const offset = parseIntegerParam(searchParams, "offset", 0, { min: 0 });
 
-    // Validate parameters
-    if (isNaN(limit) || limit < 1) {
-      return Response.json(
-        {
-          error: {
-            code: "INVALID_LIMIT",
-            message: "Limit must be a positive number",
-          },
-        },
-        { status: 400 },
-      );
-    }
+    // Determine which table to query
+    const table = valid ? validLexicons : invalidLexicons;
 
-    if (isNaN(offset) || offset < 0) {
-      return Response.json(
-        {
-          error: {
-            code: "INVALID_OFFSET",
-            message: "Offset must be a non-negative number",
-          },
-        },
-        { status: 400 },
-      );
-    }
-
-    let data;
-    let total;
-
-    if (validParam === "true") {
-      // Query only valid lexicons for this repository
-      const [lexicons, countResult] = await Promise.all([
-        db
-          .select()
-          .from(validLexicons)
-          .where(eq(validLexicons.repoDid, repoDid))
-          .orderBy(desc(validLexicons.ingestedAt))
-          .limit(limit)
-          .offset(offset),
-        db
-          .select({ count: sql<number>`count(*)` })
-          .from(validLexicons)
-          .where(eq(validLexicons.repoDid, repoDid)),
-      ]);
-
-      data = lexicons;
-      total = Number(countResult[0].count);
-    } else if (validParam === "false") {
-      // Query only invalid lexicons for this repository
-      const [lexicons, countResult] = await Promise.all([
-        db
-          .select()
-          .from(invalidLexicons)
-          .where(eq(invalidLexicons.repoDid, repoDid))
-          .orderBy(desc(invalidLexicons.ingestedAt))
-          .limit(limit)
-          .offset(offset),
-        db
-          .select({ count: sql<number>`count(*)` })
-          .from(invalidLexicons)
-          .where(eq(invalidLexicons.repoDid, repoDid)),
-      ]);
-
-      data = lexicons;
-      total = Number(countResult[0].count);
-    } else {
-      // Query both tables for this repository
-      const [validLexs, invalidLexs, validCount, invalidCount] =
-        await Promise.all([
-          db
-            .select()
-            .from(validLexicons)
-            .where(eq(validLexicons.repoDid, repoDid))
-            .orderBy(desc(validLexicons.ingestedAt))
-            .limit(limit)
-            .offset(offset),
-          db
-            .select()
-            .from(invalidLexicons)
-            .where(eq(invalidLexicons.repoDid, repoDid))
-            .orderBy(desc(invalidLexicons.ingestedAt))
-            .limit(limit)
-            .offset(offset),
-          db
-            .select({ count: sql<number>`count(*)` })
-            .from(validLexicons)
-            .where(eq(validLexicons.repoDid, repoDid)),
-          db
-            .select({ count: sql<number>`count(*)` })
-            .from(invalidLexicons)
-            .where(eq(invalidLexicons.repoDid, repoDid)),
-        ]);
-
-      // Merge and sort by ingestedAt
-      const merged = [
-        ...validLexs.map((l) => ({ ...l, valid: true })),
-        ...invalidLexs.map((l) => ({ ...l, valid: false })),
-      ].sort(
-        (a, b) =>
-          new Date(b.ingestedAt).getTime() - new Date(a.ingestedAt).getTime(),
-      );
-
-      data = merged.slice(0, limit);
-      total = Number(validCount[0].count) + Number(invalidCount[0].count);
-    }
+    // Query the selected table for this repository
+    const [lexicons, countResult] = await Promise.all([
+      db
+        .select()
+        .from(table)
+        .where(eq(table.repoDid, repoDid))
+        .orderBy(desc(table.ingestedAt))
+        .limit(limit)
+        .offset(offset),
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(table)
+        .where(eq(table.repoDid, repoDid)),
+    ]);
 
     return Response.json({
-      data,
+      data: lexicons,
       pagination: {
         limit,
         offset,
-        total,
+        total: Number(countResult[0].count),
       },
     });
   } catch (error) {
+    // Handle validation errors
+    if (error instanceof ValidationError) {
+      return Response.json(
+        { error: { code: error.code, message: error.message } },
+        { status: 400 },
+      );
+    }
+
     console.error("Error fetching lexicons for repository:", error);
     return Response.json(
       {
