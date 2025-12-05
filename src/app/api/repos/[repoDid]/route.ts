@@ -17,14 +17,12 @@ export async function GET(
     const { repoDid } = await params;
     const searchParams = request.nextUrl.searchParams;
 
-    // Validate DID
     try {
       ensureValidDid(repoDid);
     } catch (error) {
       throw new ValidationError("INVALID_DID", "The provided DID is not valid");
     }
 
-    // Parse query parameters with defaults
     const valid = parseBooleanParam(searchParams, "valid", true);
     const limit = parseIntegerParam(searchParams, "limit", 50, {
       min: 1,
@@ -32,10 +30,8 @@ export async function GET(
     });
     const offset = parseIntegerParam(searchParams, "offset", 0, { min: 0 });
 
-    // Determine which table to query
     const table = valid ? validLexicons : invalidLexicons;
 
-    // Query the selected table for this repository
     const [lexicons, countResult] = await Promise.all([
       db
         .select()
@@ -59,7 +55,6 @@ export async function GET(
       },
     });
   } catch (error) {
-    // Handle validation errors
     if (error instanceof ValidationError) {
       return error.toResponse();
     }

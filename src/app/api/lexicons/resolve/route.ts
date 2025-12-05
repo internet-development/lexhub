@@ -19,7 +19,6 @@ export async function GET(request: NextRequest) {
       throw new ValidationError("MISSING_URI", "URI parameter is required");
     }
 
-    // Parse AT URI
     let atUri: AtUri;
     try {
       atUri = new AtUri(uriParam);
@@ -27,7 +26,6 @@ export async function GET(request: NextRequest) {
       throw new ValidationError("INVALID_AT_URI", "Invalid AT URI format");
     }
 
-    // Validate that we have collection and rkey (NSID)
     if (!atUri.collection || !atUri.rkey) {
       throw new ValidationError(
         "INVALID_AT_URI_PATH",
@@ -35,7 +33,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Resolve handle to DID if necessary
     let repoDid = atUri.hostname;
     if (isValidHandle(repoDid)) {
       try {
@@ -66,12 +63,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Extract NSID from AT URI rkey
     const nsid = atUri.rkey;
 
-    // If CID is provided, return exact version
     if (cidParam) {
-      // Try valid lexicons first
       const validLexicon = await db
         .select()
         .from(validLexicons)
@@ -90,7 +84,6 @@ export async function GET(request: NextRequest) {
         });
       }
 
-      // Try invalid lexicons
       const invalidLexicon = await db
         .select()
         .from(invalidLexicons)
@@ -109,7 +102,6 @@ export async function GET(request: NextRequest) {
         });
       }
 
-      // Not found
       return Response.json(
         {
           error: {
@@ -166,7 +158,6 @@ export async function GET(request: NextRequest) {
         ),
     ]);
 
-    // Merge and sort by ingestedAt
     const merged = [
       ...validLexicons_results.map((l) => ({ ...l, valid: true })),
       ...invalidLexicons_results.map((l) => ({ ...l, valid: false })),
@@ -183,7 +174,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    // Handle validation errors
     if (error instanceof ValidationError) {
       return error.toResponse();
     }

@@ -1,4 +1,3 @@
-// Custom error class for validation errors
 export class ValidationError extends Error {
   constructor(
     public code: string,
@@ -16,14 +15,7 @@ export class ValidationError extends Error {
   }
 }
 
-/**
- * Parse and validate a boolean query parameter
- * @param searchParams - URLSearchParams object
- * @param paramName - Name of the parameter
- * @param defaultValue - Default value if parameter is not provided
- * @returns Validated boolean value
- * @throws ValidationError if parameter is not "true" or "false"
- */
+// Only accepts explicit "true" or "false" strings to avoid ambiguous truthy/falsy behavior
 export function parseBooleanParam(
   searchParams: URLSearchParams,
   paramName: string,
@@ -45,15 +37,7 @@ export function parseBooleanParam(
   return value === "true";
 }
 
-/**
- * Parse and validate an integer query parameter
- * @param searchParams - URLSearchParams object
- * @param paramName - Name of the parameter
- * @param defaultValue - Default value if parameter is not provided
- * @param options - Validation options (min, max) - values will be clamped to range
- * @returns Validated and clamped integer value
- * @throws ValidationError if parameter is not a valid integer
- */
+// Clamps to min/max instead of throwing to provide better UX (avoids rejecting valid requests)
 export function parseIntegerParam(
   searchParams: URLSearchParams,
   paramName: string,
@@ -73,7 +57,6 @@ export function parseIntegerParam(
     );
   }
 
-  // Clamp to min/max range
   let clamped = parsed;
   if (options?.min !== undefined && clamped < options.min) {
     clamped = options.min;

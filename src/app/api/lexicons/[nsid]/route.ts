@@ -9,7 +9,6 @@ import {
   parseIntegerParam,
 } from "@/util/params";
 
-// Query parameters interface
 interface QueryParams {
   valid: boolean;
   latest: boolean;
@@ -17,7 +16,6 @@ interface QueryParams {
   offset: number;
 }
 
-// Parse and validate all query parameters
 function parseQueryParams(searchParams: URLSearchParams): QueryParams {
   const valid = parseBooleanParam(searchParams, "valid", true);
   const latest = parseBooleanParam(searchParams, "latest", false);
@@ -30,7 +28,6 @@ function parseQueryParams(searchParams: URLSearchParams): QueryParams {
   return { valid, latest, limit, offset };
 }
 
-// Generic query builder for fetching lexicons from a table
 async function queryTable(
   table: typeof validLexicons | typeof invalidLexicons,
   nsid: string,
@@ -54,7 +51,6 @@ async function queryTable(
   return { records, count: Number(countResult[0].count) };
 }
 
-// Fetch latest record from a table
 async function queryLatest(
   table: typeof validLexicons | typeof invalidLexicons,
   nsid: string,
@@ -86,15 +82,12 @@ export async function GET(
       request.nextUrl.searchParams,
     );
 
-    // Determine which table to query
     const table = valid ? validLexicons : invalidLexicons;
 
-    // Handle "latest" query - simpler logic, early return
     if (latest) {
       return Response.json({ data: await queryLatest(table, nsid) });
     }
 
-    // Handle paginated queries
     const { records, count } = await queryTable(table, nsid, limit, offset);
 
     return Response.json({
@@ -102,7 +95,6 @@ export async function GET(
       pagination: { limit, offset, total: count },
     });
   } catch (error) {
-    // Handle validation errors
     if (error instanceof ValidationError) {
       return error.toResponse();
     }

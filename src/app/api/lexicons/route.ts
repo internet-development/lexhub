@@ -12,7 +12,6 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
 
-    // Parse query parameters with defaults
     const valid = parseBooleanParam(searchParams, "valid", true);
     const limit = parseIntegerParam(searchParams, "limit", 50, {
       min: 1,
@@ -20,10 +19,8 @@ export async function GET(request: NextRequest) {
     });
     const offset = parseIntegerParam(searchParams, "offset", 0, { min: 0 });
 
-    // Determine which table to query
     const table = valid ? validLexicons : invalidLexicons;
 
-    // Query the selected table
     const [lexicons, countResult] = await Promise.all([
       db
         .select()
@@ -43,7 +40,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    // Handle validation errors
     if (error instanceof ValidationError) {
       return error.toResponse();
     }
