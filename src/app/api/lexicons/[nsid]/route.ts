@@ -15,6 +15,26 @@ class ValidationError extends Error {
   }
 }
 
+// Helper to parse and validate boolean query parameters
+function parseBooleanParam(
+  value: string | null,
+  paramName: string,
+  defaultValue: boolean,
+): boolean {
+  if (value === null) {
+    return defaultValue;
+  }
+
+  if (value !== "true" && value !== "false") {
+    throw new ValidationError(
+      `INVALID_${paramName.toUpperCase()}_PARAM`,
+      `${paramName} parameter must be either 'true' or 'false'`,
+    );
+  }
+
+  return value === "true";
+}
+
 // Query parameters interface
 interface QueryParams {
   valid: boolean;
@@ -25,20 +45,9 @@ interface QueryParams {
 
 // Parse and validate all query parameters
 function parseQueryParams(searchParams: URLSearchParams): QueryParams {
-  // Parse valid parameter (default to true)
-  const validParam = searchParams.get("valid") ?? "true";
-  
-  if (validParam !== "true" && validParam !== "false") {
-    throw new ValidationError(
-      "INVALID_VALID_PARAM",
-      "Valid parameter must be either 'true' or 'false'",
-    );
-  }
-  
-  const valid = validParam === "true";
-
-  // Parse latest parameter
-  const latest = searchParams.get("latest") === "true";
+  // Parse boolean parameters
+  const valid = parseBooleanParam(searchParams.get("valid"), "valid", true);
+  const latest = parseBooleanParam(searchParams.get("latest"), "latest", false);
 
   // Parse pagination parameters
   const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
