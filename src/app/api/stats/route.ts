@@ -2,6 +2,9 @@ import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
 import { sql, gte } from "drizzle-orm";
 
+// Revalidate cache every 60 seconds
+export const revalidate = 60;
+
 export async function GET() {
   try {
     // Calculate timestamps for recent activity
