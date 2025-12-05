@@ -7,6 +7,13 @@ export class ValidationError extends Error {
     super(message);
     this.name = "ValidationError";
   }
+
+  toResponse(status = 400): Response {
+    return Response.json(
+      { error: { code: this.code, message: this.message } },
+      { status },
+    );
+  }
 }
 
 /**

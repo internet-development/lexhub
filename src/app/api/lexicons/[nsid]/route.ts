@@ -104,10 +104,7 @@ export async function GET(
   } catch (error) {
     // Handle validation errors
     if (error instanceof ValidationError) {
-      return Response.json(
-        { error: { code: error.code, message: error.message } },
-        { status: 400 },
-      );
+      return error.toResponse();
     }
 
     console.error("Error fetching lexicons for NSID:", error);
