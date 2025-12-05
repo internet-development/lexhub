@@ -6,6 +6,7 @@ import { AtUri, isValidHandle } from "@atproto/syntax";
 import { IdResolver } from "@atproto/identity";
 import { ValidationError } from "@/util/params";
 
+const MAX_LEXICONS_LIMIT = 500;
 const idResolver = new IdResolver();
 
 export async function GET(request: NextRequest) {
@@ -114,8 +115,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Without CID, return all versions from this repo + NSID (hard limit: 1000)
-    const HARD_LIMIT = 1000;
     const [
       validLexicons_results,
       invalidLexicons_results,
@@ -129,7 +128,7 @@ export async function GET(request: NextRequest) {
           and(eq(validLexicons.nsid, nsid), eq(validLexicons.repoDid, repoDid)),
         )
         .orderBy(desc(validLexicons.ingestedAt))
-        .limit(HARD_LIMIT),
+        .limit(MAX_LEXICONS_LIMIT),
       db
         .select()
         .from(invalidLexicons)
@@ -140,7 +139,7 @@ export async function GET(request: NextRequest) {
           ),
         )
         .orderBy(desc(invalidLexicons.ingestedAt))
-        .limit(HARD_LIMIT),
+        .limit(MAX_LEXICONS_LIMIT),
       db
         .select({ count: sql<number>`count(*)` })
         .from(validLexicons)
