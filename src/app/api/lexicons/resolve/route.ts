@@ -1,13 +1,14 @@
-import type { NextRequest } from "next/server";
 import { db } from "@/db";
-import { validLexicons, invalidLexicons } from "@/db/schema";
-import { desc, eq, and } from "drizzle-orm";
-import { AtUri, isValidHandle } from "@atproto/syntax";
-import { IdResolver } from "@atproto/identity";
+import { invalidLexicons, validLexicons } from "@/db/schema";
 import { ValidationError } from "@/util/params";
+import { IdResolver, MemoryCache } from "@atproto/identity";
+import { AtUri, isValidHandle } from "@atproto/syntax";
+import { and, desc, eq } from "drizzle-orm";
+import type { NextRequest } from "next/server";
 
 const MAX_LEXICONS_LIMIT = 500;
-const idResolver = new IdResolver();
+
+const idResolver = new IdResolver({ didCache: new MemoryCache() });
 
 async function parseAndValidateUri(uriParam: string) {
   let atUri: AtUri;
