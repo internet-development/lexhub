@@ -1,20 +1,9 @@
 import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
-import { gte } from "drizzle-orm";
+import { gte, sql } from "drizzle-orm";
+import { union } from "drizzle-orm/pg-core";
 
 export const revalidate = 60; // Cache the stats for 60 seconds
-
-function countUniqueAcrossTables<T>(
-  validRows: T[],
-  invalidRows: T[],
-  key: keyof T,
-): number {
-  const allValues = new Set([
-    ...validRows.map((row) => row[key]),
-    ...invalidRows.map((row) => row[key]),
-  ]);
-  return allValues.size;
-}
 
 async function fetchTotalCounts() {
   const [valid, invalid] = await Promise.all([
@@ -26,23 +15,29 @@ async function fetchTotalCounts() {
 }
 
 async function fetchUniqueNsids() {
-  const [validNsids, invalidNsids] = await Promise.all([
-    db.selectDistinct({ nsid: validLexicons.nsid }).from(validLexicons),
-    db.selectDistinct({ nsid: invalidLexicons.nsid }).from(invalidLexicons),
-  ]);
+  const combinedNsids = union(
+    db.select({ nsid: validLexicons.nsid }).from(validLexicons),
+    db.select({ nsid: invalidLexicons.nsid }).from(invalidLexicons),
+  ).as("combined_nsids");
 
-  return countUniqueAcrossTables(validNsids, invalidNsids, "nsid");
+  const result = await db
+    .select({ count: sql<number>`count(*)`.as("count") })
+    .from(combinedNsids);
+
+  return result[0].count;
 }
 
 async function fetchUniqueRepositories() {
-  const [validRepos, invalidRepos] = await Promise.all([
-    db.selectDistinct({ repoDid: validLexicons.repoDid }).from(validLexicons),
-    db
-      .selectDistinct({ repoDid: invalidLexicons.repoDid })
-      .from(invalidLexicons),
-  ]);
+  const combinedRepos = union(
+    db.select({ repoDid: validLexicons.repoDid }).from(validLexicons),
+    db.select({ repoDid: invalidLexicons.repoDid }).from(invalidLexicons),
+  ).as("combined_repos");
 
-  return countUniqueAcrossTables(validRepos, invalidRepos, "repoDid");
+  const result = await db
+    .select({ count: sql<number>`count(*)`.as("count") })
+    .from(combinedRepos);
+
+  return result[0].count;
 }
 
 async function fetchRecentActivity() {
