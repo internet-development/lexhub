@@ -19,12 +19,12 @@ interface QueryParams {
 
 // Parse and validate all query parameters
 function parseQueryParams(searchParams: URLSearchParams): QueryParams {
-  // Parse boolean parameters
   const valid = parseBooleanParam(searchParams, "valid", true);
   const latest = parseBooleanParam(searchParams, "latest", false);
-
-  // Parse pagination parameters with clamping
-  const limit = parseIntegerParam(searchParams, "limit", 50, { min: 1, max: 100 });
+  const limit = parseIntegerParam(searchParams, "limit", 50, {
+    min: 1,
+    max: 100,
+  });
   const offset = parseIntegerParam(searchParams, "offset", 0, { min: 0 });
 
   return { valid, latest, limit, offset };
@@ -75,9 +75,6 @@ export async function GET(
 ) {
   try {
     const { nsid } = await params;
-    const searchParams = request.nextUrl.searchParams;
-
-    // Validate NSID
     if (!isValidNsid(nsid)) {
       throw new ValidationError(
         "INVALID_NSID",
@@ -85,8 +82,9 @@ export async function GET(
       );
     }
 
-    // Parse and validate all query parameters
-    const { valid, latest, limit, offset } = parseQueryParams(searchParams);
+    const { valid, latest, limit, offset } = parseQueryParams(
+      request.nextUrl.searchParams,
+    );
 
     // Determine which table to query
     const table = valid ? validLexicons : invalidLexicons;
