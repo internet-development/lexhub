@@ -27,7 +27,15 @@ interface QueryParams {
 function parseQueryParams(searchParams: URLSearchParams): QueryParams {
   // Parse valid parameter (default to true)
   const validParam = searchParams.get("valid") ?? "true";
-  const valid = validParam !== "false";
+  
+  if (validParam !== "true" && validParam !== "false") {
+    throw new ValidationError(
+      "INVALID_VALID_PARAM",
+      "Valid parameter must be either 'true' or 'false'",
+    );
+  }
+  
+  const valid = validParam === "true";
 
   // Parse latest parameter
   const latest = searchParams.get("latest") === "true";
