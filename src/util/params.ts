@@ -43,9 +43,9 @@ export function parseBooleanParam(
  * @param searchParams - URLSearchParams object
  * @param paramName - Name of the parameter
  * @param defaultValue - Default value if parameter is not provided
- * @param options - Validation options (min, max)
- * @returns Validated integer value
- * @throws ValidationError if parameter is not a valid integer or out of range
+ * @param options - Validation options (min, max) - values will be clamped to range
+ * @returns Validated and clamped integer value
+ * @throws ValidationError if parameter is not a valid integer
  */
 export function parseIntegerParam(
   searchParams: URLSearchParams,
@@ -54,8 +54,11 @@ export function parseIntegerParam(
   options?: { min?: number; max?: number },
 ): number {
   const value = searchParams.get(paramName);
-  const parsed = value ? parseInt(value, 10) : defaultValue;
+  if (value === null) {
+    return defaultValue;
+  }
 
+  const parsed = parseInt(value, 10);
   if (isNaN(parsed)) {
     throw new ValidationError(
       `INVALID_${paramName.toUpperCase()}`,
@@ -63,19 +66,14 @@ export function parseIntegerParam(
     );
   }
 
-  if (options?.min !== undefined && parsed < options.min) {
-    throw new ValidationError(
-      `INVALID_${paramName.toUpperCase()}`,
-      `${paramName} must be at least ${options.min}`,
-    );
+  // Clamp to min/max range
+  let clamped = parsed;
+  if (options?.min !== undefined && clamped < options.min) {
+    clamped = options.min;
+  }
+  if (options?.max !== undefined && clamped > options.max) {
+    clamped = options.max;
   }
 
-  if (options?.max !== undefined && parsed > options.max) {
-    throw new ValidationError(
-      `INVALID_${paramName.toUpperCase()}`,
-      `${paramName} must be at most ${options.max}`,
-    );
-  }
-
-  return parsed;
+  return clamped;
 }

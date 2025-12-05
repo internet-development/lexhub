@@ -23,11 +23,8 @@ function parseQueryParams(searchParams: URLSearchParams): QueryParams {
   const valid = parseBooleanParam(searchParams, "valid", true);
   const latest = parseBooleanParam(searchParams, "latest", false);
 
-  // Parse pagination parameters with validation
-  const limit = Math.min(
-    parseIntegerParam(searchParams, "limit", 50, { min: 1 }),
-    100,
-  );
+  // Parse pagination parameters with clamping
+  const limit = parseIntegerParam(searchParams, "limit", 50, { min: 1, max: 100 });
   const offset = parseIntegerParam(searchParams, "offset", 0, { min: 0 });
 
   return { valid, latest, limit, offset };
