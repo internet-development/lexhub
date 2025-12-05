@@ -15,11 +15,28 @@ class ValidationError extends Error {
   }
 }
 
-// Helper to parse and validate pagination params
-function parsePaginationParams(searchParams: URLSearchParams) {
+// Query parameters interface
+interface QueryParams {
+  valid: boolean;
+  latest: boolean;
+  limit: number;
+  offset: number;
+}
+
+// Parse and validate all query parameters
+function parseQueryParams(searchParams: URLSearchParams): QueryParams {
+  // Parse valid parameter (default to true)
+  const validParam = searchParams.get("valid") ?? "true";
+  const valid = validParam !== "false";
+
+  // Parse latest parameter
+  const latest = searchParams.get("latest") === "true";
+
+  // Parse pagination parameters
   const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
   const offset = parseInt(searchParams.get("offset") || "0");
 
+  // Validate pagination parameters
   if (isNaN(limit) || limit < 1) {
     throw new ValidationError(
       "INVALID_LIMIT",
@@ -33,7 +50,7 @@ function parsePaginationParams(searchParams: URLSearchParams) {
     );
   }
 
-  return { limit, offset };
+  return { valid, latest, limit, offset };
 }
 
 // Generic query builder for fetching lexicons from a table
@@ -91,12 +108,11 @@ export async function GET(
       );
     }
 
-    // Parse query parameters - default to valid=true
-    const validParam = searchParams.get("valid") ?? "true";
-    const latest = searchParams.get("latest") === "true";
+    // Parse and validate all query parameters
+    const { valid, latest, limit, offset } = parseQueryParams(searchParams);
 
     // Determine which table to query
-    const table = validParam === "false" ? invalidLexicons : validLexicons;
+    const table = valid ? validLexicons : invalidLexicons;
 
     // Handle "latest" query - simpler logic, early return
     if (latest) {
@@ -104,7 +120,6 @@ export async function GET(
     }
 
     // Handle paginated queries
-    const { limit, offset } = parsePaginationParams(searchParams);
     const { records, count } = await queryTable(table, nsid, limit, offset);
 
     return Response.json({
