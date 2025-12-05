@@ -3,39 +3,11 @@ import { db } from "@/db";
 import { validLexicons, invalidLexicons } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
 import { isValidNsid } from "@atproto/syntax";
-
-// Custom error class for validation errors
-class ValidationError extends Error {
-  constructor(
-    public code: string,
-    message: string,
-  ) {
-    super(message);
-    this.name = "ValidationError";
-  }
-}
-
-// Helper to parse and validate boolean query parameters
-function parseBooleanParam(
-  searchParams: URLSearchParams,
-  paramName: string,
-  defaultValue: boolean,
-): boolean {
-  const value = searchParams.get(paramName);
-
-  if (value === null) {
-    return defaultValue;
-  }
-
-  if (value !== "true" && value !== "false") {
-    throw new ValidationError(
-      `INVALID_${paramName.toUpperCase()}_PARAM`,
-      `${paramName} parameter must be either 'true' or 'false'`,
-    );
-  }
-
-  return value === "true";
-}
+import {
+  ValidationError,
+  parseBooleanParam,
+  parseIntegerParam,
+} from "@/util/params";
 
 // Query parameters interface
 interface QueryParams {
@@ -51,23 +23,12 @@ function parseQueryParams(searchParams: URLSearchParams): QueryParams {
   const valid = parseBooleanParam(searchParams, "valid", true);
   const latest = parseBooleanParam(searchParams, "latest", false);
 
-  // Parse pagination parameters
-  const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
-  const offset = parseInt(searchParams.get("offset") || "0");
-
-  // Validate pagination parameters
-  if (isNaN(limit) || limit < 1) {
-    throw new ValidationError(
-      "INVALID_LIMIT",
-      "Limit must be a positive number",
-    );
-  }
-  if (isNaN(offset) || offset < 0) {
-    throw new ValidationError(
-      "INVALID_OFFSET",
-      "Offset must be a non-negative number",
-    );
-  }
+  // Parse pagination parameters with validation
+  const limit = Math.min(
+    parseIntegerParam(searchParams, "limit", 50, { min: 1 }),
+    100,
+  );
+  const offset = parseIntegerParam(searchParams, "offset", 0, { min: 0 });
 
   return { valid, latest, limit, offset };
 }
