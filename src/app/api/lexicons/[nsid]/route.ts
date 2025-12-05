@@ -17,10 +17,12 @@ class ValidationError extends Error {
 
 // Helper to parse and validate boolean query parameters
 function parseBooleanParam(
-  value: string | null,
+  searchParams: URLSearchParams,
   paramName: string,
   defaultValue: boolean,
 ): boolean {
+  const value = searchParams.get(paramName);
+
   if (value === null) {
     return defaultValue;
   }
@@ -46,8 +48,8 @@ interface QueryParams {
 // Parse and validate all query parameters
 function parseQueryParams(searchParams: URLSearchParams): QueryParams {
   // Parse boolean parameters
-  const valid = parseBooleanParam(searchParams.get("valid"), "valid", true);
-  const latest = parseBooleanParam(searchParams.get("latest"), "latest", false);
+  const valid = parseBooleanParam(searchParams, "valid", true);
+  const latest = parseBooleanParam(searchParams, "latest", false);
 
   // Parse pagination parameters
   const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
