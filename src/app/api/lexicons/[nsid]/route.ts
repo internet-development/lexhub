@@ -4,19 +4,33 @@ import { validLexicons, invalidLexicons } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
 import { isValidNsid } from "@atproto/syntax";
 
+// Custom error class for validation errors
+class ValidationError extends Error {
+  constructor(
+    public code: string,
+    message: string,
+  ) {
+    super(message);
+    this.name = "ValidationError";
+  }
+}
+
 // Helper to parse and validate pagination params
 function parsePaginationParams(searchParams: URLSearchParams) {
   const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
   const offset = parseInt(searchParams.get("offset") || "0");
 
   if (isNaN(limit) || limit < 1) {
-    throw { code: "INVALID_LIMIT", message: "Limit must be a positive number" };
+    throw new ValidationError(
+      "INVALID_LIMIT",
+      "Limit must be a positive number",
+    );
   }
   if (isNaN(offset) || offset < 0) {
-    throw {
-      code: "INVALID_OFFSET",
-      message: "Offset must be a non-negative number",
-    };
+    throw new ValidationError(
+      "INVALID_OFFSET",
+      "Offset must be a non-negative number",
+    );
   }
 
   return { limit, offset };
@@ -71,14 +85,9 @@ export async function GET(
 
     // Validate NSID
     if (!isValidNsid(nsid)) {
-      return Response.json(
-        {
-          error: {
-            code: "INVALID_NSID",
-            message: "The provided NSID is not valid",
-          },
-        },
-        { status: 400 },
+      throw new ValidationError(
+        "INVALID_NSID",
+        "The provided NSID is not valid",
       );
     }
 
@@ -103,9 +112,12 @@ export async function GET(
       pagination: { limit, offset, total: count },
     });
   } catch (error) {
-    // Handle custom validation errors
-    if (error && typeof error === "object" && "code" in error) {
-      return Response.json({ error }, { status: 400 });
+    // Handle validation errors
+    if (error instanceof ValidationError) {
+      return Response.json(
+        { error: { code: error.code, message: error.message } },
+        { status: 400 },
+      );
     }
 
     console.error("Error fetching lexicons for NSID:", error);
