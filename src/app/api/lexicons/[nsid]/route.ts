@@ -4,6 +4,63 @@ import { validLexicons, invalidLexicons } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
 import { isValidNsid } from "@atproto/syntax";
 
+// Helper to parse and validate pagination params
+function parsePaginationParams(searchParams: URLSearchParams) {
+  const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
+  const offset = parseInt(searchParams.get("offset") || "0");
+
+  if (isNaN(limit) || limit < 1) {
+    throw { code: "INVALID_LIMIT", message: "Limit must be a positive number" };
+  }
+  if (isNaN(offset) || offset < 0) {
+    throw {
+      code: "INVALID_OFFSET",
+      message: "Offset must be a non-negative number",
+    };
+  }
+
+  return { limit, offset };
+}
+
+// Generic query builder for fetching lexicons from a table
+async function queryTable(
+  table: typeof validLexicons | typeof invalidLexicons,
+  nsid: string,
+  limit: number,
+  offset: number,
+) {
+  const [records, countResult] = await Promise.all([
+    db
+      .select()
+      .from(table)
+      .where(eq(table.nsid, nsid))
+      .orderBy(desc(table.ingestedAt))
+      .limit(limit)
+      .offset(offset),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(table)
+      .where(eq(table.nsid, nsid)),
+  ]);
+
+  return { records, count: Number(countResult[0].count) };
+}
+
+// Fetch latest record from a table
+async function queryLatest(
+  table: typeof validLexicons | typeof invalidLexicons,
+  nsid: string,
+) {
+  const records = await db
+    .select()
+    .from(table)
+    .where(eq(table.nsid, nsid))
+    .orderBy(desc(table.ingestedAt))
+    .limit(1);
+
+  return records[0] || null;
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ nsid: string }> },
@@ -25,186 +82,32 @@ export async function GET(
       );
     }
 
-    // Parse query parameters
-    const validParam = searchParams.get("valid");
+    // Parse query parameters - default to valid=true
+    const validParam = searchParams.get("valid") ?? "true";
     const latest = searchParams.get("latest") === "true";
-    const limit = Math.min(
-      parseInt(searchParams.get("limit") || "50", 10),
-      100,
-    );
-    const offset = parseInt(searchParams.get("offset") || "0", 10);
 
-    // Validate parameters
-    if (isNaN(limit) || limit < 1) {
-      return Response.json(
-        {
-          error: {
-            code: "INVALID_LIMIT",
-            message: "Limit must be a positive number",
-          },
-        },
-        { status: 400 },
-      );
+    // Determine which table to query
+    const table = validParam === "false" ? invalidLexicons : validLexicons;
+
+    // Handle "latest" query - simpler logic, early return
+    if (latest) {
+      return Response.json({ data: await queryLatest(table, nsid) });
     }
 
-    if (isNaN(offset) || offset < 0) {
-      return Response.json(
-        {
-          error: {
-            code: "INVALID_OFFSET",
-            message: "Offset must be a non-negative number",
-          },
-        },
-        { status: 400 },
-      );
-    }
-
-    let data;
-    let total;
-
-    if (validParam === "true") {
-      // Query only valid lexicons for this NSID
-      if (latest) {
-        const lexicon = await db
-          .select()
-          .from(validLexicons)
-          .where(eq(validLexicons.nsid, nsid))
-          .orderBy(desc(validLexicons.ingestedAt))
-          .limit(1);
-
-        return Response.json({
-          data: lexicon[0] || null,
-        });
-      } else {
-        const [lexicons, countResult] = await Promise.all([
-          db
-            .select()
-            .from(validLexicons)
-            .where(eq(validLexicons.nsid, nsid))
-            .orderBy(desc(validLexicons.ingestedAt))
-            .limit(limit)
-            .offset(offset),
-          db
-            .select({ count: sql<number>`count(*)` })
-            .from(validLexicons)
-            .where(eq(validLexicons.nsid, nsid)),
-        ]);
-
-        data = lexicons;
-        total = Number(countResult[0].count);
-      }
-    } else if (validParam === "false") {
-      // Query only invalid lexicons for this NSID
-      if (latest) {
-        const lexicon = await db
-          .select()
-          .from(invalidLexicons)
-          .where(eq(invalidLexicons.nsid, nsid))
-          .orderBy(desc(invalidLexicons.ingestedAt))
-          .limit(1);
-
-        return Response.json({
-          data: lexicon[0] || null,
-        });
-      } else {
-        const [lexicons, countResult] = await Promise.all([
-          db
-            .select()
-            .from(invalidLexicons)
-            .where(eq(invalidLexicons.nsid, nsid))
-            .orderBy(desc(invalidLexicons.ingestedAt))
-            .limit(limit)
-            .offset(offset),
-          db
-            .select({ count: sql<number>`count(*)` })
-            .from(invalidLexicons)
-            .where(eq(invalidLexicons.nsid, nsid)),
-        ]);
-
-        data = lexicons;
-        total = Number(countResult[0].count);
-      }
-    } else {
-      // Query both tables for this NSID
-      if (latest) {
-        const [validLex, invalidLex] = await Promise.all([
-          db
-            .select()
-            .from(validLexicons)
-            .where(eq(validLexicons.nsid, nsid))
-            .orderBy(desc(validLexicons.ingestedAt))
-            .limit(1),
-          db
-            .select()
-            .from(invalidLexicons)
-            .where(eq(invalidLexicons.nsid, nsid))
-            .orderBy(desc(invalidLexicons.ingestedAt))
-            .limit(1),
-        ]);
-
-        // Return the most recent one
-        const validDate = validLex[0]
-          ? new Date(validLex[0].ingestedAt).getTime()
-          : 0;
-        const invalidDate = invalidLex[0]
-          ? new Date(invalidLex[0].ingestedAt).getTime()
-          : 0;
-
-        const latest = validDate > invalidDate ? validLex[0] : invalidLex[0];
-
-        return Response.json({
-          data: latest || null,
-        });
-      } else {
-        const [validLexs, invalidLexs, validCount, invalidCount] =
-          await Promise.all([
-            db
-              .select()
-              .from(validLexicons)
-              .where(eq(validLexicons.nsid, nsid))
-              .orderBy(desc(validLexicons.ingestedAt))
-              .limit(limit)
-              .offset(offset),
-            db
-              .select()
-              .from(invalidLexicons)
-              .where(eq(invalidLexicons.nsid, nsid))
-              .orderBy(desc(invalidLexicons.ingestedAt))
-              .limit(limit)
-              .offset(offset),
-            db
-              .select({ count: sql<number>`count(*)` })
-              .from(validLexicons)
-              .where(eq(validLexicons.nsid, nsid)),
-            db
-              .select({ count: sql<number>`count(*)` })
-              .from(invalidLexicons)
-              .where(eq(invalidLexicons.nsid, nsid)),
-          ]);
-
-        // Merge and sort by ingestedAt
-        const merged = [
-          ...validLexs.map((l) => ({ ...l, valid: true })),
-          ...invalidLexs.map((l) => ({ ...l, valid: false })),
-        ].sort(
-          (a, b) =>
-            new Date(b.ingestedAt).getTime() - new Date(a.ingestedAt).getTime(),
-        );
-
-        data = merged.slice(0, limit);
-        total = Number(validCount[0].count) + Number(invalidCount[0].count);
-      }
-    }
+    // Handle paginated queries
+    const { limit, offset } = parsePaginationParams(searchParams);
+    const { records, count } = await queryTable(table, nsid, limit, offset);
 
     return Response.json({
-      data,
-      pagination: {
-        limit,
-        offset,
-        total,
-      },
+      data: records,
+      pagination: { limit, offset, total: count },
     });
   } catch (error) {
+    // Handle custom validation errors
+    if (error && typeof error === "object" && "code" in error) {
+      return Response.json({ error }, { status: 400 });
+    }
+
     console.error("Error fetching lexicons for NSID:", error);
     return Response.json(
       {
