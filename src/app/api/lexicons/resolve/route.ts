@@ -163,11 +163,7 @@ export async function GET(request: NextRequest) {
 
     return Response.json({
       data,
-      pagination: {
-        limit: data.length,
-        offset: 0,
-        total,
-      },
+      total,
     });
   } catch (error) {
     if (error instanceof ValidationError) {
