@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { db } from "@/db";
-import { validLexicons, invalidLexicons } from "@/db/schema";
+import { valid_lexicons, invalid_lexicons } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { isValidNsid } from "@atproto/syntax";
 import {
@@ -29,7 +29,7 @@ function parseQueryParams(searchParams: URLSearchParams): QueryParams {
 }
 
 async function queryTable(
-  table: typeof validLexicons | typeof invalidLexicons,
+  table: typeof valid_lexicons | typeof invalid_lexicons,
   nsid: string,
   limit: number,
   offset: number,
@@ -49,7 +49,7 @@ async function queryTable(
 }
 
 async function queryLatest(
-  table: typeof validLexicons | typeof invalidLexicons,
+  table: typeof valid_lexicons | typeof invalid_lexicons,
   nsid: string,
 ) {
   const records = await db
@@ -79,7 +79,7 @@ export async function GET(
       request.nextUrl.searchParams,
     );
 
-    const table = valid ? validLexicons : invalidLexicons;
+    const table = valid ? valid_lexicons : invalid_lexicons;
 
     if (latest) {
       return Response.json({ data: await queryLatest(table, nsid) });

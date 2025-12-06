@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { invalidLexicons, validLexicons } from "@/db/schema";
+import { invalid_lexicons, valid_lexicons } from "@/db/schema";
 import { ValidationError } from "@/util/params";
 import { IdResolver, MemoryCache } from "@atproto/identity";
 import { AtUri, isValidHandle } from "@atproto/syntax";
@@ -49,18 +49,18 @@ async function resolveHostnameToDid(hostname: string): Promise<string> {
 
 async function querySingleLexicon(nsid: string, cid: string, repoDid: string) {
   const [validLexicon, invalidLexicon] = await Promise.all([
-    db.query.validLexicons.findFirst({
+    db.query.valid_lexicons.findFirst({
       where: and(
-        eq(validLexicons.nsid, nsid),
-        eq(validLexicons.cid, cid),
-        eq(validLexicons.repoDid, repoDid),
+        eq(valid_lexicons.nsid, nsid),
+        eq(valid_lexicons.cid, cid),
+        eq(valid_lexicons.repoDid, repoDid),
       ),
     }),
-    db.query.invalidLexicons.findFirst({
+    db.query.invalid_lexicons.findFirst({
       where: and(
-        eq(invalidLexicons.nsid, nsid),
-        eq(invalidLexicons.cid, cid),
-        eq(invalidLexicons.repoDid, repoDid),
+        eq(invalid_lexicons.nsid, nsid),
+        eq(invalid_lexicons.cid, cid),
+        eq(invalid_lexicons.repoDid, repoDid),
       ),
     }),
   ]);
@@ -77,30 +77,33 @@ async function queryAllVersions(nsid: string, repoDid: string) {
   ] = await Promise.all([
     db
       .select()
-      .from(validLexicons)
+      .from(valid_lexicons)
       .where(
-        and(eq(validLexicons.nsid, nsid), eq(validLexicons.repoDid, repoDid)),
+        and(eq(valid_lexicons.nsid, nsid), eq(valid_lexicons.repoDid, repoDid)),
       )
-      .orderBy(desc(validLexicons.ingestedAt))
+      .orderBy(desc(valid_lexicons.ingestedAt))
       .limit(MAX_LEXICONS_LIMIT),
     db
       .select()
-      .from(invalidLexicons)
+      .from(invalid_lexicons)
       .where(
         and(
-          eq(invalidLexicons.nsid, nsid),
-          eq(invalidLexicons.repoDid, repoDid),
+          eq(invalid_lexicons.nsid, nsid),
+          eq(invalid_lexicons.repoDid, repoDid),
         ),
       )
-      .orderBy(desc(invalidLexicons.ingestedAt))
+      .orderBy(desc(invalid_lexicons.ingestedAt))
       .limit(MAX_LEXICONS_LIMIT),
     db.$count(
-      validLexicons,
-      and(eq(validLexicons.nsid, nsid), eq(validLexicons.repoDid, repoDid)),
+      valid_lexicons,
+      and(eq(valid_lexicons.nsid, nsid), eq(valid_lexicons.repoDid, repoDid)),
     ),
     db.$count(
-      invalidLexicons,
-      and(eq(invalidLexicons.nsid, nsid), eq(invalidLexicons.repoDid, repoDid)),
+      invalid_lexicons,
+      and(
+        eq(invalid_lexicons.nsid, nsid),
+        eq(invalid_lexicons.repoDid, repoDid),
+      ),
     ),
   ]);
 
