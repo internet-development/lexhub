@@ -5,6 +5,24 @@ interface BaseReason {
 }
 
 /**
+ * NSID format is invalid
+ */
+interface InvalidNsidFormatReason extends BaseReason {
+  type: "invalid_nsid_format";
+  nsid: string;
+  message: string;
+}
+
+/**
+ * NSID DID authority does not match the repository DID
+ */
+interface DidAuthorityMismatchReason extends BaseReason {
+  type: "did_authority_mismatch";
+  expectedDid: string | null;
+  actualDid: string;
+}
+
+/**
  *  Record key does not match the lexicon NSID
  */
 interface RkeyMismatchReason extends BaseReason {
@@ -22,18 +40,10 @@ interface SchemaValidationReason extends BaseReason {
 }
 
 /**
- * NSID format is invalid
- */
-interface InvalidNsidFormatReason extends BaseReason {
-  type: "invalid_nsid_format";
-  nsid: string;
-  message: string;
-}
-
-/**
  * All possible validation failure reasons
  */
 export type InvalidLexiconReason =
+  | InvalidNsidFormatReason
+  | DidAuthorityMismatchReason
   | RkeyMismatchReason
-  | SchemaValidationReason
-  | InvalidNsidFormatReason;
+  | SchemaValidationReason;

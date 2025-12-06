@@ -1,4 +1,5 @@
 import { LexiconDoc, parseLexiconDoc } from "@atproto/lexicon";
+import { resolveLexiconDidAuthority } from "@atproto/lexicon-resolver";
 import { validateNsid } from "@atproto/syntax";
 import { InvalidLexiconReason } from "./reasons";
 import { Commit, isZodError } from "./types";
@@ -17,7 +18,7 @@ export type ValidationResult =
 type ValidatorFunction = (
   commit: Commit,
   reasons: InvalidLexiconReason[],
-) => void;
+) => void | Promise<void>;
 
 /**
  * Validates that the NSID format is correct.
@@ -32,6 +33,31 @@ const validateNsidFormat: ValidatorFunction = (commit, reasons) => {
       type: "invalid_nsid_format",
       nsid: nsid,
       message: result.message,
+    });
+  }
+};
+
+/**
+ * Validates that the NSID DID authority matches the repository DID.
+ * This helps prevent spoofing and DDoS attacks by only storing lexicons with valid DNS authority.
+ */
+const validateDidAuthority: ValidatorFunction = async (commit, reasons) => {
+  try {
+    const expectedDid = await resolveLexiconDidAuthority(commit.record.id);
+
+    if (!expectedDid || expectedDid !== commit.did) {
+      reasons.push({
+        type: "did_authority_mismatch",
+        expectedDid: expectedDid || null,
+        actualDid: commit.did,
+      });
+    }
+  } catch (error) {
+    // If DNS resolution fails, treat it as a mismatch
+    reasons.push({
+      type: "did_authority_mismatch",
+      expectedDid: null,
+      actualDid: commit.did,
     });
   }
 };
@@ -73,10 +99,9 @@ const validateSchema: ValidatorFunction = (commit, reasons) => {
  */
 const validators: ValidatorFunction[] = [
   validateNsidFormat,
+  validateDidAuthority,
   validateRkeyMatchesNsid,
   validateSchema,
-  // Future validators can be added here
-  // Example: validateNsidDidAuthority (currently done before validation)
 ];
 
 /**
@@ -86,11 +111,13 @@ const validators: ValidatorFunction[] = [
  * @param commit - The commit data from a Nexus record event
  * @returns ValidationResult with isValid flag, reasons array, and optional lexiconDoc
  */
-export function validateLexicon(commit: Commit): ValidationResult {
+export async function validateLexicon(
+  commit: Commit,
+): Promise<ValidationResult> {
   const reasons: InvalidLexiconReason[] = [];
 
   for (const validator of validators) {
-    validator(commit, reasons);
+    await validator(commit, reasons);
   }
 
   if (reasons.length === 0) {

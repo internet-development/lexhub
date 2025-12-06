@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { invalid_lexicons, valid_lexicons } from "@/db/schema";
 import { isLexiconSchemaRecord } from "@/util/lexicon";
-import { resolveLexiconDidAuthority } from "@atproto/lexicon-resolver";
 import { isNexusEvent, isUserEvent } from "./types";
 import { validateLexicon } from "./validation";
 
@@ -47,18 +46,10 @@ export async function POST(request: NextRequest) {
 
     const nsid = lexiconRecord.id;
 
-    // Run validation first to catch format errors before attempting DNS resolution
-    const validationResult = validateLexicon(commit);
+    // Run all validations (including DID authority check)
+    const validationResult = await validateLexicon(commit);
 
     if (validationResult.isValid) {
-      // DNS validation gate: Only resolve DNS if validation passed
-      // Reject if DNS doesn't resolve or doesn't match the repo DID
-      // This helps prevent spoofing and DDoS attacks by only storing lexicons with valid DNS authority
-      const did = await resolveLexiconDidAuthority(nsid);
-
-      if (!did || did !== commit.did) {
-        return ackEvent("NSID DID authority does not match record DID");
-      }
       // Valid lexicon: store in valid_lexicons table
       await db
         .insert(valid_lexicons)
