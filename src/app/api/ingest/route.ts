@@ -2,10 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/db";
 import { invalid_lexicons, valid_lexicons } from "@/db/schema";
-import { isLexiconSchemaRecord } from "@/util/lexicon";
-import { isNexusEvent, isUserEvent } from "./types";
+import { isCommit, isNexusEvent, isUserEvent } from "./types";
 import { validateLexicon } from "./validation";
-import { lexiconDoc } from "@atproto/lexicon";
 
 /**
  * Acknowledges receipt of a Nexus event.
@@ -39,10 +37,13 @@ export async function POST(request: NextRequest) {
     }
 
     const commit = body.record;
-    if (!isLexiconSchemaRecord(commit.record)) {
-      return ackEvent("Not a valid lexicon schema record");
+
+    // Type guard: ensure commit.record is a LexiconSchemaRecord
+    if (!isCommit(commit)) {
+      return ackEvent("Not a valid commit");
     }
 
+    // Now commit is typed as Commit (with LexiconSchemaRecord)
     const validationResult = await validateLexicon(commit);
 
     if (validationResult.isValid) {

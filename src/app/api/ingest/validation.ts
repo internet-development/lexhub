@@ -42,12 +42,15 @@ const validateNsidFormat: ValidatorFunction = (commit, reasons) => {
  * This helps prevent spoofing and DDoS attacks by only storing lexicons with valid DNS authority.
  */
 const validateDidAuthority: ValidatorFunction = async (commit, reasons) => {
+  const nsid = commit.record.id;
+
   try {
-    const expectedDid = await resolveLexiconDidAuthority(commit.record.id);
+    const expectedDid = await resolveLexiconDidAuthority(nsid);
 
     if (!expectedDid || expectedDid !== commit.did) {
       reasons.push({
         type: "did_authority_mismatch",
+        nsid: nsid,
         expectedDid: expectedDid || null,
         actualDid: commit.did,
       });
@@ -56,6 +59,7 @@ const validateDidAuthority: ValidatorFunction = async (commit, reasons) => {
     // If DNS resolution fails, treat it as a mismatch
     reasons.push({
       type: "did_authority_mismatch",
+      nsid: nsid,
       expectedDid: null,
       actualDid: commit.did,
     });

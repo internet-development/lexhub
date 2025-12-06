@@ -18,6 +18,7 @@ interface InvalidNsidFormatReason extends BaseReason {
  */
 interface DidAuthorityMismatchReason extends BaseReason {
   type: "did_authority_mismatch";
+  nsid: string;
   expectedDid: string | null;
   actualDid: string;
 }

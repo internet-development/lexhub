@@ -1,10 +1,19 @@
-import { LexiconSchemaRecord } from "@/util/lexicon";
+import { LEXICON_SCHEMA_NSID } from "@atproto/lexicon-resolver";
 import z from "zod";
 
 /**
- * Represents a commit from a Nexus record event
+ * Extend the type from `@atproto/lexicon-resolver` to require the 'id' field.
+ * This extension is necessary because we need the NSID to resolve the DID authority.
  */
-export interface Commit {
+export type LexiconSchemaRecord = {
+  $type: typeof LEXICON_SCHEMA_NSID;
+  id: string;
+};
+
+/**
+ * Base commit interface with unknown record type
+ */
+export interface RawCommit {
   did: string;
   rev: string;
   collection: string;
@@ -12,7 +21,14 @@ export interface Commit {
   action: "create" | "update" | "delete";
   cid: string;
   live: boolean;
-  record: object;
+  record: unknown;
+}
+
+/**
+ * Commit with validated LexiconSchemaRecord
+ */
+export interface Commit extends RawCommit {
+  record: LexiconSchemaRecord;
 }
 
 /**
@@ -30,7 +46,7 @@ interface UserEvent {
 interface RecordEvent {
   id: number;
   type: "record";
-  record: Commit;
+  record: RawCommit;
 }
 
 export type NexusEvent = UserEvent | RecordEvent;
@@ -50,6 +66,17 @@ export function isNexusEvent(obj: any): obj is NexusEvent {
     typeof obj.id === "number" &&
     (obj.type === "user" || obj.type === "record")
   );
+}
+
+/**
+ * Type guard to check if a value is a LexiconSchemaRecord.
+ */
+export function isLexiconSchemaRecord(v: any): v is LexiconSchemaRecord {
+  return v?.["$type"] === LEXICON_SCHEMA_NSID && Object.hasOwn(v, "id");
+}
+
+export function isCommit(commit: RawCommit): commit is Commit {
+  return isLexiconSchemaRecord(commit.record);
 }
 
 export function isZodError(error: any): error is z.ZodError {
