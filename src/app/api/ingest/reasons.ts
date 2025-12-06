@@ -22,12 +22,12 @@ interface SchemaValidationReason extends BaseReason {
 }
 
 /**
- * NSID contains invalid characters
+ * NSID format is invalid
  */
 interface InvalidNsidFormatReason extends BaseReason {
   type: "invalid_nsid_format";
   nsid: string;
-  invalidCharacters: string[];
+  message: string;
 }
 
 /**

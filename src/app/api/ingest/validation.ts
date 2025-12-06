@@ -1,4 +1,5 @@
 import { LexiconDoc, parseLexiconDoc } from "@atproto/lexicon";
+import { validateNsid } from "@atproto/syntax";
 import { InvalidLexiconReason } from "./reasons";
 import { Commit, isZodError } from "./types";
 
@@ -19,24 +20,18 @@ type ValidatorFunction = (
 ) => void;
 
 /**
- * Validates that the NSID contains only allowed characters.
- * NSIDs can only contain ASCII letters, digits, dashes, and periods.
+ * Validates that the NSID format is correct.
+ * Uses @atproto/syntax validateNsid for detailed validation messages.
  */
 const validateNsidFormat: ValidatorFunction = (commit, reasons) => {
   const nsid = commit.record.id;
-  // NSID format: only ASCII letters, digits, dashes, and periods
-  const validNsidPattern = /^[a-zA-Z0-9.-]+$/;
+  const result = validateNsid(nsid);
 
-  if (!validNsidPattern.test(nsid)) {
-    // Extract invalid characters
-    const invalidChars = Array.from(
-      new Set(nsid.split("").filter((char) => !/[a-zA-Z0-9.-]/.test(char))),
-    );
-
+  if (!result.success) {
     reasons.push({
       type: "invalid_nsid_format",
       nsid: nsid,
-      invalidCharacters: invalidChars,
+      message: result.message,
     });
   }
 };
