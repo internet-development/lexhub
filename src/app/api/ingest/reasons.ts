@@ -22,6 +22,18 @@ interface SchemaValidationReason extends BaseReason {
 }
 
 /**
+ * NSID contains invalid characters
+ */
+interface InvalidNsidFormatReason extends BaseReason {
+  type: "invalid_nsid_format";
+  nsid: string;
+  message: string;
+}
+
+/**
  * All possible validation failure reasons
  */
-export type InvalidLexiconReason = RkeyMismatchReason | SchemaValidationReason;
+export type InvalidLexiconReason =
+  | RkeyMismatchReason
+  | SchemaValidationReason
+  | InvalidNsidFormatReason;

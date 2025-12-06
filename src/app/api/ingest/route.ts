@@ -46,17 +46,19 @@ export async function POST(request: NextRequest) {
     }
 
     const nsid = lexiconRecord.id;
-    const did = await resolveLexiconDidAuthority(nsid);
 
-    // DNS validation gate: Reject if DNS doesn't resolve or doesn't match the repo DID
-    // This helps prevent spoofing and DDoS attacks by only storing lexicons with valid DNS authority
-    if (!did || did !== commit.did) {
-      return ackEvent("NSID DID authority does not match record DID");
-    }
-
+    // Run validation first to catch format errors before attempting DNS resolution
     const validationResult = validateLexicon(commit);
 
     if (validationResult.isValid) {
+      // DNS validation gate: Only resolve DNS if validation passed
+      // Reject if DNS doesn't resolve or doesn't match the repo DID
+      // This helps prevent spoofing and DDoS attacks by only storing lexicons with valid DNS authority
+      const did = await resolveLexiconDidAuthority(nsid);
+
+      if (!did || did !== commit.did) {
+        return ackEvent("NSID DID authority does not match record DID");
+      }
       // Valid lexicon: store in valid_lexicons table
       await db
         .insert(valid_lexicons)

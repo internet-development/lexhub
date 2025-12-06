@@ -19,6 +19,24 @@ type ValidatorFunction = (
 ) => void;
 
 /**
+ * Validates that the NSID contains only allowed characters.
+ * NSIDs can only contain ASCII letters, digits, dashes, and periods.
+ */
+const validateNsidFormat: ValidatorFunction = (commit, reasons) => {
+  const nsid = commit.record.id;
+  // NSID format: only ASCII letters, digits, dashes, and periods
+  const validNsidPattern = /^[a-zA-Z0-9.-]+$/;
+  
+  if (!validNsidPattern.test(nsid)) {
+    reasons.push({
+      type: "invalid_nsid_format",
+      nsid: nsid,
+      message: "NSID contains disallowed characters (ASCII letters, digits, dashes, periods only)",
+    });
+  }
+};
+
+/**
  * Validates that the record key (rkey) matches the lexicon NSID.
  * This is required because the rkey should always be the NSID for lexicon records.
  */
@@ -54,6 +72,7 @@ const validateSchema: ValidatorFunction = (commit, reasons) => {
  * Validators are executed in order and all failures are collected.
  */
 const validators: ValidatorFunction[] = [
+  validateNsidFormat,
   validateRkeyMatchesNsid,
   validateSchema,
   // Future validators can be added here
