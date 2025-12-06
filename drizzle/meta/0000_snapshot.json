@@ -1,15 +1,15 @@
 {
-  "id": "1f9ba7ab-95a0-4e5b-b8d5-89a953fef8fb",
+  "id": "c1f00b27-49e4-47bf-ac81-bee9b74f067f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.lexicons": {
-      "name": "lexicons",
+    "public.invalid_lexicons": {
+      "name": "invalid_lexicons",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "nsid": {
+          "name": "nsid",
           "type": "varchar(317)",
           "primaryKey": false,
           "notNull": true
@@ -20,21 +20,32 @@
           "primaryKey": false,
           "notNull": true
         },
-        "data": {
-          "name": "data",
+        "repo_did": {
+          "name": "repo_did",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "repo_rev": {
+          "name": "repo_rev",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "raw_data": {
+          "name": "raw_data",
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
+        "reasons": {
+          "name": "reasons",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": true
         },
-        "updated_at": {
-          "name": "updated_at",
+        "ingested_at": {
+          "name": "ingested_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
@@ -42,11 +53,11 @@
         }
       },
       "indexes": {
-        "lexicons_id_idx": {
-          "name": "lexicons_id_idx",
+        "invalid_lexicons_nsid_idx": {
+          "name": "invalid_lexicons_nsid_idx",
           "columns": [
             {
-              "expression": "id",
+              "expression": "nsid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -57,11 +68,11 @@
           "method": "btree",
           "with": {}
         },
-        "lexicons_created_at_idx": {
-          "name": "lexicons_created_at_idx",
+        "invalid_lexicons_repo_did_idx": {
+          "name": "invalid_lexicons_repo_did_idx",
           "columns": [
             {
-              "expression": "created_at",
+              "expression": "repo_did",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -72,8 +83,133 @@
           "method": "btree",
           "with": {}
         },
-        "lexicons_data_gin_idx": {
-          "name": "lexicons_data_gin_idx",
+        "invalid_lexicons_raw_data_gin_idx": {
+          "name": "invalid_lexicons_raw_data_gin_idx",
+          "columns": [
+            {
+              "expression": "raw_data",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        },
+        "invalid_lexicons_reasons_gin_idx": {
+          "name": "invalid_lexicons_reasons_gin_idx",
+          "columns": [
+            {
+              "expression": "reasons",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "invalid_lexicons_nsid_cid_repo_did_pk": {
+          "name": "invalid_lexicons_nsid_cid_repo_did_pk",
+          "columns": [
+            "nsid",
+            "cid",
+            "repo_did"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "reasons_not_empty": {
+          "name": "reasons_not_empty",
+          "value": "jsonb_array_length(\"invalid_lexicons\".\"reasons\") > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.valid_lexicons": {
+      "name": "valid_lexicons",
+      "schema": "",
+      "columns": {
+        "nsid": {
+          "name": "nsid",
+          "type": "varchar(317)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cid": {
+          "name": "cid",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "repo_did": {
+          "name": "repo_did",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "repo_rev": {
+          "name": "repo_rev",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ingested_at": {
+          "name": "ingested_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "valid_lexicons_nsid_idx": {
+          "name": "valid_lexicons_nsid_idx",
+          "columns": [
+            {
+              "expression": "nsid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "valid_lexicons_repo_did_idx": {
+          "name": "valid_lexicons_repo_did_idx",
+          "columns": [
+            {
+              "expression": "repo_did",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "valid_lexicons_data_gin_idx": {
+          "name": "valid_lexicons_data_gin_idx",
           "columns": [
             {
               "expression": "data",
@@ -90,11 +226,12 @@
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "lexicons_id_cid_pk": {
-          "name": "lexicons_id_cid_pk",
+        "valid_lexicons_nsid_cid_repo_did_pk": {
+          "name": "valid_lexicons_nsid_cid_repo_did_pk",
           "columns": [
-            "id",
-            "cid"
+            "nsid",
+            "cid",
+            "repo_did"
           ]
         }
       },
