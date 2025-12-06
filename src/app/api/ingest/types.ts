@@ -1,4 +1,5 @@
 import { LexiconSchemaRecord } from "@/util/lexicon";
+import z from "zod";
 
 /**
  * Represents a commit from a Nexus record event
@@ -48,5 +49,16 @@ export function isNexusEvent(obj: any): obj is NexusEvent {
     typeof obj === "object" &&
     typeof obj.id === "number" &&
     (obj.type === "user" || obj.type === "record")
+  );
+}
+
+export function isZodError(error: any): error is z.ZodError {
+  if (error instanceof z.ZodError) return true;
+
+  return (
+    error &&
+    typeof error === "object" &&
+    "issues" in error &&
+    Array.isArray(error.issues)
   );
 }

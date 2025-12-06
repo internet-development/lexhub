@@ -1,71 +1,21 @@
-import { parseLexiconDoc } from "@atproto/lexicon";
-import z from "zod";
-import { Commit } from "./types";
+import { LexiconDoc, parseLexiconDoc } from "@atproto/lexicon";
+import { InvalidLexiconReason } from "./reasons";
+import { Commit, isZodError } from "./types";
 
-// ============================================================================
-// Reason Types
-// ============================================================================
-
-interface BaseReason {
-  type: string;
-}
-
-/**
- * Reason: Record key does not match the lexicon NSID
- */
-interface RkeyMismatchReason extends BaseReason {
-  type: "rkey_mismatch";
-  expected: string;
-  actual: string;
-}
-
-/**
- * Reason: Lexicon failed schema validation
- */
-interface SchemaValidationReason extends BaseReason {
-  type: "schema_validation_error";
-  issues: z.ZodError["issues"];
-}
-
-/**
- * All possible validation failure reasons
- */
-export type InvalidLexiconReason =
-  | RkeyMismatchReason
-  | SchemaValidationReason;
-
-// ============================================================================
-// Validation Result
-// ============================================================================
-
-export type ValidationResult = {
-  isValid: boolean;
-  reasons: InvalidLexiconReason[];
-  lexiconDoc?: any; // LexiconDoc type from @atproto/lexicon
-};
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-function isZodError(error: any): error is z.ZodError {
-  if (error instanceof z.ZodError) return true;
-
-  return (
-    error &&
-    typeof error === "object" &&
-    "issues" in error &&
-    Array.isArray(error.issues)
-  );
-}
-
-// ============================================================================
-// Validator Functions
-// ============================================================================
+export type ValidationResult =
+  | {
+      isValid: true;
+      lexiconDoc: LexiconDoc;
+      reasons: [];
+    }
+  | {
+      isValid: false;
+      reasons: InvalidLexiconReason[];
+    };
 
 type ValidatorFunction = (
   commit: Commit,
-  reasons: InvalidLexiconReason[]
+  reasons: InvalidLexiconReason[],
 ) => void;
 
 /**
@@ -110,10 +60,6 @@ const validators: ValidatorFunction[] = [
   // Example: validateNsidDidAuthority (currently done before validation)
 ];
 
-// ============================================================================
-// Main Validation Function
-// ============================================================================
-
 /**
  * Validates a lexicon commit against all registered validators.
  * Collects all validation failures and returns them.
@@ -123,27 +69,21 @@ const validators: ValidatorFunction[] = [
  */
 export function validateLexicon(commit: Commit): ValidationResult {
   const reasons: InvalidLexiconReason[] = [];
-  let lexiconDoc: any = undefined;
 
-  // Run all validators to collect all possible reasons
   for (const validator of validators) {
     validator(commit, reasons);
   }
 
-  // If valid, parse and return the lexicon doc
   if (reasons.length === 0) {
-    try {
-      lexiconDoc = parseLexiconDoc(commit.record);
-    } catch (error) {
-      // This shouldn't happen since schema validator passed,
-      // but handle defensively
-      console.error("Unexpected error after validation passed:", error);
-    }
+    return {
+      isValid: true,
+      lexiconDoc: commit.record as unknown as LexiconDoc,
+      reasons: [],
+    };
   }
 
   return {
-    isValid: reasons.length === 0,
-    reasons,
-    lexiconDoc,
+    isValid: false,
+    reasons: reasons,
   };
 }
