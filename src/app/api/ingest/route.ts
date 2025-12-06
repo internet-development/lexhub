@@ -5,6 +5,7 @@ import { invalid_lexicons, valid_lexicons } from "@/db/schema";
 import { isLexiconSchemaRecord } from "@/util/lexicon";
 import { isNexusEvent, isUserEvent } from "./types";
 import { validateLexicon } from "./validation";
+import { lexiconDoc } from "@atproto/lexicon";
 
 /**
  * Acknowledges receipt of a Nexus event.
@@ -38,15 +39,10 @@ export async function POST(request: NextRequest) {
     }
 
     const commit = body.record;
-    const { cid, record: lexiconRecord } = commit;
-
-    if (!isLexiconSchemaRecord(lexiconRecord)) {
+    if (!isLexiconSchemaRecord(commit.record)) {
       return ackEvent("Not a valid lexicon schema record");
     }
 
-    const nsid = lexiconRecord.id;
-
-    // Run all validations (including DID authority check)
     const validationResult = await validateLexicon(commit);
 
     if (validationResult.isValid) {
@@ -54,8 +50,8 @@ export async function POST(request: NextRequest) {
       await db
         .insert(valid_lexicons)
         .values({
-          nsid: nsid,
-          cid: cid,
+          nsid: validationResult.lexiconDoc.id,
+          cid: commit.cid,
           repoDid: commit.did,
           repoRev: commit.rev,
           data: validationResult.lexiconDoc,
@@ -64,8 +60,8 @@ export async function POST(request: NextRequest) {
 
       console.log("Valid lexicon ingested:", {
         eventId: body.id,
-        nsid: nsid,
-        cid: cid,
+        nsid: validationResult.lexiconDoc.id,
+        cid: commit.cid,
         repoDid: commit.did,
         action: commit.action,
       });
@@ -76,19 +72,19 @@ export async function POST(request: NextRequest) {
       await db
         .insert(invalid_lexicons)
         .values({
-          nsid: nsid,
-          cid: cid,
+          nsid: commit.record.id,
+          cid: commit.cid,
           repoDid: commit.did,
           repoRev: commit.rev,
-          rawData: lexiconRecord,
+          rawData: commit.record,
           reasons: validationResult.reasons,
         })
         .onConflictDoNothing();
 
       console.warn("Invalid lexicon ingested:", {
         eventId: body.id,
-        nsid: nsid,
-        cid: cid,
+        nsid: commit.record.id,
+        cid: commit.cid,
         repoDid: commit.did,
         reasonCount: validationResult.reasons.length,
         reasonTypes: validationResult.reasons.map((r) => r.type),

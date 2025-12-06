@@ -12,7 +12,7 @@ export interface Commit {
   action: "create" | "update" | "delete";
   cid: string;
   live: boolean;
-  record: LexiconSchemaRecord;
+  record: object;
 }
 
 /**
