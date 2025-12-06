@@ -2,62 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/db";
 import { invalid_lexicons, valid_lexicons } from "@/db/schema";
-import { isLexiconSchemaRecord, LexiconSchemaRecord } from "@/util/lexicon";
-import { parseLexiconDoc } from "@atproto/lexicon";
+import { isLexiconSchemaRecord } from "@/util/lexicon";
 import { resolveLexiconDidAuthority } from "@atproto/lexicon-resolver";
-import z from "zod";
-
-interface UserEvent {
-  id: number;
-  type: "user";
-  user: object;
-}
-
-interface RecordEvent {
-  id: number;
-  type: "record";
-  record: {
-    did: string;
-    rev: string;
-    collection: string;
-    rkey: string;
-    action: "create" | "update" | "delete";
-    cid: string;
-    live: boolean;
-    record: LexiconSchemaRecord;
-  };
-}
-
-type NexusEvent = UserEvent | RecordEvent;
-
-function isUserEvent(event: NexusEvent): event is UserEvent {
-  return event.type === "user";
-}
-
-function isRecordEvent(event: NexusEvent): event is RecordEvent {
-  return event.type === "record";
-}
-
-function isNexusEvent(obj: any): obj is NexusEvent {
-  return (
-    obj &&
-    typeof obj === "object" &&
-    typeof obj.id === "number" &&
-    (obj.type === "user" || obj.type === "record")
-  );
-}
-
-function isZodError(error: any): error is z.ZodError {
-  if (error instanceof z.ZodError) return true;
-
-  // Check for ZodError shape, since instanceof may fail when ZodError is nested in another error
-  return (
-    error &&
-    typeof error === "object" &&
-    "issues" in error &&
-    Array.isArray(error.issues)
-  );
-}
+import { isNexusEvent, isUserEvent } from "./types";
+import { validateLexicon } from "./validation";
 
 /**
  * Acknowledges receipt of a Nexus event.
@@ -106,10 +54,9 @@ export async function POST(request: NextRequest) {
       return ackEvent("NSID DID authority does not match record DID");
     }
 
-    try {
-      // Attempt to parse and validate the lexicon schema
-      const lexiconDoc = parseLexiconDoc(lexiconRecord);
+    const validationResult = validateLexicon(commit);
 
+    if (validationResult.isValid) {
       // Valid lexicon: store in valid_lexicons table
       await db
         .insert(valid_lexicons)
@@ -118,7 +65,7 @@ export async function POST(request: NextRequest) {
           cid: cid,
           repoDid: commit.did,
           repoRev: commit.rev,
-          data: lexiconDoc,
+          data: validationResult.lexiconDoc,
         })
         .onConflictDoNothing();
 
@@ -131,34 +78,30 @@ export async function POST(request: NextRequest) {
       });
 
       return ackEvent("Valid lexicon ingested successfully");
-    } catch (error) {
-      if (isZodError(error)) {
-        // Invalid lexicon: store in invalid_lexicons table for debugging
-        await db
-          .insert(invalid_lexicons)
-          .values({
-            nsid: nsid,
-            cid: cid,
-            repoDid: commit.did,
-            repoRev: commit.rev,
-            rawData: lexiconRecord,
-            validationErrors: error.issues,
-          })
-          .onConflictDoNothing();
-
-        console.warn("Invalid lexicon ingested:", {
-          eventId: body.id,
+    } else {
+      // Invalid lexicon: store in invalid_lexicons table
+      await db
+        .insert(invalid_lexicons)
+        .values({
           nsid: nsid,
           cid: cid,
           repoDid: commit.did,
-          errorCount: error.issues.length,
-        });
+          repoRev: commit.rev,
+          rawData: lexiconRecord,
+          reasons: validationResult.reasons,
+        })
+        .onConflictDoNothing();
 
-        return ackEvent("Invalid lexicon stored for debugging");
-      } else {
-        console.error("Unknown error while parsing lexicon record:", error);
-        return ackEvent("Lexicon record failed to parse");
-      }
+      console.warn("Invalid lexicon ingested:", {
+        eventId: body.id,
+        nsid: nsid,
+        cid: cid,
+        repoDid: commit.did,
+        reasonCount: validationResult.reasons.length,
+        reasonTypes: validationResult.reasons.map((r) => r.type),
+      });
+
+      return ackEvent("Invalid lexicon stored for debugging");
     }
   } catch (error) {
     console.error("Error processing ingest request:", error);
