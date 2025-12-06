@@ -27,7 +27,7 @@ interface SchemaValidationReason extends BaseReason {
 interface InvalidNsidFormatReason extends BaseReason {
   type: "invalid_nsid_format";
   nsid: string;
-  message: string;
+  invalidCharacters: string[];
 }
 
 /**

@@ -26,12 +26,17 @@ const validateNsidFormat: ValidatorFunction = (commit, reasons) => {
   const nsid = commit.record.id;
   // NSID format: only ASCII letters, digits, dashes, and periods
   const validNsidPattern = /^[a-zA-Z0-9.-]+$/;
-  
+
   if (!validNsidPattern.test(nsid)) {
+    // Extract invalid characters
+    const invalidChars = Array.from(
+      new Set(nsid.split("").filter((char) => !/[a-zA-Z0-9.-]/.test(char))),
+    );
+
     reasons.push({
       type: "invalid_nsid_format",
       nsid: nsid,
-      message: "NSID contains disallowed characters (ASCII letters, digits, dashes, periods only)",
+      invalidCharacters: invalidChars,
     });
   }
 };
