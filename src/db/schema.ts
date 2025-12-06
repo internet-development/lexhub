@@ -5,7 +5,10 @@ import {
   primaryKey,
   timestamp,
   varchar,
+  check,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import type { InvalidLexiconReason } from "@/app/api/ingest/validation";
 
 /**
  * Valid lexicons table stores ATProto Lexicon schemas that have passed both
@@ -108,10 +111,11 @@ export const invalid_lexicons = pgTable(
     rawData: jsonb("raw_data").notNull(),
 
     /**
-     * Validation errors from Zod parser.
-     * Contains ZodError issues array with details about what failed.
+     * Array of validation failure reasons.
+     * Must contain at least one reason (enforced by CHECK constraint).
+     * Each reason has a 'type' field and type-specific properties.
      */
-    validationErrors: jsonb("validation_errors").notNull(),
+    reasons: jsonb().notNull().$type<InvalidLexiconReason[]>(),
 
     /**
      * Timestamp when this invalid lexicon was ingested
@@ -130,8 +134,14 @@ export const invalid_lexicons = pgTable(
     // Index on repo_did to find all invalid lexicons from a repository
     index("invalid_lexicons_repo_did_idx").on(table.repoDid),
 
-    // JSONB GIN index for searching validation errors
+    // JSONB GIN index for searching raw data
     index("invalid_lexicons_raw_data_gin_idx").using("gin", table.rawData),
+
+    // JSONB GIN index for querying reasons by type
+    index("invalid_lexicons_reasons_gin_idx").using("gin", table.reasons),
+
+    // Ensure reasons array is not empty
+    check("reasons_not_empty", sql`jsonb_array_length(${table.reasons}) > 0`),
   ],
 );
 
