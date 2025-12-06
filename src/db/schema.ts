@@ -1,14 +1,14 @@
+import { InvalidLexiconReason } from "@/app/api/ingest/reasons";
+import { sql } from "drizzle-orm";
 import {
+  check,
   index,
   jsonb,
   pgTable,
   primaryKey,
   timestamp,
   varchar,
-  check,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
-import type { InvalidLexiconReason } from "@/app/api/ingest/validation";
 
 /**
  * Valid lexicons table stores ATProto Lexicon schemas that have passed both
