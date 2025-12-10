@@ -88,12 +88,12 @@ const validateSchema: ValidatorFunction = (commit, reasons) => {
   try {
     parseLexiconDoc(commit.record);
   } catch (error) {
-    if (isZodError(error)) {
-      reasons.push({
-        type: "schema_validation_error",
-        issues: error.issues,
-      });
-    }
+    if (!isZodError(error)) throw error;
+
+    reasons.push({
+      type: "schema_validation_error",
+      issues: error.issues,
+    });
   }
 };
 
