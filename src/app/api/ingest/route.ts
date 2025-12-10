@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server'
 
-import { db } from "@/db";
-import { invalid_lexicons, valid_lexicons } from "@/db/schema";
-import { isCommit, isNexusEvent, isUserEvent } from "./types";
-import { validateLexicon } from "./validation";
+import { db } from '@/db'
+import { invalid_lexicons, valid_lexicons } from '@/db/schema'
+import { isCommit, isNexusEvent, isUserEvent } from './types'
+import { validateLexicon } from './validation'
 
 /**
  * Acknowledges receipt of a Nexus event.
  * Nexus considers events 'acked' when it receives a 200 response.
  */
 function ackEvent(body?: BodyInit) {
-  return new NextResponse(body, { status: 200 });
+  return new NextResponse(body, { status: 200 })
 }
 
 /**
@@ -20,12 +20,12 @@ function ackEvent(body?: BodyInit) {
  * This should be used sparingly to avoid excessive retries.
  */
 function retryEvent(body?: BodyInit) {
-  return new NextResponse(body, { status: 500 });
+  return new NextResponse(body, { status: 500 })
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = await request.json()
 
     /* NOTE(caidanw):
      * Nexus sends a variety of event types: 'user' events and 'record' events.
@@ -33,18 +33,18 @@ export async function POST(request: NextRequest) {
      * We only want to process 'record' events.
      */
     if (!isNexusEvent(body) || isUserEvent(body)) {
-      return ackEvent("Event type not desired");
+      return ackEvent('Event type not desired')
     }
 
-    const commit = body.record;
+    const commit = body.record
 
     // Type guard: ensure commit.record is a LexiconSchemaRecord
     if (!isCommit(commit)) {
-      return ackEvent("Not a valid commit");
+      return ackEvent('Not a valid commit')
     }
 
     // Now commit is typed as Commit (with LexiconSchemaRecord)
-    const validationResult = await validateLexicon(commit);
+    const validationResult = await validateLexicon(commit)
 
     if (validationResult.isValid) {
       // Valid lexicon: store in valid_lexicons table
@@ -57,17 +57,17 @@ export async function POST(request: NextRequest) {
           repoRev: commit.rev,
           data: validationResult.lexiconDoc,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing()
 
-      console.log("Valid lexicon ingested:", {
+      console.log('Valid lexicon ingested:', {
         eventId: body.id,
         nsid: validationResult.lexiconDoc.id,
         cid: commit.cid,
         repoDid: commit.did,
         action: commit.action,
-      });
+      })
 
-      return ackEvent("Valid lexicon ingested successfully");
+      return ackEvent('Valid lexicon ingested successfully')
     } else {
       // Invalid lexicon: store in invalid_lexicons table
       await db
@@ -80,23 +80,23 @@ export async function POST(request: NextRequest) {
           rawData: commit.record,
           reasons: validationResult.reasons,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing()
 
-      console.warn("Invalid lexicon ingested:", {
+      console.warn('Invalid lexicon ingested:', {
         eventId: body.id,
         nsid: commit.record.id,
         cid: commit.cid,
         repoDid: commit.did,
         reasonCount: validationResult.reasons.length,
         reasonTypes: validationResult.reasons.map((r) => r.type),
-      });
+      })
 
-      return ackEvent("Invalid lexicon stored for debugging");
+      return ackEvent('Invalid lexicon stored for debugging')
     }
   } catch (error) {
-    console.error("Error processing ingest request:", error);
+    console.error('Error processing ingest request:', error)
 
     // Always acknowledge events that cause unknown errors to prevent potential loops
-    return ackEvent("Failed to process request");
+    return ackEvent('Failed to process request')
   }
 }

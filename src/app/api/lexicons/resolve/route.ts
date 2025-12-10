@@ -1,50 +1,50 @@
-import { db } from "@/db";
-import { invalid_lexicons, valid_lexicons } from "@/db/schema";
-import { ValidationError } from "@/util/params";
-import { IdResolver, MemoryCache } from "@atproto/identity";
-import { AtUri, isValidHandle } from "@atproto/syntax";
-import { and, desc, eq } from "drizzle-orm";
-import type { NextRequest } from "next/server";
+import { db } from '@/db'
+import { invalid_lexicons, valid_lexicons } from '@/db/schema'
+import { ValidationError } from '@/util/params'
+import { IdResolver, MemoryCache } from '@atproto/identity'
+import { AtUri, isValidHandle } from '@atproto/syntax'
+import { and, desc, eq } from 'drizzle-orm'
+import type { NextRequest } from 'next/server'
 
-const MAX_LEXICONS_LIMIT = 500;
+const MAX_LEXICONS_LIMIT = 500
 
-const idResolver = new IdResolver({ didCache: new MemoryCache() });
+const idResolver = new IdResolver({ didCache: new MemoryCache() })
 
 async function parseAndValidateUri(uriParam: string) {
-  let atUri: AtUri;
+  let atUri: AtUri
   try {
-    atUri = new AtUri(uriParam);
+    atUri = new AtUri(uriParam)
   } catch (error) {
-    throw new ValidationError("INVALID_AT_URI", "Invalid AT URI format");
+    throw new ValidationError('INVALID_AT_URI', 'Invalid AT URI format')
   }
 
   if (!atUri.collection || !atUri.rkey) {
     throw new ValidationError(
-      "INVALID_AT_URI_PATH",
-      "AT URI must include collection and record key",
-    );
+      'INVALID_AT_URI_PATH',
+      'AT URI must include collection and record key',
+    )
   }
 
-  const nsid = atUri.rkey;
-  const repoDid = await resolveHostnameToDid(atUri.hostname);
+  const nsid = atUri.rkey
+  const repoDid = await resolveHostnameToDid(atUri.hostname)
 
-  return { nsid, repoDid };
+  return { nsid, repoDid }
 }
 
 async function resolveHostnameToDid(hostname: string): Promise<string> {
   if (!isValidHandle(hostname)) {
-    return hostname;
+    return hostname
   }
 
-  const resolvedDid = await idResolver.handle.resolve(hostname);
+  const resolvedDid = await idResolver.handle.resolve(hostname)
   if (!resolvedDid) {
     throw new ValidationError(
-      "HANDLE_NOT_FOUND",
+      'HANDLE_NOT_FOUND',
       `Could not resolve handle: ${hostname}`,
-    );
+    )
   }
 
-  return resolvedDid;
+  return resolvedDid
 }
 
 async function querySingleLexicon(nsid: string, cid: string, repoDid: string) {
@@ -63,9 +63,9 @@ async function querySingleLexicon(nsid: string, cid: string, repoDid: string) {
         eq(invalid_lexicons.repoDid, repoDid),
       ),
     }),
-  ]);
+  ])
 
-  return validLexicon ?? invalidLexicon ?? null;
+  return validLexicon ?? invalidLexicon ?? null
 }
 
 async function queryAllVersions(nsid: string, repoDid: string) {
@@ -105,69 +105,69 @@ async function queryAllVersions(nsid: string, repoDid: string) {
         eq(invalid_lexicons.repoDid, repoDid),
       ),
     ),
-  ]);
+  ])
 
   const merged = [
     ...validLexicons_results.map((l) => ({ ...l, valid: true })),
     ...invalidLexicons_results.map((l) => ({ ...l, valid: false })),
-  ].sort((a, b) => b.ingestedAt.getTime() - a.ingestedAt.getTime());
+  ].sort((a, b) => b.ingestedAt.getTime() - a.ingestedAt.getTime())
 
-  const total = validCount + invalidCount;
+  const total = validCount + invalidCount
 
-  return { data: merged, total };
+  return { data: merged, total }
 }
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const uriParam = searchParams.get("uri");
-    const cidParam = searchParams.get("cid");
+    const searchParams = request.nextUrl.searchParams
+    const uriParam = searchParams.get('uri')
+    const cidParam = searchParams.get('cid')
 
     if (!uriParam) {
-      throw new ValidationError("MISSING_URI", "URI parameter is required");
+      throw new ValidationError('MISSING_URI', 'URI parameter is required')
     }
 
-    const { nsid, repoDid } = await parseAndValidateUri(uriParam);
+    const { nsid, repoDid } = await parseAndValidateUri(uriParam)
 
     if (cidParam) {
-      const lexicon = await querySingleLexicon(nsid, cidParam, repoDid);
+      const lexicon = await querySingleLexicon(nsid, cidParam, repoDid)
 
       if (!lexicon) {
         return Response.json(
           {
             error: {
-              code: "NOT_FOUND",
+              code: 'NOT_FOUND',
               message:
-                "Lexicon not found with the specified NSID, CID, and repository DID",
+                'Lexicon not found with the specified NSID, CID, and repository DID',
             },
           },
           { status: 404 },
-        );
+        )
       }
 
-      return Response.json({ data: lexicon });
+      return Response.json({ data: lexicon })
     }
 
-    const { data, total } = await queryAllVersions(nsid, repoDid);
+    const { data, total } = await queryAllVersions(nsid, repoDid)
 
     return Response.json({
       data,
       total,
-    });
+    })
   } catch (error) {
     if (error instanceof ValidationError) {
-      return error.toResponse();
+      return error.toResponse()
     }
 
-    console.error("Error resolving AT URI:", error);
+    console.error('Error resolving AT URI:', error)
     return Response.json(
       {
         error: {
-          code: "INTERNAL_ERROR",
-          message: "Failed to resolve AT URI",
+          code: 'INTERNAL_ERROR',
+          message: 'Failed to resolve AT URI',
         },
       },
       { status: 500 },
-    );
+    )
   }
 }
