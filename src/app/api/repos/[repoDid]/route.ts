@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { db } from "@/db";
-import { validLexicons, invalidLexicons } from "@/db/schema";
+import { valid_lexicons, invalid_lexicons } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { ensureValidDid } from "@atproto/syntax";
 import {
@@ -30,7 +30,7 @@ export async function GET(
     });
     const offset = parseIntegerParam(searchParams, "offset", 0, { min: 0 });
 
-    const table = valid ? validLexicons : invalidLexicons;
+    const table = valid ? valid_lexicons : invalid_lexicons;
 
     const [lexicons, total] = await Promise.all([
       db

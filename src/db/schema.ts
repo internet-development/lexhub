@@ -1,4 +1,7 @@
+import { InvalidLexiconReason } from "@/app/api/ingest/reasons";
+import { sql } from "drizzle-orm";
 import {
+  check,
   index,
   jsonb,
   pgTable,
@@ -14,7 +17,7 @@ import {
  * Primary key is [nsid, cid, repo_did] to handle migrations where the same
  * lexicon content (same CID) is published from a different DID.
  */
-export const validLexicons = pgTable(
+export const valid_lexicons = pgTable(
   "valid_lexicons",
   {
     /**
@@ -77,7 +80,7 @@ export const validLexicons = pgTable(
  *
  * Primary key is [nsid, cid, repo_did] matching valid_lexicons structure.
  */
-export const invalidLexicons = pgTable(
+export const invalid_lexicons = pgTable(
   "invalid_lexicons",
   {
     /**
@@ -108,10 +111,11 @@ export const invalidLexicons = pgTable(
     rawData: jsonb("raw_data").notNull(),
 
     /**
-     * Validation errors from Zod parser.
-     * Contains ZodError issues array with details about what failed.
+     * Array of validation failure reasons.
+     * Must contain at least one reason (enforced by CHECK constraint).
+     * Each reason has a 'type' field and type-specific properties.
      */
-    validationErrors: jsonb("validation_errors").notNull(),
+    reasons: jsonb().notNull().$type<InvalidLexiconReason[]>(),
 
     /**
      * Timestamp when this invalid lexicon was ingested
@@ -130,13 +134,19 @@ export const invalidLexicons = pgTable(
     // Index on repo_did to find all invalid lexicons from a repository
     index("invalid_lexicons_repo_did_idx").on(table.repoDid),
 
-    // JSONB GIN index for searching validation errors
+    // JSONB GIN index for searching raw data
     index("invalid_lexicons_raw_data_gin_idx").using("gin", table.rawData),
+
+    // JSONB GIN index for querying reasons by type
+    index("invalid_lexicons_reasons_gin_idx").using("gin", table.reasons),
+
+    // Ensure reasons array is not empty
+    check("reasons_not_empty", sql`jsonb_array_length(${table.reasons}) > 0`),
   ],
 );
 
-export type ValidLexicon = typeof validLexicons.$inferSelect;
-export type NewValidLexicon = typeof validLexicons.$inferInsert;
+export type ValidLexicon = typeof valid_lexicons.$inferSelect;
+export type NewValidLexicon = typeof valid_lexicons.$inferInsert;
 
-export type InvalidLexicon = typeof invalidLexicons.$inferSelect;
-export type NewInvalidLexicon = typeof invalidLexicons.$inferInsert;
+export type InvalidLexicon = typeof invalid_lexicons.$inferSelect;
+export type NewInvalidLexicon = typeof invalid_lexicons.$inferInsert;
