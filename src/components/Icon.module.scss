@@ -1,0 +1,20 @@
+.icon {
+  transition: all 0.2s;
+}
+
+.interactive {
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.interactiveBlue {
+  cursor: pointer;
+
+  &:hover {
+    fill: #2D68F8;
+    stroke: #2D68F8;
+  }
+}

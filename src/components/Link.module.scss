@@ -1,0 +1,43 @@
+.link {
+  transition: all var(--transition-fast);
+  border-radius: var(--radius-sm);
+  outline: none;
+  text-decoration: none;
+}
+
+.default {
+  color: var(--color-text-hover);
+
+  &:hover {
+    color: var(--color-text-primary);
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 0.0625rem var(--color-background), 0 0 0 0.1875rem var(--color-text-muted);
+  }
+}
+
+.primary {
+  color: var(--color-primary);
+
+  &:hover {
+    color: var(--color-primary-hover);
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 0.0625rem var(--color-background), 0 0 0 0.1875rem var(--color-primary);
+  }
+}
+
+.muted {
+  color: var(--color-text-light);
+  text-decoration: underline;
+
+  &:hover {
+    color: var(--color-text-hover);
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 0.0625rem var(--color-background), 0 0 0 0.1875rem var(--color-text-light);
+  }
+}
