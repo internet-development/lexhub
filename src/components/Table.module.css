@@ -15,18 +15,18 @@
 
 .body {
   background-color: var(--color-background);
+}
 
-  tr {
-    border-bottom: 0.0625rem solid var(--color-border);
+.body tr {
+  border-bottom: 0.0625rem solid var(--color-border);
+}
 
-    &:hover {
-      background-color: var(--color-background-light);
-    }
+.body tr:hover {
+  background-color: var(--color-background-light);
+}
 
-    &:last-child {
-      border-bottom: none;
-    }
-  }
+.body tr:last-child {
+  border-bottom: none;
 }
 
 .row {
@@ -44,15 +44,15 @@
   display: flex;
   align-items: center;
   min-width: 0;
+}
 
-  &:first-child {
-    padding-left: var(--space-6);
-  }
+.head:first-child {
+  padding-left: var(--space-6);
+}
 
-  &:last-child {
-    padding-right: var(--space-6);
-    justify-content: flex-end;
-  }
+.head:last-child {
+  padding-right: var(--space-6);
+  justify-content: flex-end;
 }
 
 .cell {
@@ -62,15 +62,15 @@
   display: flex;
   align-items: center;
   min-width: 0;
+}
 
-  &:first-child {
-    padding-left: var(--space-6);
-  }
+.cell:first-child {
+  padding-left: var(--space-6);
+}
 
-  &:last-child {
-    padding-right: var(--space-6);
-    justify-content: flex-end;
-  }
+.cell:last-child {
+  padding-right: var(--space-6);
+  justify-content: flex-end;
 }
 
 .body tr:last-child .cell {

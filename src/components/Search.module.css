@@ -17,10 +17,10 @@
   border: none;
   outline: none;
   background: transparent;
+}
 
-  &::placeholder {
-    color: var(--color-text-light);
-  }
+.input::placeholder {
+  color: var(--color-text-light);
 }
 
 .button {
@@ -33,8 +33,8 @@
   cursor: pointer;
   transition: background-color var(--transition-fast);
   white-space: nowrap;
+}
 
-  &:hover {
-    background-color: var(--color-primary-hover);
-  }
+.button:hover {
+  background-color: var(--color-primary-hover);
 }

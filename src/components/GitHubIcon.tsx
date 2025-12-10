@@ -1,7 +1,7 @@
-import * as React from 'react';
-import iconStyles from '@/components/Icon.module.scss';
+import type { SVGProps } from 'react';
+import iconStyles from '@/components/Icon.module.css';
 
-export interface IconProps extends React.SVGProps<SVGSVGElement> {
+export interface IconProps extends SVGProps<SVGSVGElement> {
   size?: number;
   className?: string;
   variant?: 'default' | 'interactive';

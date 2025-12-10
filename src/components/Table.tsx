@@ -1,9 +1,9 @@
-import styles from '@/components/Table.module.scss';
+import styles from '@/components/Table.module.css';
 
-import * as React from 'react';
+import type { TableHTMLAttributes, HTMLAttributes, ThHTMLAttributes, TdHTMLAttributes, ReactNode } from 'react';
 
-export interface TableProps extends React.TableHTMLAttributes<HTMLTableElement> {
-  children: React.ReactNode;
+export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
+  children: ReactNode;
 }
 
 export function Table(props: TableProps) {
@@ -20,7 +20,7 @@ export function Table(props: TableProps) {
   );
 }
 
-export function TableHeader(props: React.HTMLAttributes<HTMLTableSectionElement>) {
+export function TableHeader(props: HTMLAttributes<HTMLTableSectionElement>) {
   const { className = '', children, ...restProps } = props;
 
   const classes = [styles.header, className].filter(Boolean).join(' ');
@@ -32,7 +32,7 @@ export function TableHeader(props: React.HTMLAttributes<HTMLTableSectionElement>
   );
 }
 
-export function TableBody(props: React.HTMLAttributes<HTMLTableSectionElement>) {
+export function TableBody(props: HTMLAttributes<HTMLTableSectionElement>) {
   const { className = '', children, ...restProps } = props;
 
   const classes = [styles.body, className].filter(Boolean).join(' ');
@@ -44,7 +44,7 @@ export function TableBody(props: React.HTMLAttributes<HTMLTableSectionElement>) 
   );
 }
 
-export function TableRow(props: React.HTMLAttributes<HTMLTableRowElement>) {
+export function TableRow(props: HTMLAttributes<HTMLTableRowElement>) {
   const { className = '', children, ...restProps } = props;
 
   const classes = [styles.row, className].filter(Boolean).join(' ');
@@ -56,7 +56,7 @@ export function TableRow(props: React.HTMLAttributes<HTMLTableRowElement>) {
   );
 }
 
-export function TableHead(props: React.ThHTMLAttributes<HTMLTableCellElement>) {
+export function TableHead(props: ThHTMLAttributes<HTMLTableCellElement>) {
   const { className = '', children, ...restProps } = props;
 
   const classes = [styles.head, className].filter(Boolean).join(' ');
@@ -68,7 +68,7 @@ export function TableHead(props: React.ThHTMLAttributes<HTMLTableCellElement>) {
   );
 }
 
-export function TableCell(props: React.TdHTMLAttributes<HTMLTableCellElement>) {
+export function TableCell(props: TdHTMLAttributes<HTMLTableCellElement>) {
   const { className = '', children, ...restProps } = props;
 
   const classes = [styles.cell, className].filter(Boolean).join(' ');

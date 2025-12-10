@@ -1,10 +1,10 @@
-import styles from '@/components/Card.module.scss';
+import styles from '@/components/Card.module.css';
 
-import * as React from 'react';
+import type { HTMLAttributes, ReactNode } from 'react';
 
-export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   width?: 'auto' | 'full';
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function Card(props: CardProps) {
@@ -23,7 +23,7 @@ export function Card(props: CardProps) {
   );
 }
 
-export function CardHeader(props: React.HTMLAttributes<HTMLDivElement>) {
+export function CardHeader(props: HTMLAttributes<HTMLDivElement>) {
   const { className = '', children, ...restProps } = props;
 
   const classes = [styles.header, className].filter(Boolean).join(' ');
@@ -35,7 +35,7 @@ export function CardHeader(props: React.HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-export function CardBody(props: React.HTMLAttributes<HTMLDivElement>) {
+export function CardBody(props: HTMLAttributes<HTMLDivElement>) {
   const { className = '', children, ...restProps } = props;
 
   const classes = [styles.body, className].filter(Boolean).join(' ');
@@ -47,7 +47,7 @@ export function CardBody(props: React.HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-export function CardFooter(props: React.HTMLAttributes<HTMLDivElement>) {
+export function CardFooter(props: HTMLAttributes<HTMLDivElement>) {
   const { className = '', children, ...restProps } = props;
 
   const classes = [styles.footer, className].filter(Boolean).join(' ');

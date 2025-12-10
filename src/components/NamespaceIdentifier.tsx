@@ -1,6 +1,5 @@
-import styles from '@/components/NamespaceIdentifier.module.scss';
+import styles from '@/components/NamespaceIdentifier.module.css';
 
-import * as React from 'react';
 import BlueskyIcon from '@/components/BlueskyIcon';
 import GlobeIcon from '@/components/GlobeIcon';
 import AtIcon from '@/components/AtIcon';

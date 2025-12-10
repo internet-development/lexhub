@@ -1,0 +1,43 @@
+.link {
+  transition: all var(--transition-fast);
+  border-radius: var(--radius-sm);
+  outline: none;
+  text-decoration: none;
+}
+
+.default {
+  color: var(--color-text-hover);
+}
+
+.default:hover {
+  color: var(--color-text-primary);
+}
+
+.default:focus {
+  box-shadow: 0 0 0 0.0625rem var(--color-background), 0 0 0 0.1875rem var(--color-text-muted);
+}
+
+.primary {
+  color: var(--color-primary);
+}
+
+.primary:hover {
+  color: var(--color-primary-hover);
+}
+
+.primary:focus {
+  box-shadow: 0 0 0 0.0625rem var(--color-background), 0 0 0 0.1875rem var(--color-primary);
+}
+
+.muted {
+  color: var(--color-text-light);
+  text-decoration: underline;
+}
+
+.muted:hover {
+  color: var(--color-text-hover);
+}
+
+.muted:focus {
+  box-shadow: 0 0 0 0.0625rem var(--color-background), 0 0 0 0.1875rem var(--color-text-light);
+}

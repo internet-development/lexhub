@@ -1,23 +1,20 @@
-import styles from '@/components/Link.module.scss';
+import styles from '@/components/Link.module.css';
 
-import * as React from 'react';
+import type { AnchorHTMLAttributes, ReactNode } from 'react';
 import NextLink from 'next/link';
+import clsx from '@/common/clsx';
 
-export interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   href: string;
   variant?: 'default' | 'primary' | 'muted';
-  children: React.ReactNode;
+  children: ReactNode;
   external?: boolean;
 }
 
 export default function Link(props: LinkProps) {
   const { href, variant = 'default', className = '', children, external = false, ...restProps } = props;
 
-  const classes = [
-    styles.link,
-    styles[variant],
-    className
-  ].filter(Boolean).join(' ');
+  const classes = clsx(styles.link, styles[variant], className);
 
   const externalProps = external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
 

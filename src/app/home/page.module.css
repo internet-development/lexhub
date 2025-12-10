@@ -47,8 +47,10 @@
   margin-bottom: var(--space-6);
   line-height: var(--line-height-tight);
   font-family: var(--font-family-sans);
+}
 
-  @media (min-width: 48rem) {
+@media (min-width: 48rem) {
+  .heroTitle {
     font-size: var(--font-size-3xl);
   }
 }
@@ -97,11 +99,11 @@
   gap: var(--space-8);
   width: 100%;
   align-items: start;
+}
 
-  > * {
-    width: 100%;
-    min-width: 0;
-  }
+.grid > * {
+  width: 100%;
+  min-width: 0;
 }
 
 .fullHeightCard {
@@ -126,18 +128,18 @@
   background: none;
   border: none;
   padding: 0;
+}
 
-  &.active {
-    color: var(--color-text-primary);
-  }
+.tab.active {
+  color: var(--color-text-primary);
+}
 
-  &:not(.active) {
-    color: var(--color-text-muted);
+.tab:not(.active) {
+  color: var(--color-text-muted);
+}
 
-    &:hover {
-      color: var(--color-text-hover);
-    }
-  }
+.tab:not(.active):hover {
+  color: var(--color-text-hover);
 }
 
 .codeBlock {

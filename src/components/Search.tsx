@@ -1,6 +1,4 @@
-import styles from '@/components/Search.module.scss';
-
-import * as React from 'react';
+import styles from '@/components/Search.module.css';
 
 export interface SearchProps {
   value: string;

@@ -1,6 +1,5 @@
-import styles from '@/components/NamespaceTableRow.module.scss';
+import styles from '@/components/NamespaceTableRow.module.css';
 
-import * as React from 'react';
 import { TableRow, TableCell } from '@/components/Table';
 import Link from '@/components/Link';
 import NamespaceIdentifier, { IconType } from '@/components/NamespaceIdentifier';

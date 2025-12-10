@@ -1,19 +1,16 @@
-import styles from '@/components/LexInput.module.scss';
+import styles from '@/components/Input.module.css';
 
-import * as React from 'react';
+import type { InputHTMLAttributes } from 'react';
+import clsx from '@/common/clsx';
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: boolean;
 }
 
 export default function LexInput(props: InputProps) {
   const { className = '', error = false, ...restProps } = props;
 
-  const classes = [
-    styles.input,
-    error ? styles.error : '',
-    className
-  ].filter(Boolean).join(' ');
+  const classes = clsx(styles.input, error && styles.error, className);
 
   return <input className={classes} {...restProps} />;
 }
