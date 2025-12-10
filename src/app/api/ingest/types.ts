@@ -11,7 +11,7 @@ export type LexiconSchemaRecord = {
 };
 
 /**
- * Base commit interface with unknown record type
+ * Raw commit from Nexus (unvalidated record)
  */
 export interface RawCommit {
   did: string;

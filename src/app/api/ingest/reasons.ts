@@ -24,7 +24,7 @@ interface DidAuthorityMismatchReason extends BaseReason {
 }
 
 /**
- *  Record key does not match the lexicon NSID
+ * Record key does not match the lexicon NSID
  */
 interface RkeyMismatchReason extends BaseReason {
   type: "rkey_mismatch";
