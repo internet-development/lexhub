@@ -127,7 +127,12 @@ export async function validateLexicon(
   if (reasons.length === 0) {
     return {
       isValid: true,
-      lexiconDoc: commit.record as unknown as LexiconDoc,
+      /* NOTE(caidanw):
+       * Safe to parse again since all validations passed.
+       * In the future we may want to refactor the validators to use a shared context object.
+       * For now, this is simpler and performance impact is negligible.
+       */
+      lexiconDoc: parseLexiconDoc(commit.record),
       reasons: [],
     };
   }
