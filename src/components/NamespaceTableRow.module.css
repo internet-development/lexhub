@@ -1,0 +1,12 @@
+.description {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-light);
+}
+
+.viewLink {
+  font-size: var(--font-size-sm);
+  text-decoration: underline;
+}
