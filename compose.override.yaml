@@ -28,24 +28,24 @@ services:
   postgres:
     restart: no
     command:
-      - "postgres"
-      - "-c"
-      - "shared_preload_libraries=pg_stat_statements"
-      - "-c"
-      - "pg_stat_statements.track=all"
+      - 'postgres'
+      - '-c'
+      - 'shared_preload_libraries=pg_stat_statements'
+      - '-c'
+      - 'pg_stat_statements.track=all'
       # Reduced resources for development
-      - "-c"
-      - "max_connections=100"
-      - "-c"
-      - "shared_buffers=128MB"
-      - "-c"
-      - "effective_cache_size=512MB"
-      - "-c"
-      - "work_mem=8MB"
-      - "-c"
-      - "maintenance_work_mem=64MB"
+      - '-c'
+      - 'max_connections=100'
+      - '-c'
+      - 'shared_buffers=128MB'
+      - '-c'
+      - 'effective_cache_size=512MB'
+      - '-c'
+      - 'work_mem=8MB'
+      - '-c'
+      - 'maintenance_work_mem=64MB'
       # SQL query logging for debugging
-      - "-c"
-      - "log_statement=all"
-      - "-c"
-      - "log_duration=on"
+      - '-c'
+      - 'log_statement=all'
+      - '-c'
+      - 'log_duration=on'

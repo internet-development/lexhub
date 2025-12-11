@@ -1,0 +1,7 @@
+# .git-blame-ignore-revs
+# This file contains commits that should be ignored by git blame
+# Configure git to use this file with:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# Format codebase with Prettier
+43e1e0d09ed89b22b13f0c34ed06e6ec4ea4f65b

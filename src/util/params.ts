@@ -3,15 +3,15 @@ export class ValidationError extends Error {
     public code: string,
     message: string,
   ) {
-    super(message);
-    this.name = "ValidationError";
+    super(message)
+    this.name = 'ValidationError'
   }
 
   toResponse(status = 400): Response {
     return Response.json(
       { error: { code: this.code, message: this.message } },
       { status },
-    );
+    )
   }
 }
 
@@ -21,20 +21,20 @@ export function parseBooleanParam(
   paramName: string,
   defaultValue: boolean,
 ): boolean {
-  const value = searchParams.get(paramName);
+  const value = searchParams.get(paramName)
 
   if (value === null) {
-    return defaultValue;
+    return defaultValue
   }
 
-  if (value !== "true" && value !== "false") {
+  if (value !== 'true' && value !== 'false') {
     throw new ValidationError(
       `INVALID_${paramName.toUpperCase()}_PARAM`,
       `${paramName} parameter must be either 'true' or 'false'`,
-    );
+    )
   }
 
-  return value === "true";
+  return value === 'true'
 }
 
 // Clamps to min/max instead of throwing to provide better UX (avoids rejecting valid requests)
@@ -44,26 +44,26 @@ export function parseIntegerParam(
   defaultValue: number,
   options?: { min?: number; max?: number },
 ): number {
-  const value = searchParams.get(paramName);
+  const value = searchParams.get(paramName)
   if (value === null) {
-    return defaultValue;
+    return defaultValue
   }
 
-  const parsed = parseInt(value, 10);
+  const parsed = parseInt(value, 10)
   if (isNaN(parsed)) {
     throw new ValidationError(
       `INVALID_${paramName.toUpperCase()}`,
       `${paramName} must be a valid integer`,
-    );
+    )
   }
 
-  let clamped = parsed;
+  let clamped = parsed
   if (options?.min !== undefined && clamped < options.min) {
-    clamped = options.min;
+    clamped = options.min
   }
   if (options?.max !== undefined && clamped > options.max) {
-    clamped = options.max;
+    clamped = options.max
   }
 
-  return clamped;
+  return clamped
 }
