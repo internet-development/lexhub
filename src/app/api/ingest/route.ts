@@ -1,21 +1,24 @@
+import { assureAdminAuth, parseTapEvent } from '@atproto/tap'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { db } from '@/db'
 import { invalid_lexicons, valid_lexicons } from '@/db/schema'
-import { isCommit, isNexusEvent, isUserEvent } from './types'
+import { isCommit, RawCommit } from './types'
 import { validateLexicon } from './validation'
 
+const TAP_ADMIN_PASSWORD = process.env.TAP_ADMIN_PASSWORD
+
 /**
- * Acknowledges receipt of a Nexus event.
- * Nexus considers events 'acked' when it receives a 200 response.
+ * Acknowledges receipt of a Tap event.
+ * Tap considers events 'acked' when it receives a 200 response.
  */
 function ackEvent(body?: BodyInit) {
   return new NextResponse(body, { status: 200 })
 }
 
 /**
- * Signals to Nexus that the event should be sent again later.
- * Nexus will retry events that receive any response other than 200.
+ * Signals to Tap that the event should be sent again later.
+ * Tap will retry events that receive any response other than 200.
  *
  * This should be used sparingly to avoid excessive retries.
  */
@@ -24,19 +27,42 @@ function retryEvent(body?: BodyInit) {
 }
 
 export async function POST(request: NextRequest) {
+  // Validate authentication if TAP_ADMIN_PASSWORD is configured
+  if (TAP_ADMIN_PASSWORD) {
+    const authHeader = request.headers.get('authorization') ?? ''
+    try {
+      assureAdminAuth(TAP_ADMIN_PASSWORD, authHeader)
+    } catch {
+      return new NextResponse('Unauthorized', { status: 401 })
+    }
+  }
+
   try {
     const body = await request.json()
 
+    // Parse and validate Tap event
+    let event
+    try {
+      event = parseTapEvent(body)
+    } catch (error) {
+      return ackEvent('Invalid event format')
+    }
+
     /* NOTE(caidanw):
-     * Nexus sends a variety of event types: 'user' events and 'record' events.
-     * Nexus always includes 'user' events, currently no way to configure this.
+     * Tap sends a variety of event types: 'identity' events and 'record' events.
+     * Tap always includes 'identity' events, currently no way to configure this.
      * We only want to process 'record' events.
      */
-    if (!isNexusEvent(body) || isUserEvent(body)) {
+    if (event.type === 'identity') {
       return ackEvent('Event type not desired')
     }
 
-    const commit = body.record
+    // Type guard: ensure event has required fields for a commit
+    if (!event.cid || !event.record) {
+      return ackEvent('Incomplete record event')
+    }
+
+    const commit = event as RawCommit
 
     // Type guard: ensure commit.record is a LexiconSchemaRecord
     if (!isCommit(commit)) {

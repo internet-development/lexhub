@@ -1,9 +1,6 @@
 import { LEXICON_SCHEMA_NSID } from '@atproto/lexicon-resolver'
-import { RecordEvent, TapEvent } from '@atproto/tap'
+import { RecordEvent } from '@atproto/tap'
 import z from 'zod'
-
-// Re-export Tap types for convenience
-export type { RecordEvent, TapEvent }
 
 /**
  * Extend the type from `@atproto/lexicon-resolver` to require the 'id' field.
@@ -16,16 +13,11 @@ export type LexiconSchemaRecord = {
 
 /**
  * Raw commit from Tap (unvalidated record)
+ * Extends RecordEvent to ensure all required fields are present
  */
-export interface RawCommit {
-  did: string
-  rev: string
-  collection: string
-  rkey: string
-  action: 'create' | 'update' | 'delete'
+export interface RawCommit extends RecordEvent {
   cid: string
-  live: boolean
-  record: unknown
+  record: Record<string, unknown>
 }
 
 /**
