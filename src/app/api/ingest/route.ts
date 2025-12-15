@@ -1,21 +1,24 @@
+import { assureAdminAuth, parseTapEvent } from '@atproto/tap'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { db } from '@/db'
 import { invalid_lexicons, valid_lexicons } from '@/db/schema'
-import { isCommit, isNexusEvent, isUserEvent } from './types'
+import { isLexiconRecordEvent } from './types'
 import { validateLexicon } from './validation'
 
+const TAP_ADMIN_PASSWORD = process.env.TAP_ADMIN_PASSWORD
+
 /**
- * Acknowledges receipt of a Nexus event.
- * Nexus considers events 'acked' when it receives a 200 response.
+ * Acknowledges receipt of a Tap event.
+ * Tap considers events 'acked' when it receives a 200 response.
  */
 function ackEvent(body?: BodyInit) {
   return new NextResponse(body, { status: 200 })
 }
 
 /**
- * Signals to Nexus that the event should be sent again later.
- * Nexus will retry events that receive any response other than 200.
+ * Signals to Tap that the event should be sent again later.
+ * Tap will retry events that receive any response other than 200.
  *
  * This should be used sparingly to avoid excessive retries.
  */
@@ -24,37 +27,48 @@ function retryEvent(body?: BodyInit) {
 }
 
 export async function POST(request: NextRequest) {
+  if (TAP_ADMIN_PASSWORD) {
+    const authHeader = request.headers.get('authorization') ?? ''
+    try {
+      assureAdminAuth(TAP_ADMIN_PASSWORD, authHeader)
+    } catch {
+      return new NextResponse('Unauthorized', { status: 401 })
+    }
+  }
+
   try {
     const body = await request.json()
 
+    let event
+    try {
+      event = parseTapEvent(body)
+    } catch (error) {
+      return ackEvent('Invalid event format')
+    }
+
     /* NOTE(caidanw):
-     * Nexus sends a variety of event types: 'user' events and 'record' events.
-     * Nexus always includes 'user' events, currently no way to configure this.
+     * Tap sends a variety of event types: 'identity' events and 'record' events.
+     * Tap always includes 'identity' events, currently no way to configure this.
      * We only want to process 'record' events.
      */
-    if (!isNexusEvent(body) || isUserEvent(body)) {
+    if (event.type !== 'record') {
       return ackEvent('Event type not desired')
     }
 
-    const commit = body.record
-
-    // Type guard: ensure commit.record is a LexiconSchemaRecord
-    if (!isCommit(commit)) {
-      return ackEvent('Not a valid commit')
+    if (!isLexiconRecordEvent(event)) {
+      return ackEvent('Not a valid lexicon record event')
     }
 
-    // Now commit is typed as Commit (with LexiconSchemaRecord)
-    const validationResult = await validateLexicon(commit)
+    const validationResult = await validateLexicon(event)
 
     if (validationResult.isValid) {
-      // Valid lexicon: store in valid_lexicons table
       await db
         .insert(valid_lexicons)
         .values({
           nsid: validationResult.lexiconDoc.id,
-          cid: commit.cid,
-          repoDid: commit.did,
-          repoRev: commit.rev,
+          cid: event.cid,
+          repoDid: event.did,
+          repoRev: event.rev,
           data: validationResult.lexiconDoc,
         })
         .onConflictDoNothing()
@@ -62,31 +76,30 @@ export async function POST(request: NextRequest) {
       console.log('Valid lexicon ingested:', {
         eventId: body.id,
         nsid: validationResult.lexiconDoc.id,
-        cid: commit.cid,
-        repoDid: commit.did,
-        action: commit.action,
+        cid: event.cid,
+        repoDid: event.did,
+        action: event.action,
       })
 
       return ackEvent('Valid lexicon ingested successfully')
     } else {
-      // Invalid lexicon: store in invalid_lexicons table
       await db
         .insert(invalid_lexicons)
         .values({
-          nsid: commit.record.id,
-          cid: commit.cid,
-          repoDid: commit.did,
-          repoRev: commit.rev,
-          rawData: commit.record,
+          nsid: event.record.id,
+          cid: event.cid,
+          repoDid: event.did,
+          repoRev: event.rev,
+          rawData: event.record,
           reasons: validationResult.reasons,
         })
         .onConflictDoNothing()
 
       console.warn('Invalid lexicon ingested:', {
         eventId: body.id,
-        nsid: commit.record.id,
-        cid: commit.cid,
-        repoDid: commit.did,
+        nsid: event.record.id,
+        cid: event.cid,
+        repoDid: event.did,
         reasonCount: validationResult.reasons.length,
         reasonTypes: validationResult.reasons.map((r) => r.type),
       })

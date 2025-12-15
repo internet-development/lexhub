@@ -1,4 +1,5 @@
 import { LEXICON_SCHEMA_NSID } from '@atproto/lexicon-resolver'
+import { RecordEvent } from '@atproto/tap'
 import z from 'zod'
 
 /**
@@ -11,61 +12,13 @@ export type LexiconSchemaRecord = {
 }
 
 /**
- * Raw commit from Nexus (unvalidated record)
+ * A RecordEvent that contains a lexicon schema record.
+ * Narrows RecordEvent to ensure cid and record fields are present and typed as a lexicon.
+ * Note: This does NOT mean the lexicon has been validated - use validateLexicon() for that.
  */
-export interface RawCommit {
-  did: string
-  rev: string
-  collection: string
-  rkey: string
-  action: 'create' | 'update' | 'delete'
+export type LexiconRecordEvent = RecordEvent & {
   cid: string
-  live: boolean
-  record: unknown
-}
-
-/**
- * Commit with validated LexiconSchemaRecord
- */
-export interface Commit extends RawCommit {
   record: LexiconSchemaRecord
-}
-
-/**
- * User event from Nexus (not processed)
- */
-interface UserEvent {
-  id: number
-  type: 'user'
-  user: object
-}
-
-/**
- * Record event from Nexus containing a commit
- */
-interface RecordEvent {
-  id: number
-  type: 'record'
-  record: RawCommit
-}
-
-export type NexusEvent = UserEvent | RecordEvent
-
-export function isUserEvent(event: NexusEvent): event is UserEvent {
-  return event.type === 'user'
-}
-
-export function isRecordEvent(event: NexusEvent): event is RecordEvent {
-  return event.type === 'record'
-}
-
-export function isNexusEvent(obj: any): obj is NexusEvent {
-  return (
-    obj &&
-    typeof obj === 'object' &&
-    typeof obj.id === 'number' &&
-    (obj.type === 'user' || obj.type === 'record')
-  )
 }
 
 /**
@@ -75,8 +28,13 @@ export function isLexiconSchemaRecord(v: any): v is LexiconSchemaRecord {
   return v?.['$type'] === LEXICON_SCHEMA_NSID && Object.hasOwn(v, 'id')
 }
 
-export function isCommit(commit: RawCommit): commit is Commit {
-  return isLexiconSchemaRecord(commit.record)
+/**
+ * Type guard to check if a RecordEvent contains a lexicon.
+ */
+export function isLexiconRecordEvent(
+  event: RecordEvent,
+): event is LexiconRecordEvent {
+  return !!event.cid && !!event.record && isLexiconSchemaRecord(event.record)
 }
 
 export function isZodError(error: any): error is z.ZodError {
