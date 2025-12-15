@@ -6,6 +6,8 @@
     "dev": "next dev --port 10000",
     "build": "next build",
     "start": "next start",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
@@ -16,6 +18,7 @@
     "@atproto/lexicon": "^0.5.2",
     "@atproto/lexicon-resolver": "^0.2.4",
     "@atproto/syntax": "^0.4.2",
+    "@atproto/tap": "^0.0.2",
     "drizzle-kit": "^0.31.7",
     "drizzle-orm": "^0.44.7",
     "next": "^16.0.7",
@@ -29,6 +32,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "prettier": "^3.7.4",
     "typescript": "^5"
   }
 }

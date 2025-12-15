@@ -1,12 +1,12 @@
-import "./reset.css";
-import "./globals.css";
+import './reset.css'
+import './globals.css'
 
-import type { Metadata } from "next";
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: "LexHub",
-  description: "ATProto lexicon explorer",
-};
+  title: 'LexHub',
+  description: 'ATProto lexicon explorer',
+}
 
 export default function RootLayout({
   children,
@@ -15,5 +15,5 @@ export default function RootLayout({
     <html lang="en">
       <body>{children}</body>
     </html>
-  );
+  )
 }

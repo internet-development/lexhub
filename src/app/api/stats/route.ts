@@ -1,56 +1,56 @@
-import { db } from "@/db";
-import { validLexicons, invalidLexicons } from "@/db/schema";
-import { gte, sql } from "drizzle-orm";
-import { union } from "drizzle-orm/pg-core";
+import { db } from '@/db'
+import { valid_lexicons, invalid_lexicons } from '@/db/schema'
+import { gte, sql } from 'drizzle-orm'
+import { union } from 'drizzle-orm/pg-core'
 
-export const revalidate = 60; // Cache the stats for 60 seconds
+export const revalidate = 60 // Cache the stats for 60 seconds
 
 async function fetchTotalCounts() {
   const [valid, invalid] = await Promise.all([
-    db.$count(validLexicons),
-    db.$count(invalidLexicons),
-  ]);
+    db.$count(valid_lexicons),
+    db.$count(invalid_lexicons),
+  ])
 
-  return { valid, invalid };
+  return { valid, invalid }
 }
 
 async function fetchUniqueNsids() {
   const combinedNsids = union(
-    db.select({ nsid: validLexicons.nsid }).from(validLexicons),
-    db.select({ nsid: invalidLexicons.nsid }).from(invalidLexicons),
-  ).as("combined_nsids");
+    db.select({ nsid: valid_lexicons.nsid }).from(valid_lexicons),
+    db.select({ nsid: invalid_lexicons.nsid }).from(invalid_lexicons),
+  ).as('combined_nsids')
 
   const result = await db
-    .select({ count: sql<number>`count(*)`.as("count") })
-    .from(combinedNsids);
+    .select({ count: sql<number>`count(*)`.as('count') })
+    .from(combinedNsids)
 
-  return result[0].count;
+  return result[0].count
 }
 
 async function fetchUniqueRepositories() {
   const combinedRepos = union(
-    db.select({ repoDid: validLexicons.repoDid }).from(validLexicons),
-    db.select({ repoDid: invalidLexicons.repoDid }).from(invalidLexicons),
-  ).as("combined_repos");
+    db.select({ repoDid: valid_lexicons.repoDid }).from(valid_lexicons),
+    db.select({ repoDid: invalid_lexicons.repoDid }).from(invalid_lexicons),
+  ).as('combined_repos')
 
   const result = await db
-    .select({ count: sql<number>`count(*)`.as("count") })
-    .from(combinedRepos);
+    .select({ count: sql<number>`count(*)`.as('count') })
+    .from(combinedRepos)
 
-  return result[0].count;
+  return result[0].count
 }
 
 async function fetchRecentActivity() {
-  const now = new Date();
-  const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-  const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const now = new Date()
+  const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+  const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
 
   const [valid24h, invalid24h, valid7d, invalid7d] = await Promise.all([
-    db.$count(validLexicons, gte(validLexicons.ingestedAt, last24h)),
-    db.$count(invalidLexicons, gte(invalidLexicons.ingestedAt, last24h)),
-    db.$count(validLexicons, gte(validLexicons.ingestedAt, last7d)),
-    db.$count(invalidLexicons, gte(invalidLexicons.ingestedAt, last7d)),
-  ]);
+    db.$count(valid_lexicons, gte(valid_lexicons.ingestedAt, last24h)),
+    db.$count(invalid_lexicons, gte(invalid_lexicons.ingestedAt, last24h)),
+    db.$count(valid_lexicons, gte(valid_lexicons.ingestedAt, last7d)),
+    db.$count(invalid_lexicons, gte(invalid_lexicons.ingestedAt, last7d)),
+  ])
 
   return {
     last24h: {
@@ -63,7 +63,7 @@ async function fetchRecentActivity() {
       invalid: invalid7d,
       total: valid7d + invalid7d,
     },
-  };
+  }
 }
 
 export async function GET() {
@@ -74,7 +74,7 @@ export async function GET() {
         fetchUniqueNsids(),
         fetchUniqueRepositories(),
         fetchRecentActivity(),
-      ]);
+      ])
 
     const stats = {
       totalLexicons: totalCounts.valid + totalCounts.invalid,
@@ -83,21 +83,21 @@ export async function GET() {
       uniqueNsids,
       uniqueRepositories,
       recentActivity,
-    };
+    }
 
     return Response.json({
       data: stats,
-    });
+    })
   } catch (error) {
-    console.error("Error fetching stats:", error);
+    console.error('Error fetching stats:', error)
     return Response.json(
       {
         error: {
-          code: "INTERNAL_ERROR",
-          message: "Failed to fetch statistics",
+          code: 'INTERNAL_ERROR',
+          message: 'Failed to fetch statistics',
         },
       },
       { status: 500 },
-    );
+    )
   }
 }

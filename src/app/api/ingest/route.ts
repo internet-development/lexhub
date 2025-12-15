@@ -1,169 +1,115 @@
-import { NextRequest, NextResponse } from "next/server";
+import { assureAdminAuth, parseTapEvent } from '@atproto/tap'
+import { NextRequest, NextResponse } from 'next/server'
 
-import { db } from "@/db";
-import { invalidLexicons, validLexicons } from "@/db/schema";
-import { isLexiconSchemaRecord, LexiconSchemaRecord } from "@/util/lexicon";
-import { parseLexiconDoc } from "@atproto/lexicon";
-import { resolveLexiconDidAuthority } from "@atproto/lexicon-resolver";
-import z from "zod";
+import { db } from '@/db'
+import { invalid_lexicons, valid_lexicons } from '@/db/schema'
+import { isLexiconRecordEvent } from './types'
+import { validateLexicon } from './validation'
 
-interface UserEvent {
-  id: number;
-  type: "user";
-  user: object;
-}
-
-interface RecordEvent {
-  id: number;
-  type: "record";
-  record: {
-    did: string;
-    rev: string;
-    collection: string;
-    rkey: string;
-    action: "create" | "update" | "delete";
-    cid: string;
-    live: boolean;
-    record: LexiconSchemaRecord;
-  };
-}
-
-type NexusEvent = UserEvent | RecordEvent;
-
-function isUserEvent(event: NexusEvent): event is UserEvent {
-  return event.type === "user";
-}
-
-function isRecordEvent(event: NexusEvent): event is RecordEvent {
-  return event.type === "record";
-}
-
-function isNexusEvent(obj: any): obj is NexusEvent {
-  return (
-    obj &&
-    typeof obj === "object" &&
-    typeof obj.id === "number" &&
-    (obj.type === "user" || obj.type === "record")
-  );
-}
-
-function isZodError(error: any): error is z.ZodError {
-  if (error instanceof z.ZodError) return true;
-
-  // Check for ZodError shape, since instanceof may fail when ZodError is nested in another error
-  return (
-    error &&
-    typeof error === "object" &&
-    "issues" in error &&
-    Array.isArray(error.issues)
-  );
-}
+const TAP_ADMIN_PASSWORD = process.env.TAP_ADMIN_PASSWORD
 
 /**
- * Acknowledges receipt of a Nexus event.
- * Nexus considers events 'acked' when it receives a 200 response.
+ * Acknowledges receipt of a Tap event.
+ * Tap considers events 'acked' when it receives a 200 response.
  */
 function ackEvent(body?: BodyInit) {
-  return new NextResponse(body, { status: 200 });
+  return new NextResponse(body, { status: 200 })
 }
 
 /**
- * Signals to Nexus that the event should be sent again later.
- * Nexus will retry events that receive any response other than 200.
+ * Signals to Tap that the event should be sent again later.
+ * Tap will retry events that receive any response other than 200.
  *
  * This should be used sparingly to avoid excessive retries.
  */
 function retryEvent(body?: BodyInit) {
-  return new NextResponse(body, { status: 500 });
+  return new NextResponse(body, { status: 500 })
 }
 
 export async function POST(request: NextRequest) {
+  if (TAP_ADMIN_PASSWORD) {
+    const authHeader = request.headers.get('authorization') ?? ''
+    try {
+      assureAdminAuth(TAP_ADMIN_PASSWORD, authHeader)
+    } catch {
+      return new NextResponse('Unauthorized', { status: 401 })
+    }
+  }
+
   try {
-    const body = await request.json();
+    const body = await request.json()
+
+    let event
+    try {
+      event = parseTapEvent(body)
+    } catch (error) {
+      return ackEvent('Invalid event format')
+    }
 
     /* NOTE(caidanw):
-     * Nexus sends a variety of event types: 'user' events and 'record' events.
-     * Nexus always includes 'user' events, currently no way to configure this.
+     * Tap sends a variety of event types: 'identity' events and 'record' events.
+     * Tap always includes 'identity' events, currently no way to configure this.
      * We only want to process 'record' events.
      */
-    if (!isNexusEvent(body) || isUserEvent(body)) {
-      return ackEvent("Event type not desired");
+    if (event.type !== 'record') {
+      return ackEvent('Event type not desired')
     }
 
-    const commit = body.record;
-    const { cid, record: lexiconRecord } = commit;
-
-    if (!isLexiconSchemaRecord(lexiconRecord)) {
-      return ackEvent("Not a valid lexicon schema record");
+    if (!isLexiconRecordEvent(event)) {
+      return ackEvent('Not a valid lexicon record event')
     }
 
-    const nsid = lexiconRecord.id;
-    const did = await resolveLexiconDidAuthority(nsid);
+    const validationResult = await validateLexicon(event)
 
-    // DNS validation gate: Reject if DNS doesn't resolve or doesn't match the repo DID
-    // This helps prevent spoofing and DDoS attacks by only storing lexicons with valid DNS authority
-    if (!did || did !== commit.did) {
-      return ackEvent("NSID DID authority does not match record DID");
-    }
-
-    try {
-      // Attempt to parse and validate the lexicon schema
-      const lexiconDoc = parseLexiconDoc(lexiconRecord);
-
-      // Valid lexicon: store in valid_lexicons table
+    if (validationResult.isValid) {
       await db
-        .insert(validLexicons)
+        .insert(valid_lexicons)
         .values({
-          nsid: nsid,
-          cid: cid,
-          repoDid: commit.did,
-          repoRev: commit.rev,
-          data: lexiconDoc,
+          nsid: validationResult.lexiconDoc.id,
+          cid: event.cid,
+          repoDid: event.did,
+          repoRev: event.rev,
+          data: validationResult.lexiconDoc,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing()
 
-      console.log("Valid lexicon ingested:", {
+      console.log('Valid lexicon ingested:', {
         eventId: body.id,
-        nsid: nsid,
-        cid: cid,
-        repoDid: commit.did,
-        action: commit.action,
-      });
+        nsid: validationResult.lexiconDoc.id,
+        cid: event.cid,
+        repoDid: event.did,
+        action: event.action,
+      })
 
-      return ackEvent("Valid lexicon ingested successfully");
-    } catch (error) {
-      if (isZodError(error)) {
-        // Invalid lexicon: store in invalid_lexicons table for debugging
-        await db
-          .insert(invalidLexicons)
-          .values({
-            nsid: nsid,
-            cid: cid,
-            repoDid: commit.did,
-            repoRev: commit.rev,
-            rawData: lexiconRecord,
-            validationErrors: error.issues,
-          })
-          .onConflictDoNothing();
+      return ackEvent('Valid lexicon ingested successfully')
+    } else {
+      await db
+        .insert(invalid_lexicons)
+        .values({
+          nsid: event.record.id,
+          cid: event.cid,
+          repoDid: event.did,
+          repoRev: event.rev,
+          rawData: event.record,
+          reasons: validationResult.reasons,
+        })
+        .onConflictDoNothing()
 
-        console.warn("Invalid lexicon ingested:", {
-          eventId: body.id,
-          nsid: nsid,
-          cid: cid,
-          repoDid: commit.did,
-          errorCount: error.issues.length,
-        });
+      console.warn('Invalid lexicon ingested:', {
+        eventId: body.id,
+        nsid: event.record.id,
+        cid: event.cid,
+        repoDid: event.did,
+        reasonCount: validationResult.reasons.length,
+        reasonTypes: validationResult.reasons.map((r) => r.type),
+      })
 
-        return ackEvent("Invalid lexicon stored for debugging");
-      } else {
-        console.error("Unknown error while parsing lexicon record:", error);
-        return ackEvent("Lexicon record failed to parse");
-      }
+      return ackEvent('Invalid lexicon stored for debugging')
     }
   } catch (error) {
-    console.error("Error processing ingest request:", error);
+    console.error('Error processing ingest request:', error)
 
     // Always acknowledge events that cause unknown errors to prevent potential loops
-    return ackEvent("Failed to process request");
+    return ackEvent('Failed to process request')
   }
 }

@@ -1,18 +1,18 @@
-import { notFound } from "next/navigation";
-import { isValidNsid } from "@atproto/syntax";
+import { notFound } from 'next/navigation'
+import { isValidNsid } from '@atproto/syntax'
 
 interface PageProps {
   params: Promise<{
-    id: string;
-  }>;
+    id: string
+  }>
 }
 
 export default async function Page({ params }: PageProps) {
-  const { id } = await params;
+  const { id } = await params
 
   if (!isValidNsid(id)) {
-    notFound();
+    notFound()
   }
 
-  return <div>{id}</div>;
+  return <div>{id}</div>
 }
