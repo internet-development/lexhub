@@ -12,18 +12,12 @@ export type LexiconSchemaRecord = {
 }
 
 /**
- * Raw commit from Tap (unvalidated record)
- * Extends RecordEvent to ensure all required fields are present
+ * A RecordEvent that contains a lexicon schema record.
+ * Narrows RecordEvent to ensure cid and record fields are present and typed as a lexicon.
+ * Note: This does NOT mean the lexicon has been validated - use validateLexicon() for that.
  */
-export interface RawCommit extends RecordEvent {
+export type LexiconRecordEvent = RecordEvent & {
   cid: string
-  record: Record<string, unknown>
-}
-
-/**
- * Commit with validated LexiconSchemaRecord
- */
-export interface Commit extends RawCommit {
   record: LexiconSchemaRecord
 }
 
@@ -34,8 +28,13 @@ export function isLexiconSchemaRecord(v: any): v is LexiconSchemaRecord {
   return v?.['$type'] === LEXICON_SCHEMA_NSID && Object.hasOwn(v, 'id')
 }
 
-export function isCommit(commit: RawCommit): commit is Commit {
-  return isLexiconSchemaRecord(commit.record)
+/**
+ * Type guard to check if a RecordEvent contains a lexicon.
+ */
+export function isLexiconRecordEvent(
+  event: RecordEvent,
+): event is LexiconRecordEvent {
+  return !!event.cid && !!event.record && isLexiconSchemaRecord(event.record)
 }
 
 export function isZodError(error: any): error is z.ZodError {

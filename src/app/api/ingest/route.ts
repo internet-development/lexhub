@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { db } from '@/db'
 import { invalid_lexicons, valid_lexicons } from '@/db/schema'
-import { isCommit, RawCommit } from './types'
+import { isLexiconRecordEvent } from './types'
 import { validateLexicon } from './validation'
 
 const TAP_ADMIN_PASSWORD = process.env.TAP_ADMIN_PASSWORD
@@ -27,7 +27,6 @@ function retryEvent(body?: BodyInit) {
 }
 
 export async function POST(request: NextRequest) {
-  // Validate authentication if TAP_ADMIN_PASSWORD is configured
   if (TAP_ADMIN_PASSWORD) {
     const authHeader = request.headers.get('authorization') ?? ''
     try {
@@ -40,7 +39,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    // Parse and validate Tap event
     let event
     try {
       event = parseTapEvent(body)
@@ -57,30 +55,20 @@ export async function POST(request: NextRequest) {
       return ackEvent('Event type not desired')
     }
 
-    // Type guard: ensure event has required fields for a commit
-    if (!event.cid || !event.record) {
-      return ackEvent('Incomplete record event')
+    if (!isLexiconRecordEvent(event)) {
+      return ackEvent('Not a valid lexicon record event')
     }
 
-    const commit = event as RawCommit
-
-    // Type guard: ensure commit.record is a LexiconSchemaRecord
-    if (!isCommit(commit)) {
-      return ackEvent('Not a valid commit')
-    }
-
-    // Now commit is typed as Commit (with LexiconSchemaRecord)
-    const validationResult = await validateLexicon(commit)
+    const validationResult = await validateLexicon(event)
 
     if (validationResult.isValid) {
-      // Valid lexicon: store in valid_lexicons table
       await db
         .insert(valid_lexicons)
         .values({
           nsid: validationResult.lexiconDoc.id,
-          cid: commit.cid,
-          repoDid: commit.did,
-          repoRev: commit.rev,
+          cid: event.cid,
+          repoDid: event.did,
+          repoRev: event.rev,
           data: validationResult.lexiconDoc,
         })
         .onConflictDoNothing()
@@ -88,31 +76,30 @@ export async function POST(request: NextRequest) {
       console.log('Valid lexicon ingested:', {
         eventId: body.id,
         nsid: validationResult.lexiconDoc.id,
-        cid: commit.cid,
-        repoDid: commit.did,
-        action: commit.action,
+        cid: event.cid,
+        repoDid: event.did,
+        action: event.action,
       })
 
       return ackEvent('Valid lexicon ingested successfully')
     } else {
-      // Invalid lexicon: store in invalid_lexicons table
       await db
         .insert(invalid_lexicons)
         .values({
-          nsid: commit.record.id,
-          cid: commit.cid,
-          repoDid: commit.did,
-          repoRev: commit.rev,
-          rawData: commit.record,
+          nsid: event.record.id,
+          cid: event.cid,
+          repoDid: event.did,
+          repoRev: event.rev,
+          rawData: event.record,
           reasons: validationResult.reasons,
         })
         .onConflictDoNothing()
 
       console.warn('Invalid lexicon ingested:', {
         eventId: body.id,
-        nsid: commit.record.id,
-        cid: commit.cid,
-        repoDid: commit.did,
+        nsid: event.record.id,
+        cid: event.cid,
+        repoDid: event.did,
         reasonCount: validationResult.reasons.length,
         reasonTypes: validationResult.reasons.map((r) => r.type),
       })

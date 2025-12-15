@@ -2,7 +2,7 @@ import { LexiconDoc, parseLexiconDoc } from '@atproto/lexicon'
 import { resolveLexiconDidAuthority } from '@atproto/lexicon-resolver'
 import { validateNsid } from '@atproto/syntax'
 import { InvalidLexiconReason } from './reasons'
-import { Commit, isZodError } from './types'
+import { isZodError, LexiconRecordEvent } from './types'
 
 export type ValidationResult =
   | {
@@ -16,7 +16,7 @@ export type ValidationResult =
     }
 
 type ValidatorFunction = (
-  commit: Commit,
+  event: LexiconRecordEvent,
   reasons: InvalidLexiconReason[],
 ) => void | Promise<void>
 
@@ -24,8 +24,8 @@ type ValidatorFunction = (
  * Validates that the NSID format is correct.
  * Uses @atproto/syntax validateNsid for detailed validation messages.
  */
-const validateNsidFormat: ValidatorFunction = (commit, reasons) => {
-  const nsid = commit.record.id
+const validateNsidFormat: ValidatorFunction = (event, reasons) => {
+  const nsid = event.record.id
   const result = validateNsid(nsid)
 
   if (!result.success) {
@@ -41,18 +41,18 @@ const validateNsidFormat: ValidatorFunction = (commit, reasons) => {
  * Validates that the NSID DID authority matches the repository DID.
  * This helps prevent spoofing and DDoS attacks by only storing lexicons with valid DNS authority.
  */
-const validateDidAuthority: ValidatorFunction = async (commit, reasons) => {
-  const nsid = commit.record.id
+const validateDidAuthority: ValidatorFunction = async (event, reasons) => {
+  const nsid = event.record.id
 
   try {
     const expectedDid = await resolveLexiconDidAuthority(nsid)
 
-    if (!expectedDid || expectedDid !== commit.did) {
+    if (!expectedDid || expectedDid !== event.did) {
       reasons.push({
         type: 'did_authority_mismatch',
         nsid: nsid,
         expectedDid: expectedDid || null,
-        actualDid: commit.did,
+        actualDid: event.did,
       })
     }
   } catch (error) {
@@ -61,7 +61,7 @@ const validateDidAuthority: ValidatorFunction = async (commit, reasons) => {
       type: 'did_authority_mismatch',
       nsid: nsid,
       expectedDid: null,
-      actualDid: commit.did,
+      actualDid: event.did,
     })
   }
 }
@@ -70,13 +70,13 @@ const validateDidAuthority: ValidatorFunction = async (commit, reasons) => {
  * Validates that the record key (rkey) matches the lexicon NSID.
  * This is required because the rkey should always be the NSID for lexicon records.
  */
-const validateRkeyMatchesNsid: ValidatorFunction = (commit, reasons) => {
-  const nsid = commit.record.id
-  if (commit.rkey !== nsid) {
+const validateRkeyMatchesNsid: ValidatorFunction = (event, reasons) => {
+  const nsid = event.record.id
+  if (event.rkey !== nsid) {
     reasons.push({
       type: 'rkey_mismatch',
       expected: nsid,
-      actual: commit.rkey,
+      actual: event.rkey,
     })
   }
 }
@@ -84,9 +84,9 @@ const validateRkeyMatchesNsid: ValidatorFunction = (commit, reasons) => {
 /**
  * Validates the lexicon record against the ATProto lexicon schema using Zod.
  */
-const validateSchema: ValidatorFunction = (commit, reasons) => {
+const validateSchema: ValidatorFunction = (event, reasons) => {
   try {
-    parseLexiconDoc(commit.record)
+    parseLexiconDoc(event.record)
   } catch (error) {
     if (!isZodError(error)) throw error
 
@@ -109,19 +109,19 @@ const validators: ValidatorFunction[] = [
 ]
 
 /**
- * Validates a lexicon commit against all registered validators.
+ * Validates a lexicon record event against all registered validators.
  * Collects all validation failures and returns them.
  *
- * @param commit - The commit data from a Tap record event
+ * @param event - The lexicon record event from Tap
  * @returns ValidationResult with isValid flag, reasons array, and optional lexiconDoc
  */
 export async function validateLexicon(
-  commit: Commit,
+  event: LexiconRecordEvent,
 ): Promise<ValidationResult> {
   const reasons: InvalidLexiconReason[] = []
 
   for (const validator of validators) {
-    await validator(commit, reasons)
+    await validator(event, reasons)
   }
 
   if (reasons.length === 0) {
@@ -132,7 +132,7 @@ export async function validateLexicon(
        * In the future we may want to refactor the validators to use a shared context object.
        * For now, this is simpler and performance impact is negligible.
        */
-      lexiconDoc: parseLexiconDoc(commit.record),
+      lexiconDoc: parseLexiconDoc(event.record),
       reasons: [],
     }
   }
