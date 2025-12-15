@@ -8,13 +8,13 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      nexus:
+      tap:
         condition: service_started
     ports:
       - '10000:10000'
     environment:
       - NODE_ENV=production
-      - NEXUS_URL=http://nexus:8080
+      - TAP_URL=http://tap:2480
       - DATABASE_URL=postgresql://lexhub:lexhub_password@postgres:5432/lexhub
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
@@ -22,41 +22,21 @@ services:
       - POSTGRES_PASSWORD=lexhub_password
       - POSTGRES_DB=lexhub
 
-  nexus:
-    build:
-      context: .
-      dockerfile: nexus.Dockerfile
-    container_name: nexus
+  tap:
+    image: ghcr.io/bluesky-social/indigo/tap:latest
+    container_name: tap
     restart: unless-stopped
     ports:
-      - '8080:8080'
+      - '2480:2480'
     volumes:
-      - nexus_data:/app/data
+      - tap_data:/data
     environment:
-      # Relay configuration
-      - NEXUS_RELAY_URL=https://relay1.us-east.bsky.network
-
-      # Performance tuning
-      - NEXUS_FIREHOSE_PARALLELISM=10
-      - NEXUS_RESYNC_PARALLELISM=5
-      - NEXUS_OUTBOX_PARALLELISM=5
-
-      # Cursor and timeout settings
-      - NEXUS_CURSOR_SAVE_INTERVAL=5s
-      # - NEXUS_REPO_FETCH_TIMEOUT=180s
-
       # Network and filtering options
-      - NEXUS_FULL_NETWORK_MODE=false
-      - NEXUS_SIGNAL_COLLECTION=com.atproto.lexicon.schema
-      - NEXUS_COLLECTION_FILTERS=com.atproto.lexicon.schema
+      - TAP_SIGNAL_COLLECTION=com.atproto.lexicon.schema
+      - TAP_COLLECTION_FILTERS=com.atproto.lexicon.schema
 
       # Delivery options
-      - NEXUS_DISABLE_ACKS=false
-      - NEXUS_WEBHOOK_URL=http://lexhub:10000/api/ingest
-      # - NEXUS_OUTBOX_ONLY=false
-
-      # Logging
-      - NEXUS_LOG_LEVEL=info
+      - TAP_WEBHOOK_URL=http://lexhub:10000/api/ingest
 
   postgres:
     image: postgres:18-alpine
@@ -93,7 +73,7 @@ services:
       retries: 5
 
 volumes:
-  nexus_data:
+  tap_data:
     driver: local
   postgres_data:
     driver: local
