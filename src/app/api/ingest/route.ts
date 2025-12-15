@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
      * Tap always includes 'identity' events, currently no way to configure this.
      * We only want to process 'record' events.
      */
-    if (event.type === 'identity') {
+    if (event.type !== 'record') {
       return ackEvent('Event type not desired')
     }
 
