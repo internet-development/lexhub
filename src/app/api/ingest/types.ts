@@ -1,5 +1,9 @@
 import { LEXICON_SCHEMA_NSID } from '@atproto/lexicon-resolver'
+import { RecordEvent, TapEvent } from '@atproto/tap'
 import z from 'zod'
+
+// Re-export Tap types for convenience
+export type { RecordEvent, TapEvent }
 
 /**
  * Extend the type from `@atproto/lexicon-resolver` to require the 'id' field.
@@ -11,7 +15,7 @@ export type LexiconSchemaRecord = {
 }
 
 /**
- * Raw commit from Nexus (unvalidated record)
+ * Raw commit from Tap (unvalidated record)
  */
 export interface RawCommit {
   did: string
@@ -29,43 +33,6 @@ export interface RawCommit {
  */
 export interface Commit extends RawCommit {
   record: LexiconSchemaRecord
-}
-
-/**
- * User event from Nexus (not processed)
- */
-interface UserEvent {
-  id: number
-  type: 'user'
-  user: object
-}
-
-/**
- * Record event from Nexus containing a commit
- */
-interface RecordEvent {
-  id: number
-  type: 'record'
-  record: RawCommit
-}
-
-export type NexusEvent = UserEvent | RecordEvent
-
-export function isUserEvent(event: NexusEvent): event is UserEvent {
-  return event.type === 'user'
-}
-
-export function isRecordEvent(event: NexusEvent): event is RecordEvent {
-  return event.type === 'record'
-}
-
-export function isNexusEvent(obj: any): obj is NexusEvent {
-  return (
-    obj &&
-    typeof obj === 'object' &&
-    typeof obj.id === 'number' &&
-    (obj.type === 'user' || obj.type === 'record')
-  )
 }
 
 /**
