@@ -112,7 +112,7 @@ const validators: ValidatorFunction[] = [
  * Validates a lexicon commit against all registered validators.
  * Collects all validation failures and returns them.
  *
- * @param commit - The commit data from a Nexus record event
+ * @param commit - The commit data from a Tap record event
  * @returns ValidationResult with isValid flag, reasons array, and optional lexiconDoc
  */
 export async function validateLexicon(
