@@ -57,6 +57,11 @@ export default function Search(props: SearchProps) {
     // reset selection whenever query changes
     setActiveIndex(-1)
 
+    if (!open) {
+      setLoading(false)
+      return
+    }
+
     if (!debouncedValue) {
       setSuggestions([])
       setLoading(false)
@@ -84,7 +89,6 @@ export default function Search(props: SearchProps) {
       .then((json) => {
         if (requestId !== requestIdRef.current) return
         setSuggestions(json.data)
-        setOpen(true)
       })
       .catch((e) => {
         if (controller.signal.aborted) return
@@ -98,7 +102,7 @@ export default function Search(props: SearchProps) {
       })
 
     return () => controller.abort()
-  }, [debouncedValue])
+  }, [debouncedValue, open])
 
   function handleSubmit() {
     setOpen(false)
@@ -198,6 +202,7 @@ export default function Search(props: SearchProps) {
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => {
                 onChange(item)
+                setSuggestions([])
                 setOpen(false)
                 inputRef.current?.focus()
               }}
