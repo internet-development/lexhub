@@ -1,0 +1,27 @@
+.input {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: 0.0625rem solid #d1d5db;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  font-size: 1rem;
+  outline: none;
+}
+
+.input:focus {
+  border-color: #4f46e5;
+  box-shadow:
+    0 0 0 0.0625rem white,
+    0 0 0 0.1875rem #4f46e5;
+}
+
+.input.error {
+  border-color: #ef4444;
+}
+
+.input.error:focus {
+  border-color: #ef4444;
+  box-shadow:
+    0 0 0 0.0625rem white,
+    0 0 0 0.1875rem #ef4444;
+}
