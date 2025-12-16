@@ -4,6 +4,7 @@ import styles from './page.module.css'
 import cardStyles from '@/components/Card.module.css'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 import { Card, CardHeader, CardBody } from '@/components/Card'
 import {
@@ -84,6 +85,7 @@ const namespaces: Namespace[] = [
 ]
 
 export default function HomePage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<TabType>('featured')
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -138,7 +140,11 @@ export default function HomePage() {
             <Search
               value={searchQuery}
               onChange={setSearchQuery}
-              onSearch={() => console.log('Search:', searchQuery)}
+              onSearch={() => {
+                const q = searchQuery.trim()
+                if (!q) return
+                router.push(`/${encodeURIComponent(q)}`)
+              }}
               placeholder="Lexicons, Namespaces, CIDs..."
             />
           </div>
