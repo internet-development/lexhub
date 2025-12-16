@@ -38,6 +38,7 @@ export default function Search(props: SearchProps) {
 
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [showLoading, setShowLoading] = useState(false)
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [activeIndex, setActiveIndex] = useState<number>(-1)
   const [error, setError] = useState<string | null>(null)
@@ -49,7 +50,10 @@ export default function Search(props: SearchProps) {
 
   const showSuggestions =
     open &&
-    (loading || suggestions.length > 0 || !!error || debouncedValue.length > 0)
+    (showLoading ||
+      suggestions.length > 0 ||
+      !!error ||
+      debouncedValue.length > 0)
 
   const suggestionItems = useMemo(() => suggestions, [suggestions])
 
@@ -59,12 +63,14 @@ export default function Search(props: SearchProps) {
 
     if (!open) {
       setLoading(false)
+      setShowLoading(false)
       return
     }
 
     if (!debouncedValue) {
       setSuggestions([])
       setLoading(false)
+      setShowLoading(false)
       setError(null)
       return
     }
@@ -72,9 +78,15 @@ export default function Search(props: SearchProps) {
     const requestId = ++requestIdRef.current
 
     setLoading(true)
+    setShowLoading(false)
     setError(null)
 
     const controller = new AbortController()
+
+    const loadingTimer = setTimeout(() => {
+      if (requestId !== requestIdRef.current) return
+      setShowLoading(true)
+    }, 200)
 
     fetch(
       `/api/search/suggest?type=nsid&prefix=${encodeURIComponent(debouncedValue)}&limit=20`,
@@ -97,11 +109,16 @@ export default function Search(props: SearchProps) {
         setError(e instanceof Error ? e.message : 'Failed to load suggestions')
       })
       .finally(() => {
+        clearTimeout(loadingTimer)
         if (requestId !== requestIdRef.current) return
         setLoading(false)
+        setShowLoading(false)
       })
 
-    return () => controller.abort()
+    return () => {
+      clearTimeout(loadingTimer)
+      controller.abort()
+    }
   }, [debouncedValue, open])
 
   function handleSubmit() {
@@ -188,7 +205,9 @@ export default function Search(props: SearchProps) {
       {showSuggestions ? (
         <div className={styles.suggestions} role="listbox">
           {error ? <div className={styles.statusRow}>{error}</div> : null}
-          {loading ? <div className={styles.statusRow}>Loading...</div> : null}
+          {showLoading ? (
+            <div className={styles.statusRow}>Loading...</div>
+          ) : null}
           {!loading && !error && suggestionItems.length === 0 ? (
             <div className={styles.statusRow}>No matches</div>
           ) : null}
