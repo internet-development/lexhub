@@ -1,6 +1,12 @@
 .container {
   min-height: 100vh;
-  background: linear-gradient(to bottom, var(--color-background-blue) 0%, var(--color-background) 20%, var(--color-background) 80%, var(--color-background-blue) 100%);
+  background: linear-gradient(
+    to bottom,
+    var(--color-background-blue) 0%,
+    var(--color-background) 20%,
+    var(--color-background) 80%,
+    var(--color-background-blue) 100%
+  );
   font-family: var(--font-family-sans);
 }
 

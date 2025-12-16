@@ -1,12 +1,12 @@
-import type { SVGProps } from 'react';
+import type { SVGProps } from 'react'
 
 export interface IconProps extends SVGProps<SVGSVGElement> {
-  size?: number;
-  className?: string;
+  size?: number
+  className?: string
 }
 
 export default function GlobeIcon(props: IconProps) {
-  const { size = 24, className = '', ...restProps } = props;
+  const { size = 24, className = '', ...restProps } = props
 
   return (
     <svg
@@ -25,5 +25,5 @@ export default function GlobeIcon(props: IconProps) {
       <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
       <path d="M2 12h20" />
     </svg>
-  );
+  )
 }

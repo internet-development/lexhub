@@ -1,60 +1,57 @@
-import styles from '@/components/Card.module.css';
+import styles from '@/components/Card.module.css'
 
-import type { HTMLAttributes, ReactNode } from 'react';
+import type { HTMLAttributes, ReactNode } from 'react'
+import clsx from '@/common/clsx'
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  width?: 'auto' | 'full';
-  children: ReactNode;
+  width?: 'auto' | 'full'
+  children: ReactNode
 }
 
 export function Card(props: CardProps) {
-  const { width = 'auto', className = '', children, ...restProps } = props;
+  const { width = 'auto', className = '', children, ...restProps } = props
 
-  const classes = [
-    styles.card,
-    styles[width],
-    className
-  ].filter(Boolean).join(' ');
+  const classes = clsx(styles.card, styles[width], className)
 
   return (
     <div className={classes} {...restProps}>
       {children}
     </div>
-  );
+  )
 }
 
 export function CardHeader(props: HTMLAttributes<HTMLDivElement>) {
-  const { className = '', children, ...restProps } = props;
+  const { className = '', children, ...restProps } = props
 
-  const classes = [styles.header, className].filter(Boolean).join(' ');
+  const classes = clsx(styles.header, className)
 
   return (
     <div className={classes} {...restProps}>
       {children}
     </div>
-  );
+  )
 }
 
 export function CardBody(props: HTMLAttributes<HTMLDivElement>) {
-  const { className = '', children, ...restProps } = props;
+  const { className = '', children, ...restProps } = props
 
-  const classes = [styles.body, className].filter(Boolean).join(' ');
+  const classes = clsx(styles.body, className)
 
   return (
     <div className={classes} {...restProps}>
       {children}
     </div>
-  );
+  )
 }
 
 export function CardFooter(props: HTMLAttributes<HTMLDivElement>) {
-  const { className = '', children, ...restProps } = props;
+  const { className = '', children, ...restProps } = props
 
-  const classes = [styles.footer, className].filter(Boolean).join(' ');
+  const classes = clsx(styles.footer, className)
 
   return (
     <div className={classes} {...restProps}>
       {children}
     </div>
-  );
+  )
 }

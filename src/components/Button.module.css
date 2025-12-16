@@ -25,7 +25,9 @@
 }
 
 .primary:focus {
-  box-shadow: 0 0 0 0.125rem white, 0 0 0 0.25rem #4f46e5;
+  box-shadow:
+    0 0 0 0.125rem white,
+    0 0 0 0.25rem #4f46e5;
 }
 
 .secondary {
@@ -38,7 +40,9 @@
 }
 
 .secondary:focus {
-  box-shadow: 0 0 0 0.125rem white, 0 0 0 0.25rem #6b7280;
+  box-shadow:
+    0 0 0 0.125rem white,
+    0 0 0 0.25rem #6b7280;
 }
 
 .outline {
@@ -52,7 +56,9 @@
 }
 
 .outline:focus {
-  box-shadow: 0 0 0 0.125rem white, 0 0 0 0.25rem #6b7280;
+  box-shadow:
+    0 0 0 0.125rem white,
+    0 0 0 0.25rem #6b7280;
 }
 
 .ghost {
@@ -65,7 +71,9 @@
 }
 
 .ghost:focus {
-  box-shadow: 0 0 0 0.125rem white, 0 0 0 0.25rem #6b7280;
+  box-shadow:
+    0 0 0 0.125rem white,
+    0 0 0 0.25rem #6b7280;
 }
 
 .sm {

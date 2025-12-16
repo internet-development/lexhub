@@ -1,43 +1,91 @@
-'use client';
+'use client'
 
-import styles from './page.module.css';
-import cardStyles from '@/components/Card.module.css';
+import styles from './page.module.css'
+import cardStyles from '@/components/Card.module.css'
 
-import { useState } from 'react';
+import { useState } from 'react'
 
-import { Card, CardHeader, CardBody } from '@/components/Card';
-import { Table, TableHeader, TableBody, TableRow, TableHead } from '@/components/Table';
-import Link from '@/components/Link';
-import Search from '@/components/Search';
-import NamespaceTableRow from '@/components/NamespaceTableRow';
-import BlueskyIcon from '@/components/BlueskyIcon';
-import GitHubIcon from '@/components/GitHubIcon';
-import AtIcon from '@/components/AtIcon';
-import DocumentIcon from '@/components/DocumentIcon';
+import { Card, CardHeader, CardBody } from '@/components/Card'
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+} from '@/components/Table'
+import Link from '@/components/Link'
+import Search from '@/components/Search'
+import NamespaceTableRow from '@/components/NamespaceTableRow'
+import BlueskyIcon from '@/components/BlueskyIcon'
+import GitHubIcon from '@/components/GitHubIcon'
+import AtIcon from '@/components/AtIcon'
+import DocumentIcon from '@/components/DocumentIcon'
 
-type TabType = 'featured' | 'recent' | 'viewed';
+type TabType = 'featured' | 'recent' | 'viewed'
 
 interface Namespace {
-  name: string;
-  icon: 'bluesky' | 'globe' | 'at';
-  lexicons: number;
-  description: string;
+  name: string
+  icon: 'bluesky' | 'globe' | 'at'
+  lexicons: number
+  description: string
 }
 
 const namespaces: Namespace[] = [
-  { name: 'bsky.app', icon: 'bluesky', lexicons: 4827, description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit' },
-  { name: 'bsky.chat', icon: 'bluesky', lexicons: 1394, description: 'Curabitur fringilla erat a leo imperdiet, vitae vehicula erat vehicula...' },
-  { name: 'atproto.com', icon: 'bluesky', lexicons: 7502, description: 'Suspendisse quis orci nec velit pretium tempor et sit amet tellus' },
-  { name: 'ozone.tools', icon: 'at', lexicons: 9041, description: 'Maecenas congue diam eget mi posuere vestibulum' },
-  { name: 'statusphere.xyz', icon: 'at', lexicons: 2678, description: 'Cras nec ligula consequat, tristique eros ac, euismod enim' },
-  { name: 'robocracy.org', icon: 'at', lexicons: 5180, description: 'Donec venenatis dolor ut quam pretium sodales' },
-  { name: 'atprofile.com', icon: 'globe', lexicons: 3409, description: 'Aenean consectetur orci vitae orci semper eleifend' },
-  { name: 'skyblur.uk', icon: 'globe', lexicons: 7713, description: 'Aenean ut nisi a augue venenatis egestas' },
-];
+  {
+    name: 'bsky.app',
+    icon: 'bluesky',
+    lexicons: 4827,
+    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+  },
+  {
+    name: 'bsky.chat',
+    icon: 'bluesky',
+    lexicons: 1394,
+    description:
+      'Curabitur fringilla erat a leo imperdiet, vitae vehicula erat vehicula...',
+  },
+  {
+    name: 'atproto.com',
+    icon: 'bluesky',
+    lexicons: 7502,
+    description:
+      'Suspendisse quis orci nec velit pretium tempor et sit amet tellus',
+  },
+  {
+    name: 'ozone.tools',
+    icon: 'at',
+    lexicons: 9041,
+    description: 'Maecenas congue diam eget mi posuere vestibulum',
+  },
+  {
+    name: 'statusphere.xyz',
+    icon: 'at',
+    lexicons: 2678,
+    description: 'Cras nec ligula consequat, tristique eros ac, euismod enim',
+  },
+  {
+    name: 'robocracy.org',
+    icon: 'at',
+    lexicons: 5180,
+    description: 'Donec venenatis dolor ut quam pretium sodales',
+  },
+  {
+    name: 'atprofile.com',
+    icon: 'globe',
+    lexicons: 3409,
+    description: 'Aenean consectetur orci vitae orci semper eleifend',
+  },
+  {
+    name: 'skyblur.uk',
+    icon: 'globe',
+    lexicons: 7713,
+    description: 'Aenean ut nisi a augue venenatis egestas',
+  },
+]
 
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<TabType>('featured');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<TabType>('featured')
+  const [searchQuery, setSearchQuery] = useState('')
 
   return (
     <div className={styles.container}>
@@ -45,10 +93,18 @@ export default function HomePage() {
         <div className={styles.headerContent}>
           <h1 className={styles.title}>LexHub</h1>
           <div className={styles.socialLinks}>
-            <a href="https://bsky.app" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://bsky.app"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <BlueskyIcon size={20} variant="interactive" />
             </a>
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://github.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <GitHubIcon size={20} variant="interactive" />
             </a>
           </div>
@@ -58,11 +114,13 @@ export default function HomePage() {
       <section className={styles.hero}>
         <div className={styles.heroContent}>
           <h2 className={styles.heroTitle}>
-            Explore ideas. Remix code.<br />Build amazing protocols.
+            Explore ideas. Remix code.
+            <br />
+            Build amazing protocols.
           </h2>
           <p className={styles.heroDescription}>
-            Jump into the ecosystem and explore real examples. See how builders solve problems, test ideas,
-            and turn concepts into protocols.
+            Jump into the ecosystem and explore real examples. See how builders
+            solve problems, test ideas, and turn concepts into protocols.
           </p>
 
           <div className={styles.heroButtons}>
@@ -154,9 +212,7 @@ export default function HomePage() {
                 </code>
               </div>
 
-              <p className={styles.getStartedText}>
-                And start building:
-              </p>
+              <p className={styles.getStartedText}>And start building:</p>
 
               <div className={styles.codeBlock}>
                 <pre className={styles.codeMultiline}>
@@ -176,7 +232,10 @@ const response = await client.call(app.bsky.actor.getProfile, {
               <Link href="#docs" variant="primary" style={{ fontSize: '14px' }}>
                 Read the docs
               </Link>
-              <span className={styles.getStartedText}> for other languages and to learn more.</span>
+              <span className={styles.getStartedText}>
+                {' '}
+                for other languages and to learn more.
+              </span>
             </CardBody>
           </Card>
         </div>
@@ -197,5 +256,5 @@ const response = await client.call(app.bsky.actor.getProfile, {
         </div>
       </footer>
     </div>
-  );
+  )
 }

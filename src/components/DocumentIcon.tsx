@@ -1,12 +1,12 @@
-import type { SVGProps } from 'react';
+import type { SVGProps } from 'react'
 
 export interface IconProps extends SVGProps<SVGSVGElement> {
-  size?: number;
-  className?: string;
+  size?: number
+  className?: string
 }
 
 export default function DocumentIcon(props: IconProps) {
-  const { size = 24, className = '', ...restProps } = props;
+  const { size = 24, className = '', ...restProps } = props
 
   return (
     <svg
@@ -27,5 +27,5 @@ export default function DocumentIcon(props: IconProps) {
       <line x1="16" y1="17" x2="8" y2="17" />
       <polyline points="10 9 9 9 8 9" />
     </svg>
-  );
+  )
 }

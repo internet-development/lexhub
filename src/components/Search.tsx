@@ -1,15 +1,21 @@
-import styles from '@/components/Search.module.css';
+import styles from '@/components/Search.module.css'
 
 export interface SearchProps {
-  value: string;
-  onChange: (value: string) => void;
-  onSearch: () => void;
-  placeholder?: string;
-  buttonText?: string;
+  value: string
+  onChange: (value: string) => void
+  onSearch: () => void
+  placeholder?: string
+  buttonText?: string
 }
 
 export default function Search(props: SearchProps) {
-  const { value, onChange, onSearch, placeholder = 'Search...', buttonText = 'Search' } = props;
+  const {
+    value,
+    onChange,
+    onSearch,
+    placeholder = 'Search...',
+    buttonText = 'Search',
+  } = props
 
   return (
     <div className={styles.wrapper}>
@@ -24,5 +30,5 @@ export default function Search(props: SearchProps) {
         {buttonText}
       </button>
     </div>
-  );
+  )
 }

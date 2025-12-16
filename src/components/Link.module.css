@@ -14,7 +14,9 @@
 }
 
 .default:focus {
-  box-shadow: 0 0 0 0.0625rem var(--color-background), 0 0 0 0.1875rem var(--color-text-muted);
+  box-shadow:
+    0 0 0 0.0625rem var(--color-background),
+    0 0 0 0.1875rem var(--color-text-muted);
 }
 
 .primary {
@@ -26,7 +28,9 @@
 }
 
 .primary:focus {
-  box-shadow: 0 0 0 0.0625rem var(--color-background), 0 0 0 0.1875rem var(--color-primary);
+  box-shadow:
+    0 0 0 0.0625rem var(--color-background),
+    0 0 0 0.1875rem var(--color-primary);
 }
 
 .muted {
@@ -39,5 +43,7 @@
 }
 
 .muted:focus {
-  box-shadow: 0 0 0 0.0625rem var(--color-background), 0 0 0 0.1875rem var(--color-text-light);
+  box-shadow:
+    0 0 0 0.0625rem var(--color-background),
+    0 0 0 0.1875rem var(--color-text-light);
 }

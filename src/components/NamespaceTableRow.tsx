@@ -1,19 +1,19 @@
-import styles from '@/components/NamespaceTableRow.module.css';
+import styles from '@/components/NamespaceTableRow.module.css'
 
-import { TableRow, TableCell } from '@/components/Table';
-import Link from '@/components/Link';
-import NamespaceIdentifier, { IconType } from '@/components/NamespaceIdentifier';
+import { TableRow, TableCell } from '@/components/Table'
+import Link from '@/components/Link'
+import NamespaceIdentifier, { IconType } from '@/components/NamespaceIdentifier'
 
 export interface NamespaceTableRowProps {
-  icon: IconType;
-  name: string;
-  lexicons: number;
-  description: string;
-  href: string;
+  icon: IconType
+  name: string
+  lexicons: number
+  description: string
+  href: string
 }
 
 export default function NamespaceTableRow(props: NamespaceTableRowProps) {
-  const { icon, name, lexicons, description, href } = props;
+  const { icon, name, lexicons, description, href } = props
 
   return (
     <TableRow>
@@ -30,5 +30,5 @@ export default function NamespaceTableRow(props: NamespaceTableRowProps) {
         </Link>
       </TableCell>
     </TableRow>
-  );
+  )
 }

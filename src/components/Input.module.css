@@ -10,7 +10,9 @@
 
 .input:focus {
   border-color: #4f46e5;
-  box-shadow: 0 0 0 0.0625rem white, 0 0 0 0.1875rem #4f46e5;
+  box-shadow:
+    0 0 0 0.0625rem white,
+    0 0 0 0.1875rem #4f46e5;
 }
 
 .input.error {
@@ -19,5 +21,7 @@
 
 .input.error:focus {
   border-color: #ef4444;
-  box-shadow: 0 0 0 0.0625rem white, 0 0 0 0.1875rem #ef4444;
+  box-shadow:
+    0 0 0 0.0625rem white,
+    0 0 0 0.1875rem #ef4444;
 }
