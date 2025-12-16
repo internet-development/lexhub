@@ -1,3 +1,4 @@
+import clsx from '@/common/clsx'
 import styles from '@/components/Search.module.css'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -153,7 +154,9 @@ export default function Search(props: SearchProps) {
 
   return (
     <div className={styles.container}>
-      <div className={styles.wrapper}>
+      <div
+        className={clsx(styles.wrapper, showSuggestions && styles.wrapperOpen)}
+      >
         <input
           ref={inputRef}
           type="text"
