@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { db } from '@/db'
 import { invalid_lexicons, valid_lexicons } from '@/db/schema'
+import { DrizzleError } from 'drizzle-orm'
 import { isLexiconRecordEvent } from './types'
 import { validateLexicon } from './validation'
 
@@ -107,6 +108,11 @@ export async function POST(request: NextRequest) {
       return ackEvent('Invalid lexicon stored for debugging')
     }
   } catch (error) {
+    if (error instanceof DrizzleError) {
+      console.error('Database error processing ingest request:', error)
+      return retryEvent('Database error, please retry later')
+    }
+
     console.error('Error processing ingest request:', error)
 
     // Always acknowledge events that cause unknown errors to prevent potential loops
