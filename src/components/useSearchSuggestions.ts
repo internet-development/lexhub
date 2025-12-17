@@ -15,12 +15,19 @@ function useDebouncedValue(value: string, delayMs: number): string {
   return debounced
 }
 
+export type UseSearchSuggestionsStatus =
+  | 'idle'
+  | 'loading'
+  | 'success'
+  | 'error'
+
 export type UseSearchSuggestionsResult = {
   query: string
   suggestions: string[]
   error: string | null
   isFetching: boolean
   showSpinner: boolean
+  status: UseSearchSuggestionsStatus
 }
 
 export function useSearchSuggestions(
@@ -49,20 +56,36 @@ export function useSearchSuggestions(
 
   const requestIdRef = useRef(0)
 
+  const [status, setStatus] = useState<UseSearchSuggestionsStatus>('idle')
+
   useEffect(() => {
-    if (!enabled || !debounced) {
+    requestIdRef.current++
+
+    if (!enabled || !normalized) {
       setSuggestions([])
       setError(null)
       setIsFetching(false)
       setShowSpinner(false)
+      setStatus('idle')
       return
     }
+
+    setSuggestions([])
+    setError(null)
+    setIsFetching(false)
+    setShowSpinner(false)
+    setStatus('idle')
+  }, [enabled, normalized])
+
+  useEffect(() => {
+    if (!enabled || !debounced) return
 
     const requestId = ++requestIdRef.current
 
     setIsFetching(true)
     setShowSpinner(false)
     setError(null)
+    setStatus('loading')
 
     const controller = new AbortController()
 
@@ -84,12 +107,14 @@ export function useSearchSuggestions(
       .then((json) => {
         if (requestId !== requestIdRef.current) return
         setSuggestions(json.data)
+        setStatus('success')
       })
       .catch((e) => {
         if (controller.signal.aborted) return
         if (requestId !== requestIdRef.current) return
         setSuggestions([])
         setError(e instanceof Error ? e.message : 'Failed to load suggestions')
+        setStatus('error')
       })
       .finally(() => {
         clearTimeout(spinnerTimer)
@@ -102,7 +127,7 @@ export function useSearchSuggestions(
       clearTimeout(spinnerTimer)
       controller.abort()
     }
-  }, [debounced, debounceMs, enabled, limit, spinnerDelayMs])
+  }, [debounced, enabled, limit, spinnerDelayMs])
 
   return {
     query: debounced,
@@ -110,5 +135,6 @@ export function useSearchSuggestions(
     error,
     isFetching,
     showSpinner,
+    status,
   }
 }

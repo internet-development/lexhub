@@ -72,9 +72,12 @@ export default function Search(props: SearchProps) {
   const [state, dispatch] = useReducer(reducer, initialState)
   const inputRef = useRef<HTMLInputElement | null>(null)
 
-  const { suggestions, error, isFetching, showSpinner } = useSearchSuggestions(
+  const { suggestions, error, showSpinner, status } = useSearchSuggestions(
     value,
-    { enabled: state.isOpen, limit: 20 },
+    {
+      enabled: state.isOpen,
+      limit: 20,
+    },
   )
 
   useEffect(() => {
@@ -192,7 +195,7 @@ export default function Search(props: SearchProps) {
           {showSpinner ? (
             <div className={styles.statusRow}>Loading...</div>
           ) : null}
-          {!isFetching && !error && suggestions.length === 0 ? (
+          {!error && status === 'success' && suggestions.length === 0 ? (
             <div className={styles.statusRow}>No matches</div>
           ) : null}
 
