@@ -1,4 +1,4 @@
-import type { LexiconDoc } from '@atproto/lexicon'
+import type { LexiconDoc, LexUserType } from '@atproto/lexicon'
 import styles from './LexiconPage.module.css'
 
 export interface LexiconPageProps {
@@ -6,8 +6,7 @@ export interface LexiconPageProps {
 }
 
 export function LexiconPage({ lexicon }: LexiconPageProps) {
-  const defs = lexicon.defs || {}
-  const defNames = Object.keys(defs)
+  const defs = Object.entries(lexicon.defs ?? {}).sort()
 
   return (
     <article className={styles.root}>
@@ -21,30 +20,34 @@ export function LexiconPage({ lexicon }: LexiconPageProps) {
       <section className={styles.definitions}>
         <h2 className={styles.sectionTitle}>Definitions</h2>
         <ul className={styles.defList}>
-          {defNames.map((name) => {
-            const def = defs[name]
-            return (
-              <li key={name} className={styles.defItem} id={name}>
-                <div className={styles.defHeader}>
-                  <code className={styles.defName}>{name}</code>
-                  {'type' in def && (
-                    <span className={styles.defType}>{def.type}</span>
-                  )}
-                </div>
-                {'description' in def && def.description && (
-                  <p className={styles.defDescription}>{def.description}</p>
-                )}
-                <details className={styles.defDetails}>
-                  <summary>Schema</summary>
-                  <pre className={styles.schema}>
-                    {JSON.stringify(def, null, 2)}
-                  </pre>
-                </details>
-              </li>
-            )
-          })}
+          {defs.map(([name, def]) => (
+            <SchemaDefinition key={name} name={name} def={def} />
+          ))}
         </ul>
       </section>
     </article>
+  )
+}
+
+interface SchemaDefinitionProps {
+  name: string
+  def: LexUserType
+}
+
+function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
+  return (
+    <li className={styles.defItem} id={name}>
+      <div className={styles.defHeader}>
+        <code className={styles.defName}>{name}</code>
+        {'type' in def && <span className={styles.defType}>{def.type}</span>}
+      </div>
+      {'description' in def && def.description && (
+        <p className={styles.defDescription}>{def.description}</p>
+      )}
+      <details className={styles.defDetails}>
+        <summary>Schema</summary>
+        <pre className={styles.schema}>{JSON.stringify(def, null, 2)}</pre>
+      </details>
+    </li>
   )
 }
