@@ -162,8 +162,9 @@ export default function Search(props: SearchProps) {
           value={value}
           role="combobox"
           aria-autocomplete="list"
+          aria-haspopup="listbox"
           aria-expanded={showPopup}
-          aria-controls={showPopup ? listboxId : undefined}
+          aria-controls={listboxId}
           aria-activedescendant={
             showPopup && state.activeIndex >= 0
               ? `${listboxId}-${state.activeIndex}`
