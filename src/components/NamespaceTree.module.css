@@ -1,0 +1,77 @@
+.root {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.parent {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color, #e5e5e5);
+}
+
+.parentLink {
+  font-weight: 500;
+}
+
+.tree {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  margin: 0;
+}
+
+.subject {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  padding: 0.125rem 0;
+}
+
+.subjectName {
+  font-weight: 600;
+  color: var(--text-primary, #111);
+}
+
+.branch {
+  color: var(--text-muted, #999);
+  user-select: none;
+  white-space: pre;
+}
+
+.children {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.childItem {
+  display: flex;
+  align-items: baseline;
+  padding: 0.125rem 0;
+}
+
+.childBranch {
+  color: var(--text-muted, #999);
+  user-select: none;
+  white-space: pre;
+}
+
+.childLink {
+  text-decoration: none;
+}
+
+.childLink:hover {
+  text-decoration: underline;
+}
+
+.siblingLink {
+  text-decoration: none;
+}
+
+.siblingLink:hover {
+  text-decoration: underline;
+}
