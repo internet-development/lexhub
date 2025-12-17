@@ -1,8 +1,9 @@
 import clsx from '@/common/clsx'
 import styles from '@/components/Search.module.css'
+import { useSearchSuggestions } from '@/components/useSearchSuggestions'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
-import type { KeyboardEvent } from 'react'
+import { useEffect, useId, useReducer, useRef } from 'react'
+import type { FocusEvent, KeyboardEvent } from 'react'
 
 export interface SearchProps {
   value: string
@@ -12,19 +13,51 @@ export interface SearchProps {
   buttonText?: string
 }
 
-type SuggestResponse = {
-  data: string[]
+type State = {
+  isOpen: boolean
+  activeIndex: number
 }
 
-function useDebouncedValue<T>(value: T, delayMs: number): T {
-  const [debounced, setDebounced] = useState(value)
+type Action =
+  | { type: 'open' }
+  | { type: 'close' }
+  | { type: 'resetActive' }
+  | { type: 'setActive'; index: number }
+  | { type: 'moveActive'; delta: 1 | -1; itemCount: number }
 
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delayMs)
-    return () => clearTimeout(timer)
-  }, [value, delayMs])
+const initialState: State = {
+  isOpen: false,
+  activeIndex: -1,
+}
 
-  return debounced
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'open': {
+      return { ...state, isOpen: true }
+    }
+    case 'close': {
+      return { isOpen: false, activeIndex: -1 }
+    }
+    case 'resetActive': {
+      return { ...state, activeIndex: -1 }
+    }
+    case 'setActive': {
+      return { ...state, activeIndex: action.index }
+    }
+    case 'moveActive': {
+      if (action.itemCount <= 0) return state
+
+      const nextBase =
+        state.activeIndex < 0
+          ? action.delta === 1
+            ? 0
+            : action.itemCount - 1
+          : state.activeIndex + action.delta
+
+      const next = Math.max(0, Math.min(nextBase, action.itemCount - 1))
+      return { ...state, activeIndex: next, isOpen: true }
+    }
+  }
 }
 
 export default function Search(props: SearchProps) {
@@ -36,203 +69,178 @@ export default function Search(props: SearchProps) {
     buttonText = 'Search',
   } = props
 
-  const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [showLoading, setShowLoading] = useState(false)
-  const [suggestions, setSuggestions] = useState<string[]>([])
-  const [activeIndex, setActiveIndex] = useState<number>(-1)
-  const [error, setError] = useState<string | null>(null)
-
+  const [state, dispatch] = useReducer(reducer, initialState)
   const inputRef = useRef<HTMLInputElement | null>(null)
-  const requestIdRef = useRef(0)
 
-  const debouncedValue = useDebouncedValue(value.trim(), 200)
-
-  const showSuggestions =
-    open &&
-    (showLoading ||
-      suggestions.length > 0 ||
-      !!error ||
-      debouncedValue.length > 0)
-
-  const suggestionItems = useMemo(() => suggestions, [suggestions])
+  const { suggestions, error, isFetching, showSpinner } = useSearchSuggestions(
+    value,
+    { enabled: state.isOpen, limit: 20 },
+  )
 
   useEffect(() => {
-    // reset selection whenever query changes
-    setActiveIndex(-1)
+    dispatch({ type: 'resetActive' })
+  }, [value])
 
-    if (!open) {
-      setLoading(false)
-      setShowLoading(false)
-      return
+  const inputHasValue = value.trim().length > 0
+
+  const shouldShowPopup = () =>
+    state.isOpen &&
+    (showSpinner || suggestions.length > 0 || !!error || inputHasValue)
+
+  const showPopup = shouldShowPopup()
+
+  const listboxId = useId()
+
+  const close = () => {
+    dispatch({ type: 'close' })
+  }
+
+  const wrapperRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!state.isOpen) return
+
+    const handlePointerDown = (e: PointerEvent) => {
+      const wrapper = wrapperRef.current
+      if (!wrapper) return
+      if (e.target instanceof Node && wrapper.contains(e.target)) return
+      close()
     }
 
-    if (!debouncedValue) {
-      setSuggestions([])
-      setLoading(false)
-      setShowLoading(false)
-      setError(null)
-      return
-    }
+    document.addEventListener('pointerdown', handlePointerDown)
+    return () => document.removeEventListener('pointerdown', handlePointerDown)
+  }, [state.isOpen])
 
-    const requestId = ++requestIdRef.current
+  const commitSelection = (next: string) => {
+    onChange(next)
+    close()
+    inputRef.current?.focus()
+  }
 
-    setLoading(true)
-    setShowLoading(false)
-    setError(null)
-
-    const controller = new AbortController()
-
-    const loadingTimer = setTimeout(() => {
-      if (requestId !== requestIdRef.current) return
-      setShowLoading(true)
-    }, 200)
-
-    fetch(
-      `/api/search/suggest?type=nsid&prefix=${encodeURIComponent(debouncedValue)}&limit=20`,
-      { signal: controller.signal },
-    )
-      .then(async (res) => {
-        if (!res.ok) {
-          throw new Error(`Request failed with ${res.status}`)
-        }
-        return (await res.json()) as SuggestResponse
-      })
-      .then((json) => {
-        if (requestId !== requestIdRef.current) return
-        setSuggestions(json.data)
-      })
-      .catch((e) => {
-        if (controller.signal.aborted) return
-        if (requestId !== requestIdRef.current) return
-        setSuggestions([])
-        setError(e instanceof Error ? e.message : 'Failed to load suggestions')
-      })
-      .finally(() => {
-        clearTimeout(loadingTimer)
-        if (requestId !== requestIdRef.current) return
-        setLoading(false)
-        setShowLoading(false)
-      })
-
-    return () => {
-      clearTimeout(loadingTimer)
-      controller.abort()
-    }
-  }, [debouncedValue, open])
-
-  function handleSubmit() {
-    setOpen(false)
-    onSearch()
+  function handleBlur(e: FocusEvent<HTMLDivElement>) {
+    if (!state.isOpen) return
+    const next = e.relatedTarget
+    if (next instanceof Node && wrapperRef.current?.contains(next)) return
+    close()
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') {
-      if (open && activeIndex >= 0 && activeIndex < suggestionItems.length) {
-        const next = suggestionItems[activeIndex]
-        onChange(next)
-        setOpen(false)
+    switch (e.key) {
+      case 'Enter': {
+        if (
+          showPopup &&
+          state.activeIndex >= 0 &&
+          state.activeIndex < suggestions.length
+        ) {
+          commitSelection(suggestions[state.activeIndex])
+          return
+        }
+
+        e.preventDefault()
+        close()
+        onSearch()
         return
       }
-
-      e.preventDefault()
-      handleSubmit()
-      return
-    }
-
-    if (!open && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
-      setOpen(true)
-      return
-    }
-
-    if (!open) return
-
-    if (e.key === 'Escape') {
-      setOpen(false)
-      return
-    }
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      if (suggestionItems.length === 0) return
-      setActiveIndex((idx) => {
-        const nextIndex = Math.min(idx + 1, suggestionItems.length - 1)
-        return nextIndex
-      })
-      return
-    }
-
-    if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      if (suggestionItems.length === 0) return
-      setActiveIndex((idx) => {
-        const nextIndex = Math.max(idx - 1, 0)
-        return nextIndex
-      })
-      return
+      case 'Escape': {
+        close()
+        return
+      }
+      case 'ArrowDown': {
+        e.preventDefault()
+        dispatch({
+          type: 'moveActive',
+          delta: 1,
+          itemCount: suggestions.length,
+        })
+        return
+      }
+      case 'ArrowUp': {
+        e.preventDefault()
+        dispatch({
+          type: 'moveActive',
+          delta: -1,
+          itemCount: suggestions.length,
+        })
+        return
+      }
+      default: {
+        return
+      }
     }
   }
 
   return (
-    <div className={styles.container}>
+    <form
+      className={styles.container}
+      role="search"
+      onSubmit={(e) => {
+        e.preventDefault()
+        close()
+        onSearch()
+      }}
+    >
       <div
-        className={clsx(styles.wrapper, showSuggestions && styles.wrapperOpen)}
+        ref={wrapperRef}
+        className={clsx(styles.wrapper, showPopup && styles.wrapperOpen)}
+        onBlur={handleBlur}
       >
         <input
           ref={inputRef}
           type="text"
           placeholder={placeholder}
           value={value}
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={showPopup}
+          aria-controls={showPopup ? listboxId : undefined}
+          aria-activedescendant={
+            showPopup && state.activeIndex >= 0
+              ? `${listboxId}-${state.activeIndex}`
+              : undefined
+          }
           onChange={(e) => {
             onChange(e.target.value)
-            setOpen(true)
+            dispatch({ type: 'open' })
           }}
-          onFocus={() => setOpen(true)}
-          onBlur={() => {
-            // Allow click selection to register before closing.
-            setTimeout(() => setOpen(false), 100)
-          }}
+          onFocus={() => dispatch({ type: 'open' })}
           onKeyDown={handleKeyDown}
           className={styles.input}
           autoComplete="off"
           spellCheck={false}
         />
-        <button className={styles.button} onClick={handleSubmit}>
+        <button className={styles.button} type="submit">
           {buttonText}
         </button>
       </div>
 
-      {showSuggestions ? (
-        <div className={styles.suggestions} role="listbox">
+      {showPopup ? (
+        <div className={styles.suggestions} role="listbox" id={listboxId}>
           {error ? <div className={styles.statusRow}>{error}</div> : null}
-          {showLoading ? (
+          {showSpinner ? (
             <div className={styles.statusRow}>Loading...</div>
           ) : null}
-          {!loading && !error && suggestionItems.length === 0 ? (
+          {!isFetching && !error && suggestions.length === 0 ? (
             <div className={styles.statusRow}>No matches</div>
           ) : null}
 
-          {suggestionItems.map((item, index) => (
+          {suggestions.map((item: string, index: number) => (
             <button
+              id={`${listboxId}-${index}`}
               key={item}
               type="button"
-              className={`${styles.suggestion} ${index === activeIndex ? styles.suggestionActive : ''}`}
-              onMouseEnter={() => setActiveIndex(index)}
+              tabIndex={-1}
+              className={`${styles.suggestion} ${index === state.activeIndex ? styles.suggestionActive : ''}`}
+              onMouseEnter={() => dispatch({ type: 'setActive', index })}
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() => {
-                onChange(item)
-                setSuggestions([])
-                setOpen(false)
-                inputRef.current?.focus()
-              }}
+              onClick={() => commitSelection(item)}
               role="option"
-              aria-selected={index === activeIndex}
+              aria-selected={index === state.activeIndex}
             >
               {item}
             </button>
           ))}
         </div>
       ) : null}
-    </div>
+    </form>
   )
 }
