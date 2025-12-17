@@ -21,6 +21,7 @@ import BlueskyIcon from '@/components/BlueskyIcon'
 import GitHubIcon from '@/components/GitHubIcon'
 import AtIcon from '@/components/AtIcon'
 import DocumentIcon from '@/components/DocumentIcon'
+import Logo from '@/components/Logo'
 
 type TabType = 'featured' | 'recent' | 'viewed'
 
@@ -93,7 +94,7 @@ export default function HomePage() {
     <div className={styles.container}>
       <header className={styles.header}>
         <div className={styles.headerContent}>
-          <h1 className={styles.title}>LexHub</h1>
+          <Logo className={styles.title} />
           <div className={styles.socialLinks}>
             <a
               href="https://bsky.app"
