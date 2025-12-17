@@ -14,6 +14,17 @@
   font-weight: 500;
 }
 
+.rootHeader {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color, #e5e5e5);
+}
+
+.rootName {
+  font-weight: 600;
+  color: var(--text-primary, #111);
+}
+
 .tree {
   list-style: none;
   padding: 0;

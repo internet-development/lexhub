@@ -17,11 +17,44 @@ export function NamespaceTree({
   siblings,
   children,
 }: NamespaceTreeProps) {
-  // Sort all items: subject first, then sorted siblings
+  // Sort siblings alphabetically
   const sortedSiblings = [...siblings].sort((a, b) =>
     a.segment.localeCompare(b.segment),
   )
 
+  // For 2-segment prefixes (no parent), show a flat tree with full path as header
+  const isRootNamespace = !parent && sortedSiblings.length === 0
+
+  if (isRootNamespace) {
+    return (
+      <nav className={styles.root} aria-label="Namespace navigation">
+        <div className={styles.rootHeader}>
+          <span className={styles.rootName}>{subjectPath}</span>
+        </div>
+
+        {children.length > 0 && (
+          <ul className={styles.tree}>
+            {children.map((child, index) => (
+              <li key={child.segment} className={styles.item}>
+                <span className={styles.branch}>
+                  {index === children.length - 1 ? '└─' : '├─'}
+                </span>
+                <Link
+                  href={`/${child.fullPath}`}
+                  variant="default"
+                  className={styles.childLink}
+                >
+                  {child.segment}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </nav>
+    )
+  }
+
+  // For deeper paths, show parent > subject with children > siblings
   return (
     <nav className={styles.root} aria-label="Namespace navigation">
       {parent && (
