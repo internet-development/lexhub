@@ -32,28 +32,22 @@ const initialState: State = {
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case 'open': {
+    case 'open':
       return { ...state, isOpen: true }
-    }
-    case 'close': {
+    case 'close':
       return { isOpen: false, activeIndex: -1 }
-    }
-    case 'resetActive': {
+    case 'resetActive':
       return { ...state, activeIndex: -1 }
-    }
-    case 'setActive': {
+    case 'setActive':
       return { ...state, activeIndex: action.index }
-    }
     case 'moveActive': {
       if (action.itemCount <= 0) return state
-
       const nextBase =
         state.activeIndex < 0
           ? action.delta === 1
             ? 0
             : action.itemCount - 1
           : state.activeIndex + action.delta
-
       const next = Math.max(0, Math.min(nextBase, action.itemCount - 1))
       return { ...state, activeIndex: next, isOpen: true }
     }
@@ -70,23 +64,21 @@ export default function Search(props: SearchProps) {
   } = props
 
   const listboxId = useId()
+  const inputRef = useRef<HTMLInputElement | null>(null)
 
   const [state, dispatch] = useReducer(reducer, initialState)
   const close = () => dispatch({ type: 'close' })
   const open = () => dispatch({ type: 'open' })
-  const resetActive = () => dispatch({ type: 'resetActive' })
 
-  useEffect(resetActive, [value])
+  useEffect(() => {
+    dispatch({ type: 'resetActive' })
+  }, [value])
 
-  const { suggestions, error, showSpinner, status } = useSearchSuggestions(
-    value,
-    {
-      enabled: state.isOpen,
-      limit: 20,
-    },
-  )
+  const { suggestions, isLoading, error } = useSearchSuggestions(value, {
+    enabled: state.isOpen,
+    limit: 20,
+  })
 
-  const inputRef = useRef<HTMLInputElement | null>(null)
   const commitSelection = (next: string) => {
     onChange(next)
     close()
@@ -94,13 +86,11 @@ export default function Search(props: SearchProps) {
   }
 
   const inputHasValue = value.trim().length > 0
-  const showPopup =
-    state.isOpen &&
-    (showSpinner || suggestions.length > 0 || !!error || inputHasValue)
+  const showPopup = state.isOpen && inputHasValue
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     switch (e.key) {
-      case 'Enter': {
+      case 'Enter':
         if (
           showPopup &&
           state.activeIndex >= 0 &&
@@ -109,17 +99,14 @@ export default function Search(props: SearchProps) {
           commitSelection(suggestions[state.activeIndex])
           return
         }
-
         e.preventDefault()
         close()
         onSearch()
         return
-      }
-      case 'Escape': {
+      case 'Escape':
         close()
         return
-      }
-      case 'ArrowDown': {
+      case 'ArrowDown':
         e.preventDefault()
         dispatch({
           type: 'moveActive',
@@ -127,8 +114,7 @@ export default function Search(props: SearchProps) {
           itemCount: suggestions.length,
         })
         return
-      }
-      case 'ArrowUp': {
+      case 'ArrowUp':
         e.preventDefault()
         dispatch({
           type: 'moveActive',
@@ -136,10 +122,6 @@ export default function Search(props: SearchProps) {
           itemCount: suggestions.length,
         })
         return
-      }
-      default: {
-        return
-      }
     }
   }
 
@@ -185,26 +167,28 @@ export default function Search(props: SearchProps) {
         </button>
       </div>
 
-      {showPopup ? (
+      {showPopup && (
         <div className={styles.suggestions} role="listbox" id={listboxId}>
-          {error ? <div className={styles.statusRow}>{error}</div> : null}
-          {!error && status === 'loading' && !showSpinner ? (
-            <div className={styles.statusRow}>Searching...</div>
-          ) : null}
-          {showSpinner ? (
-            <div className={styles.statusRow}>Loading...</div>
-          ) : null}
-          {!error && status === 'success' && suggestions.length === 0 ? (
-            <div className={styles.statusRow}>No matches</div>
-          ) : null}
+          {error && <div className={styles.statusRow}>{error}</div>}
 
-          {suggestions.map((item: string, index: number) => (
+          {!error && isLoading && suggestions.length === 0 && (
+            <div className={styles.statusRow}>Loading...</div>
+          )}
+
+          {!error && !isLoading && suggestions.length === 0 && (
+            <div className={styles.statusRow}>No matches</div>
+          )}
+
+          {suggestions.map((item, index) => (
             <button
               id={`${listboxId}-${index}`}
               key={item}
               type="button"
               tabIndex={-1}
-              className={`${styles.suggestion} ${index === state.activeIndex ? styles.suggestionActive : ''}`}
+              className={clsx(
+                styles.suggestion,
+                index === state.activeIndex && styles.suggestionActive,
+              )}
               onMouseEnter={() => dispatch({ type: 'setActive', index })}
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => commitSelection(item)}
@@ -215,7 +199,7 @@ export default function Search(props: SearchProps) {
             </button>
           ))}
         </div>
-      ) : null}
+      )}
     </form>
   )
 }
