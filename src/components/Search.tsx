@@ -95,15 +95,15 @@ export default function Search(props: SearchProps) {
     dispatch({ type: 'close' })
   }
 
-  const wrapperRef = useRef<HTMLDivElement | null>(null)
+  const containerRef = useRef<HTMLFormElement | null>(null)
 
   useEffect(() => {
     if (!state.isOpen) return
 
     const handlePointerDown = (e: PointerEvent) => {
-      const wrapper = wrapperRef.current
-      if (!wrapper) return
-      if (e.target instanceof Node && wrapper.contains(e.target)) return
+      const container = containerRef.current
+      if (!container) return
+      if (e.target instanceof Node && container.contains(e.target)) return
       close()
     }
 
@@ -120,7 +120,7 @@ export default function Search(props: SearchProps) {
   function handleBlur(e: FocusEvent<HTMLDivElement>) {
     if (!state.isOpen) return
     const next = e.relatedTarget
-    if (next instanceof Node && wrapperRef.current?.contains(next)) return
+    if (next instanceof Node && containerRef.current?.contains(next)) return
     close()
   }
 
@@ -171,6 +171,7 @@ export default function Search(props: SearchProps) {
 
   return (
     <form
+      ref={containerRef}
       className={styles.container}
       role="search"
       onSubmit={(e) => {
@@ -180,7 +181,6 @@ export default function Search(props: SearchProps) {
       }}
     >
       <div
-        ref={wrapperRef}
         className={clsx(styles.wrapper, showPopup && styles.wrapperOpen)}
         onBlur={handleBlur}
       >
