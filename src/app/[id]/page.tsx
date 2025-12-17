@@ -5,15 +5,11 @@ import {
   getTreeData,
   getNamespaceData,
   hasLexiconsUnderPrefix,
-  type LexiconDoc,
   type TreeData,
 } from '@/db/queries'
 import { isValidNamespacePrefix } from '@/util/nsid'
 import { LexiconPage } from '@/components/LexiconPage'
-import {
-  NamespacePage,
-  type NamespacePageProps,
-} from '@/components/NamespacePage'
+import { NamespacePage } from '@/components/NamespacePage'
 import { NamespaceTree } from '@/components/NamespaceTree'
 import styles from './page.module.css'
 
@@ -21,13 +17,15 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-interface LayoutProps {
+function PageLayout({
+  id,
+  treeData,
+  children,
+}: {
   id: string
   treeData: TreeData
   children: React.ReactNode
-}
-
-function PageLayout({ id, treeData, children }: LayoutProps) {
+}) {
   return (
     <div className={styles.layout}>
       <aside className={styles.sidebar}>
@@ -38,32 +36,21 @@ function PageLayout({ id, treeData, children }: LayoutProps) {
   )
 }
 
-interface LexiconPageData {
-  type: 'lexicon'
-  lexicon: LexiconDoc
-  treeData: TreeData
-}
-
-interface NamespacePageData {
-  type: 'namespace'
-  namespaceData: NamespacePageProps
-  treeData: TreeData
-}
-
-type PageData = LexiconPageData | NamespacePageData
-
-async function getPageData(id: string): Promise<PageData | null> {
-  // Case 1: Valid NSID - check for lexicon document
+async function renderPage(id: string): Promise<React.ReactNode | null> {
+  // Check for lexicon document first
   if (isValidNsid(id)) {
     const lexicon = await getLexiconByNsid(id)
-
     if (lexicon) {
       const treeData = await getTreeData(id, lexicon)
-      return { type: 'lexicon', lexicon, treeData }
+      return (
+        <PageLayout id={id} treeData={treeData}>
+          <LexiconPage lexicon={lexicon} />
+        </PageLayout>
+      )
     }
   }
 
-  // Case 2: Valid namespace prefix or NSID without a lexicon
+  // Check for namespace prefix
   const isValidPath = isValidNsid(id) || isValidNamespacePrefix(id)
   if (!isValidPath) return null
 
@@ -75,32 +62,20 @@ async function getPageData(id: string): Promise<PageData | null> {
     getNamespaceData(id),
   ])
 
-  return {
-    type: 'namespace',
-    namespaceData: { prefix: id, children },
-    treeData,
-  }
+  return (
+    <PageLayout id={id} treeData={treeData}>
+      <NamespacePage prefix={id} children={children} />
+    </PageLayout>
+  )
 }
 
 export default async function Page({ params }: PageProps) {
   const { id } = await params
-  const data = await getPageData(id)
+  const content = await renderPage(id)
 
-  if (!data) {
+  if (!content) {
     notFound()
   }
 
-  if (data.type === 'lexicon') {
-    return (
-      <PageLayout id={id} treeData={data.treeData}>
-        <LexiconPage lexicon={data.lexicon} />
-      </PageLayout>
-    )
-  }
-
-  return (
-    <PageLayout id={id} treeData={data.treeData}>
-      <NamespacePage {...data.namespaceData} />
-    </PageLayout>
-  )
+  return content
 }
