@@ -10,10 +10,6 @@
   border-bottom: 1px solid var(--border-color, #e5e5e5);
 }
 
-.parentLink {
-  font-weight: 500;
-}
-
 .rootHeader {
   margin-bottom: 0.5rem;
   padding-bottom: 0.5rem;
@@ -65,24 +61,10 @@
   padding: 0.125rem 0;
 }
 
-.childBranch {
-  color: var(--text-muted, #999);
-  user-select: none;
-  white-space: pre;
-}
-
-.childLink {
+.link {
   text-decoration: none;
 }
 
-.childLink:hover {
-  text-decoration: underline;
-}
-
-.siblingLink {
-  text-decoration: none;
-}
-
-.siblingLink:hover {
+.link:hover {
   text-decoration: underline;
 }

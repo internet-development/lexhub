@@ -10,6 +10,28 @@ export interface NamespaceTreeProps {
   children: TreeNode[]
 }
 
+function TreeBranch({ isLast, indent }: { isLast: boolean; indent?: string }) {
+  return (
+    <span className={styles.branch}>
+      {indent}
+      {isLast ? '└─' : '├─'}
+    </span>
+  )
+}
+
+interface TreeItemLinkProps {
+  node: TreeNode
+  variant?: 'default' | 'muted'
+}
+
+function TreeItemLink({ node, variant = 'default' }: TreeItemLinkProps) {
+  return (
+    <Link href={`/${node.fullPath}`} variant={variant} className={styles.link}>
+      {node.segment}
+    </Link>
+  )
+}
+
 export function NamespaceTree({
   parent,
   subject,
@@ -17,108 +39,61 @@ export function NamespaceTree({
   siblings,
   children,
 }: NamespaceTreeProps) {
-  // For 2-segment prefixes (no parent), show a flat tree with full path as header
   const isRootNamespace = !parent && siblings.length === 0
+  const hasSiblings = siblings.length > 0
 
-  if (isRootNamespace) {
-    return (
-      <nav className={styles.root} aria-label="Namespace navigation">
+  return (
+    <nav className={styles.root} aria-label="Namespace navigation">
+      {isRootNamespace ? (
         <div className={styles.rootHeader}>
           <span className={styles.rootName}>{subjectPath}</span>
         </div>
-
-        {children.length > 0 && (
-          <ul className={styles.tree}>
-            {children.map((child, index) => (
-              <li key={child.segment} className={styles.item}>
-                <span className={styles.branch}>
-                  {index === children.length - 1 ? '└─' : '├─'}
-                </span>
-                <Link
-                  href={`/${child.fullPath}`}
-                  variant="default"
-                  className={styles.childLink}
-                >
-                  {child.segment}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </nav>
-    )
-  }
-
-  // For deeper paths, show parent > subject with children > siblings
-  return (
-    <nav className={styles.root} aria-label="Namespace navigation">
-      {parent && (
-        <div className={styles.parent}>
-          <Link
-            href={`/${parent}`}
-            variant="muted"
-            className={styles.parentLink}
-          >
-            {parent}
-          </Link>
-        </div>
+      ) : (
+        parent && (
+          <div className={styles.parent}>
+            <Link href={`/${parent}`} variant="muted" className={styles.link}>
+              {parent}
+            </Link>
+          </div>
+        )
       )}
 
       <ul className={styles.tree}>
-        {/* Subject with its children */}
-        <li className={styles.item}>
-          <div className={styles.subject}>
-            <span className={styles.branch}>
-              {siblings.length > 0 ? '├─' : '└─'}
-            </span>
-            <span className={styles.subjectName}>{subject}</span>
-          </div>
+        {!isRootNamespace && (
+          <li className={styles.item}>
+            <div className={styles.subject}>
+              <TreeBranch isLast={!hasSiblings} />
+              <span className={styles.subjectName}>{subject}</span>
+            </div>
 
-          {children.length > 0 && (
-            <ul className={styles.children}>
-              {children.map((child, index) => (
-                <li key={child.segment} className={styles.childItem}>
-                  <span className={styles.childBranch}>
-                    {siblings.length > 0 ? '│  ' : '   '}
-                    {index === children.length - 1 ? '└─' : '├─'}
-                  </span>
-                  {child.fullPath.includes('#') ? (
-                    // Schema def - link to anchor
-                    <Link
-                      href={`/${subjectPath}#${child.segment}`}
-                      variant="default"
-                      className={styles.childLink}
-                    >
-                      {child.segment}
-                    </Link>
-                  ) : (
-                    <Link
-                      href={`/${child.fullPath}`}
-                      variant="default"
-                      className={styles.childLink}
-                    >
-                      {child.segment}
-                    </Link>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-        </li>
+            {children.length > 0 && (
+              <ul className={styles.children}>
+                {children.map((child, i) => (
+                  <li key={child.segment} className={styles.childItem}>
+                    <TreeBranch
+                      isLast={i === children.length - 1}
+                      indent={hasSiblings ? '│  ' : '   '}
+                    />
+                    <TreeItemLink node={child} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        )}
 
-        {/* Siblings (no children shown) */}
-        {siblings.map((sibling, index) => (
+        {isRootNamespace &&
+          children.map((child, i) => (
+            <li key={child.segment} className={styles.item}>
+              <TreeBranch isLast={i === children.length - 1} />
+              <TreeItemLink node={child} />
+            </li>
+          ))}
+
+        {siblings.map((sibling, i) => (
           <li key={sibling.segment} className={styles.item}>
-            <span className={styles.branch}>
-              {index === siblings.length - 1 ? '└─' : '├─'}
-            </span>
-            <Link
-              href={`/${sibling.fullPath}`}
-              variant="muted"
-              className={styles.siblingLink}
-            >
-              {sibling.segment}
-            </Link>
+            <TreeBranch isLast={i === siblings.length - 1} />
+            <TreeItemLink node={sibling} variant="muted" />
           </li>
         ))}
       </ul>
