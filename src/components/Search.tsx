@@ -69,8 +69,14 @@ export default function Search(props: SearchProps) {
     buttonText = 'Search',
   } = props
 
+  const listboxId = useId()
+
   const [state, dispatch] = useReducer(reducer, initialState)
-  const inputRef = useRef<HTMLInputElement | null>(null)
+  const close = () => dispatch({ type: 'close' })
+  const open = () => dispatch({ type: 'open' })
+  const resetActive = () => dispatch({ type: 'resetActive' })
+
+  useEffect(resetActive, [value])
 
   const { suggestions, error, showSpinner, status } = useSearchSuggestions(
     value,
@@ -80,27 +86,17 @@ export default function Search(props: SearchProps) {
     },
   )
 
-  useEffect(() => {
-    dispatch({ type: 'resetActive' })
-  }, [value])
-
-  const inputHasValue = value.trim().length > 0
-
-  const showPopup =
-    state.isOpen &&
-    (showSpinner || suggestions.length > 0 || !!error || inputHasValue)
-
-  const listboxId = useId()
-
-  const close = () => {
-    dispatch({ type: 'close' })
-  }
-
+  const inputRef = useRef<HTMLInputElement | null>(null)
   const commitSelection = (next: string) => {
     onChange(next)
     close()
     inputRef.current?.focus()
   }
+
+  const inputHasValue = value.trim().length > 0
+  const showPopup =
+    state.isOpen &&
+    (showSpinner || suggestions.length > 0 || !!error || inputHasValue)
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     switch (e.key) {
@@ -175,10 +171,10 @@ export default function Search(props: SearchProps) {
           }
           onChange={(e) => {
             onChange(e.target.value)
-            dispatch({ type: 'open' })
+            open()
           }}
-          onFocus={() => dispatch({ type: 'open' })}
-          onBlur={() => close()}
+          onFocus={open}
+          onBlur={close}
           onKeyDown={handleKeyDown}
           className={styles.input}
           autoComplete="off"
