@@ -83,11 +83,9 @@ export default function Search(props: SearchProps) {
 
   const inputHasValue = value.trim().length > 0
 
-  const shouldShowPopup = () =>
+  const showPopup =
     state.isOpen &&
     (showSpinner || suggestions.length > 0 || !!error || inputHasValue)
-
-  const showPopup = shouldShowPopup()
 
   const listboxId = useId()
 
