@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 type SuggestResponse = {
   data: string[]
@@ -25,7 +25,6 @@ export type UseSearchSuggestionsResult = {
   query: string
   suggestions: string[]
   error: string | null
-  isFetching: boolean
   showSpinner: boolean
   status: UseSearchSuggestionsStatus
 }
@@ -46,51 +45,44 @@ export function useSearchSuggestions(
     spinnerDelayMs = 200,
   } = options
 
-  const normalized = useMemo(() => query.trim(), [query])
+  const normalized = query.trim()
   const debounced = useDebouncedValue(normalized, debounceMs)
 
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
-  const [isFetching, setIsFetching] = useState(false)
   const [showSpinner, setShowSpinner] = useState(false)
 
-  const requestIdRef = useRef(0)
+  const controllerRef = useRef<AbortController | null>(null)
 
   const [status, setStatus] = useState<UseSearchSuggestionsStatus>('idle')
 
-  useEffect(() => {
-    requestIdRef.current++
-
-    if (!enabled || !normalized) {
-      setSuggestions([])
-      setError(null)
-      setIsFetching(false)
-      setShowSpinner(false)
-      setStatus('idle')
-      return
-    }
+  const reset = useCallback(() => {
+    controllerRef.current?.abort()
+    controllerRef.current = null
 
     setSuggestions([])
     setError(null)
-    setIsFetching(false)
     setShowSpinner(false)
     setStatus('idle')
-  }, [enabled, normalized])
+  }, [])
 
   useEffect(() => {
-    if (!enabled || !debounced) return
+    reset()
+  }, [enabled, normalized, reset])
 
-    const requestId = ++requestIdRef.current
+  useEffect(() => {
+    if (!enabled || !normalized || !debounced) return
 
-    setIsFetching(true)
+    const controller = new AbortController()
+    controllerRef.current?.abort()
+    controllerRef.current = controller
+
     setShowSpinner(false)
     setError(null)
     setStatus('loading')
 
-    const controller = new AbortController()
-
     const spinnerTimer = setTimeout(() => {
-      if (requestId !== requestIdRef.current) return
+      if (controller.signal.aborted) return
       setShowSpinner(true)
     }, spinnerDelayMs)
 
@@ -105,35 +97,33 @@ export function useSearchSuggestions(
         return (await res.json()) as SuggestResponse
       })
       .then((json) => {
-        if (requestId !== requestIdRef.current) return
+        if (controller.signal.aborted) return
         setSuggestions(json.data)
         setStatus('success')
       })
       .catch((e) => {
         if (controller.signal.aborted) return
-        if (requestId !== requestIdRef.current) return
         setSuggestions([])
         setError(e instanceof Error ? e.message : 'Failed to load suggestions')
         setStatus('error')
       })
       .finally(() => {
         clearTimeout(spinnerTimer)
-        if (requestId !== requestIdRef.current) return
-        setIsFetching(false)
+        if (controller.signal.aborted) return
         setShowSpinner(false)
+        controllerRef.current = null
       })
 
     return () => {
       clearTimeout(spinnerTimer)
       controller.abort()
     }
-  }, [debounced, enabled, limit, spinnerDelayMs])
+  }, [debounced, enabled, limit, normalized, spinnerDelayMs])
 
   return {
     query: debounced,
     suggestions,
     error,
-    isFetching,
     showSpinner,
     status,
   }
