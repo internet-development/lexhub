@@ -17,13 +17,8 @@ export function NamespaceTree({
   siblings,
   children,
 }: NamespaceTreeProps) {
-  // Sort siblings alphabetically
-  const sortedSiblings = [...siblings].sort((a, b) =>
-    a.segment.localeCompare(b.segment),
-  )
-
   // For 2-segment prefixes (no parent), show a flat tree with full path as header
-  const isRootNamespace = !parent && sortedSiblings.length === 0
+  const isRootNamespace = !parent && siblings.length === 0
 
   if (isRootNamespace) {
     return (
@@ -74,7 +69,7 @@ export function NamespaceTree({
         <li className={styles.item}>
           <div className={styles.subject}>
             <span className={styles.branch}>
-              {sortedSiblings.length > 0 ? '├─' : '└─'}
+              {siblings.length > 0 ? '├─' : '└─'}
             </span>
             <span className={styles.subjectName}>{subject}</span>
           </div>
@@ -84,7 +79,7 @@ export function NamespaceTree({
               {children.map((child, index) => (
                 <li key={child.segment} className={styles.childItem}>
                   <span className={styles.childBranch}>
-                    {sortedSiblings.length > 0 ? '│  ' : '   '}
+                    {siblings.length > 0 ? '│  ' : '   '}
                     {index === children.length - 1 ? '└─' : '├─'}
                   </span>
                   {child.fullPath.includes('#') ? (
@@ -112,10 +107,10 @@ export function NamespaceTree({
         </li>
 
         {/* Siblings (no children shown) */}
-        {sortedSiblings.map((sibling, index) => (
+        {siblings.map((sibling, index) => (
           <li key={sibling.segment} className={styles.item}>
             <span className={styles.branch}>
-              {index === sortedSiblings.length - 1 ? '└─' : '├─'}
+              {index === siblings.length - 1 ? '└─' : '├─'}
             </span>
             <Link
               href={`/${sibling.fullPath}`}

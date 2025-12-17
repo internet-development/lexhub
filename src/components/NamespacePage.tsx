@@ -37,7 +37,9 @@ export function NamespacePage({ prefix, children }: NamespacePageProps) {
             <TableHead>Type</TableHead>
             <TableHead>Lexicons</TableHead>
             <TableHead>Description</TableHead>
-            <TableHead></TableHead>
+            <TableHead>
+              <span className="visually-hidden">Actions</span>
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

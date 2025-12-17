@@ -7,7 +7,6 @@ export type { LexiconDoc }
 
 /**
  * Fetches the latest lexicon document by NSID
- * Returns null if no lexicon exists for this NSID
  */
 export async function getLexiconByNsid(
   nsid: string,
@@ -37,38 +36,26 @@ export async function hasLexiconsUnderPrefix(prefix: string): Promise<boolean> {
 }
 
 /**
- * Gets direct children of a namespace prefix (next segment only, deduplicated)
- * Returns segment names and whether they are lexicons or just namespace prefixes
- *
- * @example
- * getDirectChildren('app.bsky') → [
- *   { segment: 'actor', isLexicon: false },
- *   { segment: 'feed', isLexicon: false },
- *   ...
- * ]
+ * Gets direct children segments of a namespace prefix
  */
-export async function getDirectChildren(
+async function getDirectChildren(
   prefix: string,
 ): Promise<Array<{ segment: string; isLexicon: boolean }>> {
-  const prefixLength = prefix.split('.').length
+  const prefixDepth = prefix.split('.').length
 
-  // Query to extract the next segment after the prefix and check if it's a full NSID
   const result: Array<{ segment: string; is_lexicon: boolean }> =
-    await db.execute(
-      sql`
+    await db.execute(sql`
       SELECT DISTINCT
-        SPLIT_PART(nsid, '.', ${prefixLength + 1}) as segment,
-        -- Check if this exact path (prefix + segment) is a lexicon
+        SPLIT_PART(nsid, '.', ${prefixDepth + 1}) as segment,
         EXISTS (
           SELECT 1 FROM valid_lexicons v2
-          WHERE v2.nsid = ${prefix} || '.' || SPLIT_PART(valid_lexicons.nsid, '.', ${prefixLength + 1})
+          WHERE v2.nsid = ${prefix} || '.' || SPLIT_PART(valid_lexicons.nsid, '.', ${prefixDepth + 1})
         ) as is_lexicon
       FROM valid_lexicons
       WHERE nsid LIKE ${prefix + '.%'}
-        AND SPLIT_PART(nsid, '.', ${prefixLength + 1}) != ''
+        AND SPLIT_PART(nsid, '.', ${prefixDepth + 1}) != ''
       ORDER BY segment
-    `,
-    )
+    `)
 
   return result.map((row) => ({
     segment: row.segment,
@@ -90,11 +77,9 @@ export interface TreeData {
 }
 
 /**
- * Gets tree data for sidebar navigation
- * Returns parent, siblings (excluding subject), and children
- *
- * For namespace subjects: children are direct namespace/lexicon children
- * For lexicon subjects: children are schema definition names from the lexicon
+ * Gets tree data for sidebar navigation.
+ * For lexicons: children are schema definition names.
+ * For namespaces: children are direct namespace/lexicon children.
  */
 export async function getTreeData(
   subjectPath: string,
@@ -104,106 +89,108 @@ export async function getTreeData(
   const subject = segments[segments.length - 1]
   const parent = segments.length > 2 ? segments.slice(0, -1).join('.') : null
 
-  // Get siblings (other children of parent, excluding subject)
-  let siblings: TreeNode[] = []
+  // For lexicons, children come from schema defs (no DB query needed)
+  if (lexiconDoc) {
+    const defs = lexiconDoc.defs ?? {}
+    const children: TreeNode[] = Object.keys(defs).map((defName) => ({
+      segment: defName,
+      isLexicon: false,
+      fullPath: `${subjectPath}#${defName}`,
+    }))
+
+    // Only need to fetch siblings if we have a parent
+    let siblings: TreeNode[] = []
+    if (parent) {
+      const parentChildren = await getDirectChildren(parent)
+      siblings = parentChildren
+        .filter((child) => child.segment !== subject)
+        .map((child) => ({
+          ...child,
+          fullPath: `${parent}.${child.segment}`,
+        }))
+    }
+
+    return { parent, subject, siblings, children }
+  }
+
+  // For namespaces, fetch siblings and children in parallel if we have a parent
   if (parent) {
-    const parentChildren = await getDirectChildren(parent)
-    siblings = parentChildren
+    const [parentChildren, subjectChildren] = await Promise.all([
+      getDirectChildren(parent),
+      getDirectChildren(subjectPath),
+    ])
+
+    const siblings = parentChildren
       .filter((child) => child.segment !== subject)
       .map((child) => ({
-        segment: child.segment,
-        isLexicon: child.isLexicon,
+        ...child,
         fullPath: `${parent}.${child.segment}`,
       }))
-  }
 
-  // Get children
-  let children: TreeNode[] = []
-
-  if (lexiconDoc) {
-    // For lexicons, children are schema definition names
-    const defs = lexiconDoc.defs || {}
-    children = Object.keys(defs)
-      .sort()
-      .map((defName) => ({
-        segment: defName,
-        isLexicon: false, // Schema defs aren't lexicons
-        fullPath: `${subjectPath}#${defName}`, // Use hash for def anchors
-      }))
-  } else {
-    // For namespaces, children are direct children
-    const directChildren = await getDirectChildren(subjectPath)
-    children = directChildren.map((child) => ({
-      segment: child.segment,
-      isLexicon: child.isLexicon,
+    const children = subjectChildren.map((child) => ({
+      ...child,
       fullPath: `${subjectPath}.${child.segment}`,
     }))
+
+    return { parent, subject, siblings, children }
   }
 
-  return {
-    parent,
-    subject,
-    siblings,
-    children,
-  }
+  // Root namespace (2 segments) - no parent, no siblings
+  const subjectChildren = await getDirectChildren(subjectPath)
+  const children = subjectChildren.map((child) => ({
+    ...child,
+    fullPath: `${subjectPath}.${child.segment}`,
+  }))
+
+  return { parent: null, subject, siblings: [], children }
+}
+
+export interface NamespaceChild {
+  segment: string
+  fullPath: string
+  isLexicon: boolean
+  lexiconCount: number
+  description: string | null
 }
 
 /**
  * Gets namespace data for rendering the namespace page
- * Returns child namespaces with their lexicon counts
  */
-export async function getNamespaceData(prefix: string): Promise<{
-  children: Array<{
-    segment: string
-    fullPath: string
-    isLexicon: boolean
-    lexiconCount: number
-    description: string | null
-  }>
-}> {
-  const prefixLength = prefix.split('.').length
+export async function getNamespaceData(
+  prefix: string,
+): Promise<{ children: NamespaceChild[] }> {
+  const prefixDepth = prefix.split('.').length
 
-  // Get children with counts
   const result: Array<{
     segment: string
     is_lexicon: boolean
     lexicon_count: number
     description: string | null
-  }> = await db.execute(
-    sql`
-      WITH child_segments AS (
-        SELECT DISTINCT
-          SPLIT_PART(nsid, '.', ${prefixLength + 1}) as segment
-        FROM valid_lexicons
-        WHERE nsid LIKE ${prefix + '.%'}
-          AND SPLIT_PART(nsid, '.', ${prefixLength + 1}) != ''
-      )
-      SELECT
-        cs.segment,
-        -- Check if this exact path is a lexicon
-        EXISTS (
-          SELECT 1 FROM valid_lexicons
-          WHERE nsid = ${prefix} || '.' || cs.segment
-        ) as is_lexicon,
-        -- Count all lexicons under this path
-        (
-          SELECT COUNT(DISTINCT nsid)
-          FROM valid_lexicons
-          WHERE nsid LIKE ${prefix} || '.' || cs.segment || '.%'
-             OR nsid = ${prefix} || '.' || cs.segment
-        )::int as lexicon_count,
-        -- Get description if it's a lexicon
-        (
-          SELECT data->>'description'
-          FROM valid_lexicons
-          WHERE nsid = ${prefix} || '.' || cs.segment
-          ORDER BY ingested_at DESC
-          LIMIT 1
-        ) as description
-      FROM child_segments cs
-      ORDER BY cs.segment
-    `,
-  )
+  }> = await db.execute(sql`
+    WITH child_segments AS (
+      SELECT DISTINCT SPLIT_PART(nsid, '.', ${prefixDepth + 1}) as segment
+      FROM valid_lexicons
+      WHERE nsid LIKE ${prefix + '.%'}
+        AND SPLIT_PART(nsid, '.', ${prefixDepth + 1}) != ''
+    )
+    SELECT
+      cs.segment,
+      EXISTS (
+        SELECT 1 FROM valid_lexicons WHERE nsid = ${prefix} || '.' || cs.segment
+      ) as is_lexicon,
+      (
+        SELECT COUNT(DISTINCT nsid)::int FROM valid_lexicons
+        WHERE nsid LIKE ${prefix} || '.' || cs.segment || '.%'
+           OR nsid = ${prefix} || '.' || cs.segment
+      ) as lexicon_count,
+      (
+        SELECT data->>'description' FROM valid_lexicons
+        WHERE nsid = ${prefix} || '.' || cs.segment
+        ORDER BY ingested_at DESC LIMIT 1
+      ) as description
+    FROM child_segments cs
+    ORDER BY cs.segment
+  `)
 
   return {
     children: result.map((row) => ({
