@@ -1,3 +1,7 @@
+.container {
+  position: relative;
+}
+
 .wrapper {
   display: flex;
   align-items: center;
@@ -6,12 +10,20 @@
   border: 0.0625rem solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
-  padding: var(--space-1);
+  padding: var(--space-2);
+
+  transition: border-radius var(--transition-fast);
+
+  &.wrapperOpen {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
 }
 
 .input {
   flex: 1;
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) 0;
+  margin-left: var(--space-2);
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
   border: none;
@@ -24,11 +36,11 @@
 }
 
 .button {
-  padding: var(--space-3) var(--space-8);
+  padding: var(--space-2) var(--space-8);
   background-color: var(--color-primary);
   color: var(--color-background);
   font-weight: var(--font-weight-medium);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
   transition: background-color var(--transition-fast);
@@ -37,4 +49,44 @@
 
 .button:hover {
   background-color: var(--color-primary-hover);
+}
+
+.suggestions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  background: var(--color-background);
+  border: 0.0625rem solid var(--color-border);
+  border-top: none;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 0 var(--space-4);
+  z-index: 10;
+}
+
+.suggestion {
+  width: 100%;
+  text-align: left;
+  padding: var(--space-2) 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+
+  &:not(:last-child) {
+    border-bottom: 0.0625rem solid var(--color-border);
+  }
+}
+
+.suggestion:hover,
+.suggestionActive {
+  text-decoration: underline;
+}
+
+.statusRow {
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text-light);
+  font-size: var(--font-size-sm);
 }
