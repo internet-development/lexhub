@@ -188,7 +188,7 @@ export default function Search(props: SearchProps) {
       {showPopup ? (
         <div className={styles.suggestions} role="listbox" id={listboxId}>
           {error ? <div className={styles.statusRow}>{error}</div> : null}
-          {!error && status === 'idle' && inputHasValue ? (
+          {!error && status === 'loading' && !showSpinner ? (
             <div className={styles.statusRow}>Searching...</div>
           ) : null}
           {showSpinner ? (

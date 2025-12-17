@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 type SuggestResponse = {
   data: string[]
@@ -56,7 +56,7 @@ export function useSearchSuggestions(
 
   const [status, setStatus] = useState<UseSearchSuggestionsStatus>('idle')
 
-  const reset = useCallback(() => {
+  const reset = () => {
     controllerRef.current?.abort()
     controllerRef.current = null
 
@@ -64,11 +64,15 @@ export function useSearchSuggestions(
     setError(null)
     setShowSpinner(false)
     setStatus('idle')
-  }, [])
+  }
 
   useEffect(() => {
     reset()
-  }, [enabled, normalized, reset])
+
+    if (!enabled || !normalized) return
+
+    setStatus('loading')
+  }, [enabled, normalized])
 
   useEffect(() => {
     if (!enabled || !normalized || !debounced) return
