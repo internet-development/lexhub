@@ -3,7 +3,7 @@ import styles from '@/components/Search.module.css'
 import { useSearchSuggestions } from '@/components/useSearchSuggestions'
 
 import { useEffect, useId, useReducer, useRef } from 'react'
-import type { FocusEvent, KeyboardEvent } from 'react'
+import type { KeyboardEvent } from 'react'
 
 export interface SearchProps {
   value: string
@@ -95,33 +95,10 @@ export default function Search(props: SearchProps) {
     dispatch({ type: 'close' })
   }
 
-  const containerRef = useRef<HTMLFormElement | null>(null)
-
-  useEffect(() => {
-    if (!state.isOpen) return
-
-    const handlePointerDown = (e: PointerEvent) => {
-      const container = containerRef.current
-      if (!container) return
-      if (e.target instanceof Node && container.contains(e.target)) return
-      close()
-    }
-
-    document.addEventListener('pointerdown', handlePointerDown)
-    return () => document.removeEventListener('pointerdown', handlePointerDown)
-  }, [state.isOpen])
-
   const commitSelection = (next: string) => {
     onChange(next)
     close()
     inputRef.current?.focus()
-  }
-
-  function handleBlur(e: FocusEvent<HTMLDivElement>) {
-    if (!state.isOpen) return
-    const next = e.relatedTarget
-    if (next instanceof Node && containerRef.current?.contains(next)) return
-    close()
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
@@ -171,7 +148,6 @@ export default function Search(props: SearchProps) {
 
   return (
     <form
-      ref={containerRef}
       className={styles.container}
       role="search"
       onSubmit={(e) => {
@@ -180,10 +156,7 @@ export default function Search(props: SearchProps) {
         onSearch()
       }}
     >
-      <div
-        className={clsx(styles.wrapper, showPopup && styles.wrapperOpen)}
-        onBlur={handleBlur}
-      >
+      <div className={clsx(styles.wrapper, showPopup && styles.wrapperOpen)}>
         <input
           ref={inputRef}
           type="text"
@@ -203,6 +176,7 @@ export default function Search(props: SearchProps) {
             dispatch({ type: 'open' })
           }}
           onFocus={() => dispatch({ type: 'open' })}
+          onBlur={() => close()}
           onKeyDown={handleKeyDown}
           className={styles.input}
           autoComplete="off"
