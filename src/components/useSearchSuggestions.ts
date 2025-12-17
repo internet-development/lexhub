@@ -60,16 +60,18 @@ export function useSearchSuggestions(
     controllerRef.current?.abort()
     controllerRef.current = null
 
-    setSuggestions([])
     setError(null)
     setShowSpinner(false)
-    setStatus('idle')
   }
 
   useEffect(() => {
     reset()
 
-    if (!enabled || !normalized) return
+    if (!enabled || !normalized) {
+      setSuggestions([])
+      setStatus('idle')
+      return
+    }
 
     setStatus('loading')
   }, [enabled, normalized])
