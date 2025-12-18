@@ -95,17 +95,19 @@
   --theme-background: var(--color-white);
   --theme-text: var(--color-black);
 
-  @media (prefers-color-scheme: dark) {
-    --theme-background: var(--color-black);
-    --theme-text: var(--color-white);
-  }
+  /* NOTE(caidanw): Disabled automatic dark mode for now */
+  /* @media (prefers-color-scheme: dark) { */
+  /*   --theme-background: var(--color-black); */
+  /*   --theme-text: var(--color-white); */
+  /* } */
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-}
+/* TODO(caidanw): Re-enabled when dark mode is supported */
+/* @media (prefers-color-scheme: dark) { */
+/*   html { */
+/*     color-scheme: dark; */
+/*   } */
+/* } */
 
 body {
   background: var(--theme-background);
