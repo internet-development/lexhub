@@ -68,20 +68,18 @@ function ConnectorPath({
   // For depth > 0, offset trunk by LABEL_GAP to align with parent text
   const trunkOffset = depth > 0 ? LABEL_GAP : 0
   const x = endX - INDENT_WIDTH + TRUNK_X + trunkOffset
-  const isHorizontalOnly = startY === endY
 
-  // Build path: horizontal only, or L-shape with curved corner
-  const path = isHorizontalOnly
-    ? `M ${x} ${endY} L ${endX} ${endY}`
-    : `M ${x} ${startY} L ${x} ${endY - CURVE_RADIUS} Q ${x} ${endY} ${x + CURVE_RADIUS} ${endY} L ${endX} ${endY}`
+  // L-shape path with curved corner: down then right
+  const path = `
+M ${x} ${startY} L ${x} ${endY - CURVE_RADIUS} Q ${x} ${endY} ${x + CURVE_RADIUS} ${endY} L ${endX} ${endY}`
 
   // Calculate path length for consistent animation timing
-  const pathLength = isHorizontalOnly
-    ? endX - x
-    : Math.abs(endY - startY) -
-      CURVE_RADIUS +
-      CURVE_RADIUS * 1.57 +
-      (endX - x - CURVE_RADIUS)
+  // vertical + curve (π/2 * r ≈ 1.57r) + horizontal
+  const pathLength =
+    Math.abs(endY - startY) -
+    CURVE_RADIUS +
+    CURVE_RADIUS * 1.57 +
+    (endX - x - CURVE_RADIUS)
 
   return (
     <path
