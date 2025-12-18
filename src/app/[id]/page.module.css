@@ -9,6 +9,7 @@
   padding: 1.5rem;
   background: var(--sidebar-bg, #fafafa);
   overflow-y: auto;
+  min-height: 100dvh;
 }
 
 .main {
@@ -24,6 +25,5 @@
   .sidebar {
     border-right: none;
     border-bottom: 1px solid var(--border-color, #e5e5e5);
-    max-height: 300px;
   }
 }
