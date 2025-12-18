@@ -138,9 +138,6 @@ export function NamespaceTree({
       trunkStartIndex.set(depth, index)
     }
 
-    // Subject gets rendered last (animated foreground layer)
-    if (node.isSubject) return
-
     const startY =
       depth === 0
         ? TRUNK_START_Y
@@ -152,22 +149,9 @@ export function NamespaceTree({
       endY: getY(index),
       endX: getX(depth),
       depth,
-      active: false,
+      active: node.isSubject,
     })
   })
-
-  // Add subject path (animated, rendered on top)
-  const subjectItem = items.find((i) => i.node.isSubject)
-  if (subjectItem) {
-    paths.push({
-      key: 'subject',
-      startY: TRUNK_START_Y,
-      endY: getY(subjectItem.index),
-      endX: getX(subjectItem.depth),
-      depth: subjectItem.depth,
-      active: true,
-    })
-  }
 
   const svgHeight = items.length * ITEM_HEIGHT
   const maxDepth = Math.max(...items.map((i) => i.depth), 0)
@@ -200,14 +184,9 @@ export function NamespaceTree({
           height={svgHeight}
           aria-hidden="true"
         >
-          {/* Inactive paths first, then active (subject) path on top */}
+          {/* Sort so active paths render last (on top) */}
           {paths
-            .filter((p) => !p.active)
-            .map(({ key, ...rest }) => (
-              <ConnectorPath key={key} {...rest} />
-            ))}
-          {paths
-            .filter((p) => p.active)
+            .toSorted((a, b) => Number(a.active) - Number(b.active))
             .map(({ key, ...rest }) => (
               <ConnectorPath key={key} {...rest} />
             ))}
