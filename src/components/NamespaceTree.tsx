@@ -198,8 +198,10 @@ export function NamespaceTree({
           height={svgHeight}
           aria-hidden="true"
         >
+          {/* Inactive paths first (background) */}
           {items.map((item, index) => {
             const isActive = item.isSubject || item.isChildOfSubject
+            if (isActive) return null
             const startIndex = firstIndexAtDepth[item.depth]
             return (
               <ConnectorPath
@@ -207,7 +209,21 @@ export function NamespaceTree({
                 startY={getY(startIndex)}
                 endY={getY(index)}
                 endX={getX(item.depth)}
-                active={isActive}
+              />
+            )
+          })}
+          {/* Active paths last (foreground, animated) */}
+          {items.map((item, index) => {
+            const isActive = item.isSubject || item.isChildOfSubject
+            if (!isActive) return null
+            const startIndex = firstIndexAtDepth[item.depth]
+            return (
+              <ConnectorPath
+                key={item.key}
+                startY={getY(startIndex)}
+                endY={getY(index)}
+                endX={getX(item.depth)}
+                active
               />
             )
           })}
