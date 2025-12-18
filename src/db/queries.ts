@@ -3,7 +3,7 @@ import { valid_lexicons } from '@/db/schema'
 import { desc, eq, sql } from 'drizzle-orm'
 import type { LexiconDoc } from '@atproto/lexicon'
 import { isValidNsid } from '@atproto/syntax'
-import { isValidNamespacePrefix } from '@/util/nsid'
+import { getParentPath, isValidNamespacePrefix } from '@/util/nsid'
 
 export type { LexiconDoc }
 
@@ -67,18 +67,16 @@ export interface TreeData {
   root: TreeNode[]
 }
 
+/** Direct child from DB query */
+type DirectChild = { segment: string; isLexicon: boolean }
+
 /**
  * Creates a TreeNode with sensible defaults
  */
 function makeTreeNode(
   segment: string,
   fullPath: string,
-  opts: {
-    isLexicon?: boolean
-    isSchemaDefinition?: boolean
-    isSubject?: boolean
-    children?: TreeNode[]
-  } = {},
+  opts: Partial<Omit<TreeNode, 'segment' | 'fullPath'>> = {},
 ): TreeNode {
   return {
     segment,
@@ -88,6 +86,37 @@ function makeTreeNode(
     isSubject: opts.isSubject ?? false,
     children: opts.children ?? [],
   }
+}
+
+/**
+ * Transforms a DirectChild to a TreeNode under a given prefix
+ */
+const childToTreeNode =
+  (prefix: string) =>
+  (c: DirectChild): TreeNode =>
+    makeTreeNode(c.segment, `${prefix}.${c.segment}`, {
+      isLexicon: c.isLexicon,
+    })
+
+/**
+ * Builds subject children from lexicon schema definitions or namespace children
+ */
+async function getSubjectChildren(
+  subjectPath: string,
+  lexicon: LexiconDoc | null,
+): Promise<TreeNode[]> {
+  if (lexicon) {
+    return Object.keys(lexicon.defs ?? {})
+      .sort()
+      .map((defName) =>
+        makeTreeNode(defName, `${subjectPath}#${defName}`, {
+          isSchemaDefinition: true,
+        }),
+      )
+  }
+
+  const children = await getDirectChildren(subjectPath)
+  return children.map(childToTreeNode(subjectPath))
 }
 
 /**
@@ -102,57 +131,31 @@ async function getTreeData(
   subjectPath: string,
   lexiconDoc?: LexiconDoc | null,
 ): Promise<TreeData> {
-  const segments = subjectPath.split('.')
-  const subject = segments[segments.length - 1]
-  const parent = segments.length > 2 ? segments.slice(0, -1).join('.') : null
+  const subject = subjectPath.split('.').at(-1)!
+  const parent = getParentPath(subjectPath)
 
   // Fetch lexicon if not provided and path is valid NSID
   const lexicon =
     lexiconDoc ??
     (isValidNsid(subjectPath) ? await getLexiconByNsid(subjectPath) : null)
 
-  // Build subject's children from schema definitions (lexicon) or namespace children
-  let subjectChildren: TreeNode[] = []
-  if (lexicon) {
-    const defs = lexicon.defs ?? {}
-    subjectChildren = Object.keys(defs)
-      .sort()
-      .map((defName) =>
-        makeTreeNode(defName, `${subjectPath}#${defName}`, {
-          isSchemaDefinition: true,
-        }),
-      )
-  }
-
-  // Root namespace (2 segments) - just show children at root level
+  // Root namespace - just show children at root level
   if (!parent) {
     const children = await getDirectChildren(subjectPath)
     return {
       parent: null,
       subjectPath,
-      root: children.map((c) =>
-        makeTreeNode(c.segment, `${subjectPath}.${c.segment}`, {
-          isLexicon: c.isLexicon,
-        }),
-      ),
+      root: children.map(childToTreeNode(subjectPath)),
     }
   }
 
-  // Fetch subject children (if namespace) and siblings in parallel
-  const [nsChildren, siblings] = await Promise.all([
-    lexicon ? Promise.resolve([]) : getDirectChildren(subjectPath),
+  // Fetch subject children and siblings in parallel
+  const [subjectChildren, siblings] = await Promise.all([
+    getSubjectChildren(subjectPath, lexicon),
     getDirectChildren(parent),
   ])
 
-  if (!lexicon) {
-    subjectChildren = nsChildren.map((c) =>
-      makeTreeNode(c.segment, `${subjectPath}.${c.segment}`, {
-        isLexicon: c.isLexicon,
-      }),
-    )
-  }
-
-  // Build root tree from siblings
+  // Build root tree from siblings, nesting subject children
   const root = siblings.map((c) => {
     const isSubject = c.segment === subject
     return makeTreeNode(c.segment, `${parent}.${c.segment}`, {
