@@ -12,8 +12,10 @@ export interface NamespaceTreeProps {
 
 const ITEM_HEIGHT = 28
 const INDENT_WIDTH = 16
-const TRUNK_X = 8
-const CURVE_RADIUS = 4
+const TRUNK_X = 4
+const CURVE_RADIUS = 0
+const LABEL_GAP = 4
+const CHILD_TRUNK_OFFSET_Y = 12
 
 type TreeItem = {
   key: string
@@ -32,14 +34,18 @@ function ConnectorPath({
   startY,
   endY,
   endX,
+  depth,
   active,
 }: {
   startY: number
   endY: number
   endX: number
+  depth: number
   active?: boolean
 }) {
-  const x = endX - INDENT_WIDTH + TRUNK_X
+  // For depth > 0, offset trunk by LABEL_GAP to align with parent text
+  const trunkOffset = depth > 0 ? LABEL_GAP : 0
+  const x = endX - INDENT_WIDTH + TRUNK_X + trunkOffset
 
   // If this is the first item at this depth, just draw horizontal
   if (startY === endY) {
@@ -75,9 +81,11 @@ function ItemLabel({
   item: TreeItem
   variant?: 'default' | 'muted'
 }) {
+  const style = { marginLeft: LABEL_GAP }
+
   if (item.isSubject) {
     return (
-      <span className={styles.itemLabel} data-subject>
+      <span className={styles.itemLabel} style={style} data-subject>
         {item.segment}
       </span>
     )
@@ -88,6 +96,7 @@ function ItemLabel({
       href={`/${item.fullPath}`}
       variant={variant}
       className={styles.itemLabel}
+      style={style}
     >
       {item.segment}
     </Link>
@@ -206,12 +215,14 @@ export function NamespaceTree({
           {items.map((item, index) => {
             if (item.isSubject) return null
             const startIndex = firstIndexAtDepth[item.depth]
+            const startYOffset = item.depth > 0 ? CHILD_TRUNK_OFFSET_Y : 0
             return (
               <ConnectorPath
                 key={item.key}
-                startY={getY(startIndex)}
+                startY={getY(startIndex) + startYOffset}
                 endY={getY(index)}
                 endX={getX(item.depth)}
+                depth={item.depth}
               />
             )
           })}
@@ -225,6 +236,7 @@ export function NamespaceTree({
                 startY={getY(startIndex)}
                 endY={getY(index)}
                 endX={getX(item.depth)}
+                depth={item.depth}
                 active
               />
             )
