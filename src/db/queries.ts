@@ -66,6 +66,7 @@ async function getDirectChildren(
 export interface TreeNode {
   segment: string
   isLexicon: boolean
+  isSchemaDefinition: boolean
   fullPath: string
 }
 
@@ -95,6 +96,7 @@ export async function getTreeData(
     const children: TreeNode[] = Object.keys(defs).map((defName) => ({
       segment: defName,
       isLexicon: false,
+      isSchemaDefinition: true,
       fullPath: `${subjectPath}#${defName}`,
     }))
 
@@ -106,6 +108,7 @@ export async function getTreeData(
         .filter((child) => child.segment !== subject)
         .map((child) => ({
           ...child,
+          isSchemaDefinition: false,
           fullPath: `${parent}.${child.segment}`,
         }))
     }
@@ -124,11 +127,13 @@ export async function getTreeData(
       .filter((child) => child.segment !== subject)
       .map((child) => ({
         ...child,
+        isSchemaDefinition: false,
         fullPath: `${parent}.${child.segment}`,
       }))
 
     const children = subjectChildren.map((child) => ({
       ...child,
+      isSchemaDefinition: false,
       fullPath: `${subjectPath}.${child.segment}`,
     }))
 
@@ -139,6 +144,7 @@ export async function getTreeData(
   const subjectChildren = await getDirectChildren(subjectPath)
   const children = subjectChildren.map((child) => ({
     ...child,
+    isSchemaDefinition: false,
     fullPath: `${subjectPath}.${child.segment}`,
   }))
 

@@ -174,7 +174,7 @@ export function NamespaceTree({
       depth: 1,
       isChildOfSubject: true,
       isLexicon: c.isLexicon,
-      isSchemaDefinition: c.fullPath.includes('#'),
+      isSchemaDefinition: c.isSchemaDefinition,
     }))
     .sort((a, b) => a.segment.localeCompare(b.segment))
 
