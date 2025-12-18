@@ -35,9 +35,7 @@
   overflow: visible;
 }
 
-/* Inactive connectors - muted */
-.connectorLine,
-.connectorPath {
+.connector {
   fill: none;
   stroke: var(--tree-line-color, #e0e0e0);
   stroke-width: 1.5;
@@ -45,17 +43,15 @@
   stroke-linejoin: round;
 }
 
-/* Active connectors - darker with animation */
-.connectorLineActive,
-.connectorPathActive {
+.connectorActive {
   fill: none;
-  stroke: var(--tree-line-color-active, #666);
+  stroke: var(--tree-line-color-active, #888);
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-dasharray: 200;
-  stroke-dashoffset: 200;
-  animation: drawLine 0.3s ease-out forwards;
+  stroke-dasharray: 500;
+  stroke-dashoffset: 500;
+  animation: drawLine 0.4s ease-out forwards;
 }
 
 @keyframes drawLine {
