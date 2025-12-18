@@ -16,6 +16,7 @@ const TRUNK_X = 4
 const CURVE_RADIUS = 0
 const LABEL_GAP = 4
 const CHILD_TRUNK_OFFSET_Y = 12
+const TRUNK_START_Y = 0
 
 type TreeItem = {
   key: string
@@ -215,11 +216,14 @@ export function NamespaceTree({
           {items.map((item, index) => {
             if (item.isSubject) return null
             const startIndex = firstIndexAtDepth[item.depth]
-            const startYOffset = item.depth > 0 ? CHILD_TRUNK_OFFSET_Y : 0
+            const startY =
+              item.depth === 0
+                ? TRUNK_START_Y
+                : getY(startIndex) + CHILD_TRUNK_OFFSET_Y
             return (
               <ConnectorPath
                 key={item.key}
-                startY={getY(startIndex) + startYOffset}
+                startY={startY}
                 endY={getY(index)}
                 endX={getX(item.depth)}
                 depth={item.depth}
@@ -229,11 +233,10 @@ export function NamespaceTree({
           {/* Subject path last (foreground, animated) */}
           {items.map((item, index) => {
             if (!item.isSubject) return null
-            const startIndex = firstIndexAtDepth[item.depth]
             return (
               <ConnectorPath
                 key={item.key}
-                startY={getY(startIndex)}
+                startY={TRUNK_START_Y}
                 endY={getY(index)}
                 endX={getX(item.depth)}
                 depth={item.depth}
