@@ -35,74 +35,33 @@
   overflow: visible;
 }
 
-.connectorLine {
-  stroke: var(--tree-line-color, #d0d0d0);
-  stroke-width: 1.5;
-  stroke-linecap: round;
-}
-
+/* Inactive connectors - muted */
+.connectorLine,
 .connectorPath {
   fill: none;
-  stroke: var(--tree-line-color, #d0d0d0);
+  stroke: var(--tree-line-color, #e0e0e0);
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-/* Animation for connectors */
-.connectorLine,
-.connectorPath {
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-  animation: drawLine 0.4s ease-out forwards;
+/* Active connectors - darker with animation */
+.connectorLineActive,
+.connectorPathActive {
+  fill: none;
+  stroke: var(--tree-line-color-active, #666);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  animation: drawLine 0.3s ease-out forwards;
 }
 
 @keyframes drawLine {
   to {
     stroke-dashoffset: 0;
   }
-}
-
-/* Stagger animation for each connector */
-.connectors line:nth-child(1),
-.connectors path:nth-child(1) {
-  animation-delay: 0ms;
-}
-.connectors line:nth-child(2),
-.connectors path:nth-child(2) {
-  animation-delay: 30ms;
-}
-.connectors line:nth-child(3),
-.connectors path:nth-child(3) {
-  animation-delay: 60ms;
-}
-.connectors line:nth-child(4),
-.connectors path:nth-child(4) {
-  animation-delay: 90ms;
-}
-.connectors line:nth-child(5),
-.connectors path:nth-child(5) {
-  animation-delay: 120ms;
-}
-.connectors line:nth-child(6),
-.connectors path:nth-child(6) {
-  animation-delay: 150ms;
-}
-.connectors line:nth-child(7),
-.connectors path:nth-child(7) {
-  animation-delay: 180ms;
-}
-.connectors line:nth-child(8),
-.connectors path:nth-child(8) {
-  animation-delay: 210ms;
-}
-.connectors line:nth-child(9),
-.connectors path:nth-child(9) {
-  animation-delay: 240ms;
-}
-.connectors line:nth-child(10),
-.connectors path:nth-child(10) {
-  animation-delay: 270ms;
 }
 
 .tree {

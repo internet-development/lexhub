@@ -36,24 +36,29 @@ function TreeItem({ node, isSubject, variant = 'default' }: TreeItemProps) {
   )
 }
 
-/**
- * SVG path drawing utilities
- */
 const ITEM_HEIGHT = 28
 const INDENT_WIDTH = 16
-const CONNECTOR_OFFSET = 8 // horizontal offset from left edge to vertical line
+const CONNECTOR_OFFSET = 8
 
 function VerticalLine({
   fromY,
   toY,
   x,
+  active,
 }: {
   fromY: number
   toY: number
   x: number
+  active?: boolean
 }) {
   return (
-    <line x1={x} y1={fromY} x2={x} y2={toY} className={styles.connectorLine} />
+    <line
+      x1={x}
+      y1={fromY}
+      x2={x}
+      y2={toY}
+      className={active ? styles.connectorLineActive : styles.connectorLine}
+    />
   )
 }
 
@@ -61,16 +66,22 @@ function CurvedConnector({
   x,
   y,
   width,
+  active,
 }: {
   x: number
   y: number
   width: number
+  active?: boolean
 }) {
-  // Draw a curved path from vertical line to item
   const radius = 6
   const path = `M ${x} ${y - radius} Q ${x} ${y} ${x + radius} ${y} L ${x + width} ${y}`
 
-  return <path d={path} className={styles.connectorPath} />
+  return (
+    <path
+      d={path}
+      className={active ? styles.connectorPathActive : styles.connectorPath}
+    />
+  )
 }
 
 export function NamespaceTree({
@@ -83,26 +94,23 @@ export function NamespaceTree({
   const isRootNamespace = !parent && siblings.length === 0
   const hasSiblings = siblings.length > 0
 
-  // Build flat list of all items for rendering
   type RenderItem = {
     key: string
     node: TreeNode
     depth: number
     isSubject?: boolean
-    isLastAtDepth?: boolean
+    isChild?: boolean // child of subject (part of active path)
     variant?: 'default' | 'muted'
   }
 
   const items: RenderItem[] = []
 
   if (isRootNamespace) {
-    // Root namespace: just show children at depth 0
-    children.forEach((child, i) => {
+    children.forEach((child) => {
       items.push({
         key: child.segment,
         node: child,
         depth: 0,
-        isLastAtDepth: i === children.length - 1,
       })
     })
   } else {
@@ -112,79 +120,103 @@ export function NamespaceTree({
       node: { segment: subject, fullPath: subjectPath, isLexicon: false },
       depth: 0,
       isSubject: true,
-      isLastAtDepth: !hasSiblings,
     })
 
-    // Children of subject
-    children.forEach((child, i) => {
+    // Children of subject (active path)
+    children.forEach((child) => {
       items.push({
         key: `child-${child.segment}`,
         node: child,
         depth: 1,
-        isLastAtDepth: i === children.length - 1,
+        isChild: true,
       })
     })
 
     // Siblings
-    siblings.forEach((sibling, i) => {
+    siblings.forEach((sibling) => {
       items.push({
         key: `sibling-${sibling.segment}`,
         node: sibling,
         depth: 0,
-        isLastAtDepth: i === siblings.length - 1,
         variant: 'muted',
       })
     })
   }
 
-  // Calculate SVG dimensions
   const svgHeight = items.length * ITEM_HEIGHT
   const maxDepth = Math.max(...items.map((item) => item.depth), 0)
   const svgWidth = (maxDepth + 1) * INDENT_WIDTH + CONNECTOR_OFFSET
 
-  // Generate connector paths
   const connectors: React.ReactNode[] = []
 
-  // Track vertical line segments needed at each depth
-  const depthRanges: Map<number, { start: number; end: number }> = new Map()
+  // Track vertical line ranges per depth, separately for active/inactive
+  const activeRange: { start: number; end: number } | null =
+    children.length > 0
+      ? {
+          start: ITEM_HEIGHT / 2,
+          end: children.length * ITEM_HEIGHT + ITEM_HEIGHT / 2,
+        }
+      : null
+
+  const inactiveRange = hasSiblings
+    ? {
+        start: ITEM_HEIGHT / 2,
+        end: (items.length - 1) * ITEM_HEIGHT + ITEM_HEIGHT / 2,
+      }
+    : null
 
   items.forEach((item, index) => {
     const y = index * ITEM_HEIGHT + ITEM_HEIGHT / 2
     const x = item.depth * INDENT_WIDTH + CONNECTOR_OFFSET
+    const isActive = item.isSubject || item.isChild
 
-    // Horizontal connector to this item
     connectors.push(
       <CurvedConnector
-        key={`h-${item.key}`}
+        key={`c-${item.key}`}
         x={x}
         y={y}
         width={INDENT_WIDTH - CONNECTOR_OFFSET}
+        active={isActive}
       />,
     )
-
-    // Track vertical line range at this depth
-    const existing = depthRanges.get(item.depth)
-    if (existing) {
-      existing.end = y
-    } else {
-      depthRanges.set(item.depth, { start: y, end: y })
-    }
   })
 
-  // Draw vertical lines for each depth
-  depthRanges.forEach((range, depth) => {
-    if (range.start !== range.end) {
-      const x = depth * INDENT_WIDTH + CONNECTOR_OFFSET
-      connectors.push(
-        <VerticalLine
-          key={`v-${depth}`}
-          x={x}
-          fromY={range.start}
-          toY={range.end}
-        />,
-      )
-    }
-  })
+  // Vertical line for children (active, depth 1)
+  if (activeRange && children.length > 0) {
+    connectors.push(
+      <VerticalLine
+        key="v-active"
+        x={INDENT_WIDTH + CONNECTOR_OFFSET}
+        fromY={activeRange.start}
+        toY={activeRange.end}
+        active
+      />,
+    )
+  }
+
+  // Vertical line for main trunk (inactive, depth 0)
+  if (inactiveRange && !isRootNamespace) {
+    connectors.push(
+      <VerticalLine
+        key="v-main"
+        x={CONNECTOR_OFFSET}
+        fromY={inactiveRange.start}
+        toY={inactiveRange.end}
+      />,
+    )
+  }
+
+  // Vertical line for root namespace (no subject)
+  if (isRootNamespace && items.length > 1) {
+    connectors.push(
+      <VerticalLine
+        key="v-root"
+        x={CONNECTOR_OFFSET}
+        fromY={ITEM_HEIGHT / 2}
+        toY={(items.length - 1) * ITEM_HEIGHT + ITEM_HEIGHT / 2}
+      />,
+    )
+  }
 
   return (
     <nav className={styles.root} aria-label="Namespace navigation">
