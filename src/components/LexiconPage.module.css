@@ -1,0 +1,106 @@
+.root {
+  max-width: 900px;
+}
+
+.header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color, #e5e5e5);
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  font-family: var(--font-mono, monospace);
+  margin: 0 0 0.5rem;
+  word-break: break-all;
+}
+
+.description {
+  color: var(--text-muted, #666);
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+}
+
+.definitions {
+  margin-top: 1.5rem;
+}
+
+.defList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.defItem {
+  padding: 1rem;
+  border: 1px solid var(--border-color, #e5e5e5);
+  border-radius: 8px;
+  background: var(--card-bg, #fff);
+}
+
+.defHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.defName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary, #111);
+}
+
+.defType {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  background: var(--tag-bg, #e5e5e5);
+  color: var(--tag-text, #666);
+  text-transform: lowercase;
+}
+
+.defDescription {
+  margin: 0 0 0.75rem;
+  color: var(--text-muted, #666);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.defDetails {
+  margin-top: 0.75rem;
+}
+
+.defDetails summary {
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-muted, #666);
+  user-select: none;
+}
+
+.defDetails summary:hover {
+  color: var(--text-primary, #111);
+}
+
+.schema {
+  margin: 0.75rem 0 0;
+  padding: 1rem;
+  background: var(--code-bg, #f5f5f5);
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  font-family: var(--font-mono, monospace);
+}

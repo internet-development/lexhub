@@ -1,0 +1,42 @@
+.root {
+  max-width: 1000px;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  font-family: var(--font-mono, monospace);
+  margin: 0 0 0.25rem;
+  word-break: break-all;
+}
+
+.subtitle {
+  color: var(--text-muted, #666);
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.segmentName {
+  font-weight: 500;
+}
+
+.typeTag {
+  font-size: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  background: var(--tag-bg, #e5e5e5);
+  color: var(--tag-text, #666);
+}
+
+.description {
+  color: var(--text-muted, #666);
+  font-size: 0.875rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
