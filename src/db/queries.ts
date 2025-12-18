@@ -1,6 +1,6 @@
 import { db } from '@/db'
 import { valid_lexicons } from '@/db/schema'
-import { desc, eq, like, sql } from 'drizzle-orm'
+import { desc, eq, sql } from 'drizzle-orm'
 import type { LexiconDoc } from '@atproto/lexicon'
 import { isValidNsid } from '@atproto/syntax'
 import { isValidNamespacePrefix } from '@/util/nsid'
@@ -22,19 +22,6 @@ export async function getLexiconByNsid(
 
   if (result.length === 0) return null
   return result[0].data as LexiconDoc
-}
-
-/**
- * Checks if any valid lexicons exist under a given prefix
- */
-export async function hasLexiconsUnderPrefix(prefix: string): Promise<boolean> {
-  const result = await db
-    .select({ nsid: valid_lexicons.nsid })
-    .from(valid_lexicons)
-    .where(like(valid_lexicons.nsid, `${prefix}.%`))
-    .limit(1)
-
-  return result.length > 0
 }
 
 /**
@@ -256,13 +243,13 @@ export async function getPageData(path: string): Promise<PageData | null> {
   const isValidPath = isValidNsid(path) || isValidNamespacePrefix(path)
   if (!isValidPath) return null
 
-  const hasChildren = await hasLexiconsUnderPrefix(path)
-  if (!hasChildren) return null
-
   const [treeData, { children }] = await Promise.all([
     getTreeData(path, null),
     getNamespaceData(path),
   ])
+
+  // No children means nothing exists under this prefix
+  if (children.length === 0) return null
 
   return { type: 'namespace', treeData, prefix: path, children }
 }
