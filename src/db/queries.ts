@@ -2,6 +2,8 @@ import { db } from '@/db'
 import { valid_lexicons } from '@/db/schema'
 import { desc, eq, like, sql } from 'drizzle-orm'
 import type { LexiconDoc } from '@atproto/lexicon'
+import { isValidNsid } from '@atproto/syntax'
+import { isValidNamespacePrefix } from '@/util/nsid'
 
 export type { LexiconDoc }
 
@@ -218,4 +220,49 @@ export async function getNamespaceData(
       description: row.description,
     })),
   }
+}
+
+// Page data types
+export type LexiconPageData = {
+  type: 'lexicon'
+  treeData: TreeData
+  lexicon: LexiconDoc
+}
+
+export type NamespacePageData = {
+  type: 'namespace'
+  treeData: TreeData
+  prefix: string
+  children: NamespaceChild[]
+}
+
+export type PageData = LexiconPageData | NamespacePageData
+
+/**
+ * Gets all data needed to render a page for a given path.
+ * Returns null if the path is invalid or has no content.
+ */
+export async function getPageData(path: string): Promise<PageData | null> {
+  // Check for lexicon document first
+  if (isValidNsid(path)) {
+    const lexicon = await getLexiconByNsid(path)
+    if (lexicon) {
+      const treeData = await getTreeData(path, lexicon)
+      return { type: 'lexicon', treeData, lexicon }
+    }
+  }
+
+  // Check for namespace prefix
+  const isValidPath = isValidNsid(path) || isValidNamespacePrefix(path)
+  if (!isValidPath) return null
+
+  const hasChildren = await hasLexiconsUnderPrefix(path)
+  if (!hasChildren) return null
+
+  const [treeData, { children }] = await Promise.all([
+    getTreeData(path, null),
+    getNamespaceData(path),
+  ])
+
+  return { type: 'namespace', treeData, prefix: path, children }
 }
