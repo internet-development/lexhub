@@ -68,42 +68,20 @@ function ConnectorPath({
   // For depth > 0, offset trunk by LABEL_GAP to align with parent text
   const trunkOffset = depth > 0 ? LABEL_GAP : 0
   const x = endX - INDENT_WIDTH + TRUNK_X + trunkOffset
+  const isHorizontalOnly = startY === endY
+
+  // Build path: horizontal only, or L-shape with curved corner
+  const path = isHorizontalOnly
+    ? `M ${x} ${endY} L ${endX} ${endY}`
+    : `M ${x} ${startY} L ${x} ${endY - CURVE_RADIUS} Q ${x} ${endY} ${x + CURVE_RADIUS} ${endY} L ${endX} ${endY}`
 
   // Calculate path length for consistent animation timing
-  const verticalLength = Math.abs(endY - startY) - CURVE_RADIUS
-  const horizontalLength = endX - x - CURVE_RADIUS
-  // Approximate quarter circle arc length: (π/2) * r ≈ 1.57 * r
-  const curveLength = CURVE_RADIUS * 1.57
-  const pathLength =
-    startY === endY
-      ? endX - x // horizontal only
-      : verticalLength + curveLength + horizontalLength
-
-  // If this is the first item at this depth, just draw horizontal
-  if (startY === endY) {
-    const path = `M ${x} ${endY} L ${endX} ${endY}`
-    return (
-      <path
-        d={path}
-        className={active ? styles.connectorActive : styles.connector}
-        style={
-          active
-            ? ({
-                '--path-length': pathLength,
-              } as React.CSSProperties)
-            : undefined
-        }
-      />
-    )
-  }
-
-  // L-shape with curved corner: down then right
-  const path = `
-    M ${x} ${startY}
-    L ${x} ${endY - CURVE_RADIUS}
-    Q ${x} ${endY} ${x + CURVE_RADIUS} ${endY}
-    L ${endX} ${endY}
-  `
+  const pathLength = isHorizontalOnly
+    ? endX - x
+    : Math.abs(endY - startY) -
+      CURVE_RADIUS +
+      CURVE_RADIUS * 1.57 +
+      (endX - x - CURVE_RADIUS)
 
   return (
     <path
@@ -111,9 +89,7 @@ function ConnectorPath({
       className={active ? styles.connectorActive : styles.connector}
       style={
         active
-          ? ({
-              '--path-length': pathLength,
-            } as React.CSSProperties)
+          ? ({ '--path-length': pathLength } as React.CSSProperties)
           : undefined
       }
     />
