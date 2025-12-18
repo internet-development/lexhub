@@ -51,7 +51,7 @@
   stroke-linejoin: round;
   stroke-dasharray: 500;
   stroke-dashoffset: 500;
-  animation: drawLine 0.4s ease-out forwards;
+  animation: drawLine 1s ease-out forwards;
 }
 
 @keyframes drawLine {
