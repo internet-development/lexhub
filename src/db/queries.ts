@@ -71,10 +71,13 @@ export interface TreeData {
  * Gets tree data for sidebar navigation.
  * Returns a recursive tree structure with the subject's siblings at root level,
  * and the subject's children nested under it.
+ *
+ * @param subjectPath - The path being viewed
+ * @param lexiconDoc - Optional pre-fetched lexicon doc (to avoid re-fetching)
  */
-export async function getTreeData(
+async function getTreeData(
   subjectPath: string,
-  lexiconDoc: LexiconDoc | null,
+  lexiconDoc?: LexiconDoc | null,
 ): Promise<TreeData> {
   const segments = subjectPath.split('.')
   const subject = segments[segments.length - 1]
@@ -99,15 +102,20 @@ export async function getTreeData(
     children: opts.children ?? [],
   })
 
+  // Fetch lexicon if not provided and path is valid NSID
+  const lexicon =
+    lexiconDoc ??
+    (isValidNsid(subjectPath) ? await getLexiconByNsid(subjectPath) : null)
+
   // Build subject's children
   let subjectChildren: TreeNode[] = []
-  if (lexiconDoc) {
+  if (lexicon) {
     // For lexicons, children are schema definitions
-    const defs = lexiconDoc.defs ?? {}
+    const defs = lexicon.defs ?? {}
     subjectChildren = Object.keys(defs)
       .sort()
       .map((defName) =>
-        makeNode(`${defName}`, `${subjectPath}#${defName}`, {
+        makeNode(defName, `${subjectPath}#${defName}`, {
           isSchemaDefinition: true,
         }),
       )
@@ -242,7 +250,7 @@ export async function getPageData(path: string): Promise<PageData | null> {
   if (!isValidPath) return null
 
   const [treeData, children] = await Promise.all([
-    getTreeData(path, null),
+    getTreeData(path),
     getNamespaceChildren(path),
   ])
 
