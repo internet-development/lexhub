@@ -71,7 +71,11 @@ function ConnectorPath({
 
   // L-shape path with curved corner: down then right
   const path = `
-M ${x} ${startY} L ${x} ${endY - CURVE_RADIUS} Q ${x} ${endY} ${x + CURVE_RADIUS} ${endY} L ${endX} ${endY}`
+    M ${x} ${startY}
+    L ${x} ${endY - CURVE_RADIUS}
+    Q ${x} ${endY} ${x + CURVE_RADIUS} ${endY}
+    L ${endX} ${endY}
+  `
 
   // Calculate path length for consistent animation timing
   // vertical + curve (π/2 * r ≈ 1.57r) + horizontal
