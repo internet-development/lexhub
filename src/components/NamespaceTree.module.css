@@ -1,70 +1,133 @@
 .root {
   font-family: var(--font-mono, monospace);
   font-size: 0.875rem;
-  line-height: 1.6;
+  line-height: 1;
 }
 
-.parent {
+.header {
   margin-bottom: 0.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--border-color, #e5e5e5);
 }
 
-.rootHeader {
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border-color, #e5e5e5);
-}
-
-.rootName {
+.headerName {
   font-weight: 600;
   color: var(--text-primary, #111);
+}
+
+.headerLink {
+  text-decoration: none;
+}
+
+.headerLink:hover {
+  text-decoration: underline;
+}
+
+.treeContainer {
+  position: relative;
+}
+
+.connectors {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.connectorLine {
+  stroke: var(--tree-line-color, #d0d0d0);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.connectorPath {
+  fill: none;
+  stroke: var(--tree-line-color, #d0d0d0);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Animation for connectors */
+.connectorLine,
+.connectorPath {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: drawLine 0.4s ease-out forwards;
+}
+
+@keyframes drawLine {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Stagger animation for each connector */
+.connectors line:nth-child(1),
+.connectors path:nth-child(1) {
+  animation-delay: 0ms;
+}
+.connectors line:nth-child(2),
+.connectors path:nth-child(2) {
+  animation-delay: 30ms;
+}
+.connectors line:nth-child(3),
+.connectors path:nth-child(3) {
+  animation-delay: 60ms;
+}
+.connectors line:nth-child(4),
+.connectors path:nth-child(4) {
+  animation-delay: 90ms;
+}
+.connectors line:nth-child(5),
+.connectors path:nth-child(5) {
+  animation-delay: 120ms;
+}
+.connectors line:nth-child(6),
+.connectors path:nth-child(6) {
+  animation-delay: 150ms;
+}
+.connectors line:nth-child(7),
+.connectors path:nth-child(7) {
+  animation-delay: 180ms;
+}
+.connectors line:nth-child(8),
+.connectors path:nth-child(8) {
+  animation-delay: 210ms;
+}
+.connectors line:nth-child(9),
+.connectors path:nth-child(9) {
+  animation-delay: 240ms;
+}
+.connectors line:nth-child(10),
+.connectors path:nth-child(10) {
+  animation-delay: 270ms;
 }
 
 .tree {
   list-style: none;
   padding: 0;
   margin: 0;
+  position: relative;
 }
 
 .item {
-  margin: 0;
-}
-
-.subject {
+  height: 28px;
   display: flex;
-  align-items: baseline;
-  gap: 0.25rem;
-  padding: 0.125rem 0;
+  align-items: center;
 }
 
-.subjectName {
+.itemLabel {
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.itemLabel:hover {
+  text-decoration: underline;
+}
+
+.itemLabel[data-subject] {
   font-weight: 600;
   color: var(--text-primary, #111);
-}
-
-.branch {
-  color: var(--text-muted, #999);
-  user-select: none;
-  white-space: pre;
-}
-
-.children {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.childItem {
-  display: flex;
-  align-items: baseline;
-  padding: 0.125rem 0;
-}
-
-.link {
-  text-decoration: none;
-}
-
-.link:hover {
-  text-decoration: underline;
 }
