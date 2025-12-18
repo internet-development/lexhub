@@ -24,6 +24,31 @@ type TreeItem = {
 }
 
 /**
+ * Converts a TreeNode to a TreeItem with the specified depth and options
+ */
+function toTreeItem(
+  node: TreeNode,
+  depth: number,
+  options?: {
+    keyPrefix?: string
+    isSubject?: boolean
+    isChildOfSubject?: boolean
+  },
+): TreeItem {
+  return {
+    key: options?.keyPrefix
+      ? `${options.keyPrefix}-${node.segment}`
+      : node.segment,
+    segment: node.segment,
+    fullPath: node.fullPath,
+    depth,
+    isLexicon: node.isLexicon,
+    isSchemaDefinition: node.isSchemaDefinition,
+    ...options,
+  }
+}
+
+/**
  * Draws an L-shaped path from the trunk to an item.
  * Path goes: vertical down to item's Y, then horizontal to item.
  */
@@ -139,13 +164,7 @@ export function NamespaceTree({
   // Build items list - all at depth 0, sorted alphabetically
   // Subject stays in its alphabetical position
   const depth0Items: TreeItem[] = [
-    ...siblings.map((s) => ({
-      key: s.segment,
-      segment: s.segment,
-      fullPath: s.fullPath,
-      depth: 0,
-      isLexicon: s.isLexicon,
-    })),
+    ...siblings.map((s) => toTreeItem(s, 0)),
     ...(isRootNamespace
       ? []
       : [
@@ -161,27 +180,15 @@ export function NamespaceTree({
 
   // Children of subject at depth 1, sorted alphabetically
   const depth1Items: TreeItem[] = children
-    .map((c) => ({
-      key: `child-${c.segment}`,
-      segment: c.segment,
-      fullPath: c.fullPath,
-      depth: 1,
-      isChildOfSubject: true,
-      isLexicon: c.isLexicon,
-      isSchemaDefinition: c.isSchemaDefinition,
-    }))
+    .map((c) =>
+      toTreeItem(c, 1, { keyPrefix: 'child', isChildOfSubject: true }),
+    )
     .sort((a, b) => a.segment.localeCompare(b.segment))
 
   // For root namespace, just show children at depth 0
   const rootItems: TreeItem[] = isRootNamespace
     ? children
-        .map((c) => ({
-          key: c.segment,
-          segment: c.segment,
-          fullPath: c.fullPath,
-          depth: 0,
-          isLexicon: c.isLexicon,
-        }))
+        .map((c) => toTreeItem(c, 0))
         .sort((a, b) => a.segment.localeCompare(b.segment))
     : []
 
