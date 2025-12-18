@@ -5,14 +5,10 @@ import type { LexiconDoc } from '@atproto/lexicon'
 import { isValidNsid } from '@atproto/syntax'
 import { getParentPath, isValidNamespacePrefix } from '@/util/nsid'
 
-export type { LexiconDoc }
-
 /**
  * Fetches the latest lexicon document by NSID
  */
-export async function getLexiconByNsid(
-  nsid: string,
-): Promise<LexiconDoc | null> {
+async function getLexiconByNsid(nsid: string): Promise<LexiconDoc | null> {
   const result = await db
     .select({ data: valid_lexicons.data })
     .from(valid_lexicons)
@@ -168,7 +164,7 @@ async function getTreeData(
   return { parent, subjectPath, root }
 }
 
-export interface NamespaceChild {
+interface NamespaceChild {
   segment: string
   fullPath: string
   isLexicon: boolean
@@ -179,9 +175,7 @@ export interface NamespaceChild {
 /**
  * Gets children of a namespace prefix for rendering the namespace page
  */
-export async function getNamespaceChildren(
-  prefix: string,
-): Promise<NamespaceChild[]> {
+async function getNamespaceChildren(prefix: string): Promise<NamespaceChild[]> {
   const prefixDepth = prefix.split('.').length
 
   const result: Array<{
