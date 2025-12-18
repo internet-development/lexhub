@@ -65,23 +65,23 @@ async function getDirectChildren(
 
 export interface TreeNode {
   segment: string
+  fullPath: string
   isLexicon: boolean
   isSchemaDefinition: boolean
-  fullPath: string
+  isSubject: boolean
+  children: TreeNode[]
 }
 
 export interface TreeData {
   parent: string | null
-  subject: string
   subjectPath: string
-  siblings: TreeNode[]
-  children: TreeNode[]
+  root: TreeNode[]
 }
 
 /**
  * Gets tree data for sidebar navigation.
- * For lexicons: children are schema definition names.
- * For namespaces: children are direct namespace/lexicon children.
+ * Returns a recursive tree structure with the subject's siblings at root level,
+ * and the subject's children nested under it.
  */
 export async function getTreeData(
   subjectPath: string,
@@ -91,65 +91,75 @@ export async function getTreeData(
   const subject = segments[segments.length - 1]
   const parent = segments.length > 2 ? segments.slice(0, -1).join('.') : null
 
-  // For lexicons, children come from schema defs (no DB query needed)
+  // Helper to create a TreeNode
+  const makeNode = (
+    segment: string,
+    fullPath: string,
+    opts: {
+      isLexicon?: boolean
+      isSchemaDefinition?: boolean
+      isSubject?: boolean
+      children?: TreeNode[]
+    } = {},
+  ): TreeNode => ({
+    segment,
+    fullPath,
+    isLexicon: opts.isLexicon ?? false,
+    isSchemaDefinition: opts.isSchemaDefinition ?? false,
+    isSubject: opts.isSubject ?? false,
+    children: opts.children ?? [],
+  })
+
+  // Build subject's children
+  let subjectChildren: TreeNode[] = []
   if (lexiconDoc) {
+    // For lexicons, children are schema definitions
     const defs = lexiconDoc.defs ?? {}
-    const children: TreeNode[] = Object.keys(defs).map((defName) => ({
-      segment: defName,
-      isLexicon: false,
-      isSchemaDefinition: true,
-      fullPath: `${subjectPath}#${defName}`,
-    }))
+    subjectChildren = Object.keys(defs)
+      .sort()
+      .map((defName) =>
+        makeNode(`${defName}`, `${subjectPath}#${defName}`, {
+          isSchemaDefinition: true,
+        }),
+      )
+  } else if (parent) {
+    // For namespaces with parent, fetch direct children
+    const children = await getDirectChildren(subjectPath)
+    subjectChildren = children.map((c) =>
+      makeNode(c.segment, `${subjectPath}.${c.segment}`, {
+        isLexicon: c.isLexicon,
+      }),
+    )
+  }
 
-    // Only need to fetch siblings if we have a parent
-    let siblings: TreeNode[] = []
-    if (parent) {
-      const parentChildren = await getDirectChildren(parent)
-      siblings = parentChildren
-        .filter((child) => child.segment !== subject)
-        .map((child) => ({
-          ...child,
-          isSchemaDefinition: false,
-          fullPath: `${parent}.${child.segment}`,
-        }))
+  // Root namespace (2 segments) - just show children at root level
+  if (!parent) {
+    const children = await getDirectChildren(subjectPath)
+    return {
+      parent: null,
+      subjectPath,
+      root: children.map((c) =>
+        makeNode(c.segment, `${subjectPath}.${c.segment}`, {
+          isLexicon: c.isLexicon,
+        }),
+      ),
     }
-
-    return { parent, subject, subjectPath, siblings, children }
   }
 
-  // For namespaces, fetch siblings and children in parallel if we have a parent
-  if (parent) {
-    const [parentChildren, subjectChildren] = await Promise.all([
-      getDirectChildren(parent),
-      getDirectChildren(subjectPath),
-    ])
+  // Fetch siblings and build root tree
+  const parentChildren = await getDirectChildren(parent)
+  const root = parentChildren
+    .map((c) => {
+      const isSubject = c.segment === subject
+      return makeNode(c.segment, `${parent}.${c.segment}`, {
+        isLexicon: c.isLexicon,
+        isSubject,
+        children: isSubject ? subjectChildren : [],
+      })
+    })
+    .sort((a, b) => a.segment.localeCompare(b.segment))
 
-    const siblings = parentChildren
-      .filter((child) => child.segment !== subject)
-      .map((child) => ({
-        ...child,
-        isSchemaDefinition: false,
-        fullPath: `${parent}.${child.segment}`,
-      }))
-
-    const children = subjectChildren.map((child) => ({
-      ...child,
-      isSchemaDefinition: false,
-      fullPath: `${subjectPath}.${child.segment}`,
-    }))
-
-    return { parent, subject, subjectPath, siblings, children }
-  }
-
-  // Root namespace (2 segments) - no parent, no siblings
-  const subjectChildren = await getDirectChildren(subjectPath)
-  const children = subjectChildren.map((child) => ({
-    ...child,
-    isSchemaDefinition: false,
-    fullPath: `${subjectPath}.${child.segment}`,
-  }))
-
-  return { parent: null, subject, subjectPath, siblings: [], children }
+  return { parent, subjectPath, root }
 }
 
 export interface NamespaceChild {
