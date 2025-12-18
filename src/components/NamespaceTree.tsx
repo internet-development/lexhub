@@ -163,11 +163,15 @@ export function NamespaceTree({
   const maxDepth = Math.max(...items.map((i) => i.depth), 0)
   const svgWidth = (maxDepth + 2) * INDENT_WIDTH
 
-  // Find first item index at each depth for trunk start position
+  // Find trunk start positions:
+  // - Depth 0: first item at depth 0 (siblings share a trunk)
+  // - Depth 1: subject's position (children branch from subject)
+  const subjectIndex = items.findIndex((item) => item.isSubject)
   const firstIndexAtDepth: Record<number, number> = {}
   items.forEach((item, index) => {
     if (firstIndexAtDepth[item.depth] === undefined) {
-      firstIndexAtDepth[item.depth] = index
+      // Children (depth 1) should start from subject, not first child
+      firstIndexAtDepth[item.depth] = item.depth === 1 ? subjectIndex : index
     }
   })
 
@@ -200,8 +204,7 @@ export function NamespaceTree({
         >
           {/* Inactive paths first (background) */}
           {items.map((item, index) => {
-            const isActive = item.isSubject || item.isChildOfSubject
-            if (isActive) return null
+            if (item.isSubject) return null
             const startIndex = firstIndexAtDepth[item.depth]
             return (
               <ConnectorPath
@@ -212,10 +215,9 @@ export function NamespaceTree({
               />
             )
           })}
-          {/* Active paths last (foreground, animated) */}
+          {/* Subject path last (foreground, animated) */}
           {items.map((item, index) => {
-            const isActive = item.isSubject || item.isChildOfSubject
-            if (!isActive) return null
+            if (!item.isSubject) return null
             const startIndex = firstIndexAtDepth[item.depth]
             return (
               <ConnectorPath
