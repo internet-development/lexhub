@@ -160,11 +160,11 @@ export interface NamespaceChild {
 }
 
 /**
- * Gets namespace data for rendering the namespace page
+ * Gets children of a namespace prefix for rendering the namespace page
  */
-export async function getNamespaceData(
+export async function getNamespaceChildren(
   prefix: string,
-): Promise<{ children: NamespaceChild[] }> {
+): Promise<NamespaceChild[]> {
   const prefixDepth = prefix.split('.').length
 
   const result: Array<{
@@ -198,15 +198,13 @@ export async function getNamespaceData(
     ORDER BY cs.segment
   `)
 
-  return {
-    children: result.map((row) => ({
-      segment: row.segment,
-      fullPath: `${prefix}.${row.segment}`,
-      isLexicon: row.is_lexicon,
-      lexiconCount: row.lexicon_count,
-      description: row.description,
-    })),
-  }
+  return result.map((row) => ({
+    segment: row.segment,
+    fullPath: `${prefix}.${row.segment}`,
+    isLexicon: row.is_lexicon,
+    lexiconCount: row.lexicon_count,
+    description: row.description,
+  }))
 }
 
 // Page data types
@@ -243,9 +241,9 @@ export async function getPageData(path: string): Promise<PageData | null> {
   const isValidPath = isValidNsid(path) || isValidNamespacePrefix(path)
   if (!isValidPath) return null
 
-  const [treeData, { children }] = await Promise.all([
+  const [treeData, children] = await Promise.all([
     getTreeData(path, null),
-    getNamespaceData(path),
+    getNamespaceChildren(path),
   ])
 
   // No children means nothing exists under this prefix
