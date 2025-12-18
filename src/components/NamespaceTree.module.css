@@ -49,9 +49,9 @@
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-dasharray: 500;
-  stroke-dashoffset: 500;
-  animation: drawLine 1s ease-out forwards;
+  stroke-dasharray: var(--path-length);
+  stroke-dashoffset: var(--path-length);
+  animation: drawLine 0.4s ease-out forwards;
 }
 
 @keyframes drawLine {

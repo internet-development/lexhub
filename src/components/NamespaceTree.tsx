@@ -48,6 +48,16 @@ function ConnectorPath({
   const trunkOffset = depth > 0 ? LABEL_GAP : 0
   const x = endX - INDENT_WIDTH + TRUNK_X + trunkOffset
 
+  // Calculate path length for consistent animation timing
+  const verticalLength = Math.abs(endY - startY) - CURVE_RADIUS
+  const horizontalLength = endX - x - CURVE_RADIUS
+  // Approximate quarter circle arc length: (π/2) * r ≈ 1.57 * r
+  const curveLength = CURVE_RADIUS * 1.57
+  const pathLength =
+    startY === endY
+      ? endX - x // horizontal only
+      : verticalLength + curveLength + horizontalLength
+
   // If this is the first item at this depth, just draw horizontal
   if (startY === endY) {
     const path = `M ${x} ${endY} L ${endX} ${endY}`
@@ -55,6 +65,13 @@ function ConnectorPath({
       <path
         d={path}
         className={active ? styles.connectorActive : styles.connector}
+        style={
+          active
+            ? ({
+                '--path-length': pathLength,
+              } as React.CSSProperties)
+            : undefined
+        }
       />
     )
   }
@@ -71,6 +88,13 @@ function ConnectorPath({
     <path
       d={path}
       className={active ? styles.connectorActive : styles.connector}
+      style={
+        active
+          ? ({
+              '--path-length': pathLength,
+            } as React.CSSProperties)
+          : undefined
+      }
     />
   )
 }
