@@ -68,6 +68,29 @@ export interface TreeData {
 }
 
 /**
+ * Creates a TreeNode with sensible defaults
+ */
+function makeTreeNode(
+  segment: string,
+  fullPath: string,
+  opts: {
+    isLexicon?: boolean
+    isSchemaDefinition?: boolean
+    isSubject?: boolean
+    children?: TreeNode[]
+  } = {},
+): TreeNode {
+  return {
+    segment,
+    fullPath,
+    isLexicon: opts.isLexicon ?? false,
+    isSchemaDefinition: opts.isSchemaDefinition ?? false,
+    isSubject: opts.isSubject ?? false,
+    children: opts.children ?? [],
+  }
+}
+
+/**
  * Gets tree data for sidebar navigation.
  * Returns a recursive tree structure with the subject's siblings at root level,
  * and the subject's children nested under it.
@@ -83,50 +106,22 @@ async function getTreeData(
   const subject = segments[segments.length - 1]
   const parent = segments.length > 2 ? segments.slice(0, -1).join('.') : null
 
-  // Helper to create a TreeNode
-  const makeNode = (
-    segment: string,
-    fullPath: string,
-    opts: {
-      isLexicon?: boolean
-      isSchemaDefinition?: boolean
-      isSubject?: boolean
-      children?: TreeNode[]
-    } = {},
-  ): TreeNode => ({
-    segment,
-    fullPath,
-    isLexicon: opts.isLexicon ?? false,
-    isSchemaDefinition: opts.isSchemaDefinition ?? false,
-    isSubject: opts.isSubject ?? false,
-    children: opts.children ?? [],
-  })
-
   // Fetch lexicon if not provided and path is valid NSID
   const lexicon =
     lexiconDoc ??
     (isValidNsid(subjectPath) ? await getLexiconByNsid(subjectPath) : null)
 
-  // Build subject's children
+  // Build subject's children from schema definitions (lexicon) or namespace children
   let subjectChildren: TreeNode[] = []
   if (lexicon) {
-    // For lexicons, children are schema definitions
     const defs = lexicon.defs ?? {}
     subjectChildren = Object.keys(defs)
       .sort()
       .map((defName) =>
-        makeNode(defName, `${subjectPath}#${defName}`, {
+        makeTreeNode(defName, `${subjectPath}#${defName}`, {
           isSchemaDefinition: true,
         }),
       )
-  } else if (parent) {
-    // For namespaces with parent, fetch direct children
-    const children = await getDirectChildren(subjectPath)
-    subjectChildren = children.map((c) =>
-      makeNode(c.segment, `${subjectPath}.${c.segment}`, {
-        isLexicon: c.isLexicon,
-      }),
-    )
   }
 
   // Root namespace (2 segments) - just show children at root level
@@ -136,25 +131,36 @@ async function getTreeData(
       parent: null,
       subjectPath,
       root: children.map((c) =>
-        makeNode(c.segment, `${subjectPath}.${c.segment}`, {
+        makeTreeNode(c.segment, `${subjectPath}.${c.segment}`, {
           isLexicon: c.isLexicon,
         }),
       ),
     }
   }
 
-  // Fetch siblings and build root tree
-  const parentChildren = await getDirectChildren(parent)
-  const root = parentChildren
-    .map((c) => {
-      const isSubject = c.segment === subject
-      return makeNode(c.segment, `${parent}.${c.segment}`, {
+  // Fetch subject children (if namespace) and siblings in parallel
+  const [nsChildren, siblings] = await Promise.all([
+    lexicon ? Promise.resolve([]) : getDirectChildren(subjectPath),
+    getDirectChildren(parent),
+  ])
+
+  if (!lexicon) {
+    subjectChildren = nsChildren.map((c) =>
+      makeTreeNode(c.segment, `${subjectPath}.${c.segment}`, {
         isLexicon: c.isLexicon,
-        isSubject,
-        children: isSubject ? subjectChildren : [],
-      })
+      }),
+    )
+  }
+
+  // Build root tree from siblings
+  const root = siblings.map((c) => {
+    const isSubject = c.segment === subject
+    return makeTreeNode(c.segment, `${parent}.${c.segment}`, {
+      isLexicon: c.isLexicon,
+      isSubject,
+      children: isSubject ? subjectChildren : [],
     })
-    .sort((a, b) => a.segment.localeCompare(b.segment))
+  })
 
   return { parent, subjectPath, root }
 }
