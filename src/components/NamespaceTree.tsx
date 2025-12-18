@@ -25,6 +25,8 @@ type TreeItem = {
   depth: number
   isSubject?: boolean
   isChildOfSubject?: boolean
+  isLexicon?: boolean
+  isSchemaDefinition?: boolean
 }
 
 /**
@@ -107,10 +109,12 @@ function ItemLabel({
   variant?: 'default' | 'muted'
 }) {
   const style = { marginLeft: LABEL_GAP }
+  const prefix = item.isSchemaDefinition ? '#' : ''
 
   if (item.isSubject) {
     return (
       <span className={styles.itemLabel} style={style} data-subject>
+        {prefix}
         {item.segment}
       </span>
     )
@@ -123,6 +127,7 @@ function ItemLabel({
       className={styles.itemLabel}
       style={style}
     >
+      {prefix}
       {item.segment}
     </Link>
   )
@@ -145,6 +150,7 @@ export function NamespaceTree({
       segment: s.segment,
       fullPath: s.fullPath,
       depth: 0,
+      isLexicon: s.isLexicon,
     })),
     ...(isRootNamespace
       ? []
@@ -167,6 +173,8 @@ export function NamespaceTree({
       fullPath: c.fullPath,
       depth: 1,
       isChildOfSubject: true,
+      isLexicon: c.isLexicon,
+      isSchemaDefinition: c.fullPath.includes('#'),
     }))
     .sort((a, b) => a.segment.localeCompare(b.segment))
 
@@ -178,6 +186,7 @@ export function NamespaceTree({
           segment: c.segment,
           fullPath: c.fullPath,
           depth: 0,
+          isLexicon: c.isLexicon,
         }))
         .sort((a, b) => a.segment.localeCompare(b.segment))
     : []
