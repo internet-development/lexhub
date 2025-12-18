@@ -39,6 +39,7 @@ function TreeItem({ node, isSubject, variant = 'default' }: TreeItemProps) {
 const ITEM_HEIGHT = 28
 const INDENT_WIDTH = 16
 const CONNECTOR_OFFSET = 8
+const CURVE_RADIUS = 4
 
 function VerticalLine({
   fromY,
@@ -73,8 +74,9 @@ function CurvedConnector({
   width: number
   active?: boolean
 }) {
-  const radius = 6
-  const path = `M ${x} ${y - radius} Q ${x} ${y} ${x + radius} ${y} L ${x + width} ${y}`
+  // Curve from vertical line position to item
+  // Path: start at (x, y-radius), curve to (x+radius, y), then line to end
+  const path = `M ${x} ${y - CURVE_RADIUS} Q ${x} ${y} ${x + CURVE_RADIUS} ${y} L ${x + width} ${y}`
 
   return (
     <path
@@ -82,6 +84,16 @@ function CurvedConnector({
       className={active ? styles.connectorPathActive : styles.connectorPath}
     />
   )
+}
+
+type RenderItem = {
+  key: string
+  node: TreeNode
+  depth: number
+  index: number
+  isSubject?: boolean
+  isChild?: boolean
+  variant?: 'default' | 'muted'
 }
 
 export function NamespaceTree({
@@ -92,18 +104,9 @@ export function NamespaceTree({
   children,
 }: NamespaceTreeProps) {
   const isRootNamespace = !parent && siblings.length === 0
-  const hasSiblings = siblings.length > 0
-
-  type RenderItem = {
-    key: string
-    node: TreeNode
-    depth: number
-    isSubject?: boolean
-    isChild?: boolean // child of subject (part of active path)
-    variant?: 'default' | 'muted'
-  }
 
   const items: RenderItem[] = []
+  let index = 0
 
   if (isRootNamespace) {
     children.forEach((child) => {
@@ -111,63 +114,57 @@ export function NamespaceTree({
         key: child.segment,
         node: child,
         depth: 0,
+        index: index++,
       })
     })
   } else {
-    // Subject node
+    // Subject node at depth 0
     items.push({
       key: 'subject',
       node: { segment: subject, fullPath: subjectPath, isLexicon: false },
       depth: 0,
+      index: index++,
       isSubject: true,
     })
 
-    // Children of subject (active path)
+    // Children of subject at depth 1
     children.forEach((child) => {
       items.push({
         key: `child-${child.segment}`,
         node: child,
         depth: 1,
+        index: index++,
         isChild: true,
       })
     })
 
-    // Siblings
+    // Siblings at depth 0
     siblings.forEach((sibling) => {
       items.push({
         key: `sibling-${sibling.segment}`,
         node: sibling,
         depth: 0,
+        index: index++,
         variant: 'muted',
       })
     })
   }
 
+  // Helper to get Y position for an item
+  const getY = (idx: number) => idx * ITEM_HEIGHT + ITEM_HEIGHT / 2
+  // Helper to get X position for a depth
+  const getX = (depth: number) => depth * INDENT_WIDTH + CONNECTOR_OFFSET
+
   const svgHeight = items.length * ITEM_HEIGHT
   const maxDepth = Math.max(...items.map((item) => item.depth), 0)
-  const svgWidth = (maxDepth + 1) * INDENT_WIDTH + CONNECTOR_OFFSET
+  const svgWidth = (maxDepth + 1) * INDENT_WIDTH + CONNECTOR_OFFSET + 4
 
   const connectors: React.ReactNode[] = []
 
-  // Track vertical line ranges per depth, separately for active/inactive
-  const activeRange: { start: number; end: number } | null =
-    children.length > 0
-      ? {
-          start: ITEM_HEIGHT / 2,
-          end: children.length * ITEM_HEIGHT + ITEM_HEIGHT / 2,
-        }
-      : null
-
-  const inactiveRange = hasSiblings
-    ? {
-        start: ITEM_HEIGHT / 2,
-        end: (items.length - 1) * ITEM_HEIGHT + ITEM_HEIGHT / 2,
-      }
-    : null
-
-  items.forEach((item, index) => {
-    const y = index * ITEM_HEIGHT + ITEM_HEIGHT / 2
-    const x = item.depth * INDENT_WIDTH + CONNECTOR_OFFSET
+  // Draw curved connectors for each item
+  items.forEach((item) => {
+    const y = getY(item.index)
+    const x = getX(item.depth)
     const isActive = item.isSubject || item.isChild
 
     connectors.push(
@@ -181,39 +178,28 @@ export function NamespaceTree({
     )
   })
 
-  // Vertical line for children (active, depth 1)
-  if (activeRange && children.length > 0) {
+  // Vertical line for depth 0 (main trunk)
+  const depth0Items = items.filter((item) => item.depth === 0)
+  if (depth0Items.length > 1) {
+    const firstY = getY(depth0Items[0].index)
+    const lastY = getY(depth0Items[depth0Items.length - 1].index)
+    connectors.push(
+      <VerticalLine key="v-depth0" x={getX(0)} fromY={firstY} toY={lastY} />,
+    )
+  }
+
+  // Vertical line for depth 1 (children - active)
+  const depth1Items = items.filter((item) => item.depth === 1)
+  if (depth1Items.length > 1) {
+    const firstY = getY(depth1Items[0].index)
+    const lastY = getY(depth1Items[depth1Items.length - 1].index)
     connectors.push(
       <VerticalLine
-        key="v-active"
-        x={INDENT_WIDTH + CONNECTOR_OFFSET}
-        fromY={activeRange.start}
-        toY={activeRange.end}
+        key="v-depth1"
+        x={getX(1)}
+        fromY={firstY}
+        toY={lastY}
         active
-      />,
-    )
-  }
-
-  // Vertical line for main trunk (inactive, depth 0)
-  if (inactiveRange && !isRootNamespace) {
-    connectors.push(
-      <VerticalLine
-        key="v-main"
-        x={CONNECTOR_OFFSET}
-        fromY={inactiveRange.start}
-        toY={inactiveRange.end}
-      />,
-    )
-  }
-
-  // Vertical line for root namespace (no subject)
-  if (isRootNamespace && items.length > 1) {
-    connectors.push(
-      <VerticalLine
-        key="v-root"
-        x={CONNECTOR_OFFSET}
-        fromY={ITEM_HEIGHT / 2}
-        toY={(items.length - 1) * ITEM_HEIGHT + ITEM_HEIGHT / 2}
       />,
     )
   }
