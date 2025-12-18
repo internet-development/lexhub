@@ -1,14 +1,8 @@
 import Link from '@/components/Link'
-import type { TreeNode } from '@/db/queries'
+import type { TreeData, TreeNode } from '@/db/queries'
 import styles from './NamespaceTree.module.css'
 
-export interface NamespaceTreeProps {
-  parent: string | null
-  subject: string
-  subjectPath: string
-  siblings: TreeNode[]
-  children: TreeNode[]
-}
+export type NamespaceTreeProps = TreeData
 
 const ITEM_HEIGHT = 28
 const INDENT_WIDTH = 16

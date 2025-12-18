@@ -73,6 +73,7 @@ export interface TreeNode {
 export interface TreeData {
   parent: string | null
   subject: string
+  subjectPath: string
   siblings: TreeNode[]
   children: TreeNode[]
 }
@@ -113,7 +114,7 @@ export async function getTreeData(
         }))
     }
 
-    return { parent, subject, siblings, children }
+    return { parent, subject, subjectPath, siblings, children }
   }
 
   // For namespaces, fetch siblings and children in parallel if we have a parent
@@ -137,7 +138,7 @@ export async function getTreeData(
       fullPath: `${subjectPath}.${child.segment}`,
     }))
 
-    return { parent, subject, siblings, children }
+    return { parent, subject, subjectPath, siblings, children }
   }
 
   // Root namespace (2 segments) - no parent, no siblings
@@ -148,7 +149,7 @@ export async function getTreeData(
     fullPath: `${subjectPath}.${child.segment}`,
   }))
 
-  return { parent: null, subject, siblings: [], children }
+  return { parent: null, subject, subjectPath, siblings: [], children }
 }
 
 export interface NamespaceChild {

@@ -18,18 +18,16 @@ interface PageProps {
 }
 
 function PageLayout({
-  id,
   treeData,
   children,
 }: {
-  id: string
   treeData: TreeData
   children: React.ReactNode
 }) {
   return (
     <div className={styles.layout}>
       <aside className={styles.sidebar}>
-        <NamespaceTree {...treeData} subjectPath={id} />
+        <NamespaceTree {...treeData} />
       </aside>
       <main className={styles.main}>{children}</main>
     </div>
@@ -43,7 +41,7 @@ async function renderPage(id: string): Promise<React.ReactNode | null> {
     if (lexicon) {
       const treeData = await getTreeData(id, lexicon)
       return (
-        <PageLayout id={id} treeData={treeData}>
+        <PageLayout treeData={treeData}>
           <LexiconPage lexicon={lexicon} />
         </PageLayout>
       )
@@ -63,7 +61,7 @@ async function renderPage(id: string): Promise<React.ReactNode | null> {
   ])
 
   return (
-    <PageLayout id={id} treeData={treeData}>
+    <PageLayout treeData={treeData}>
       <NamespacePage prefix={id} children={children} />
     </PageLayout>
   )
