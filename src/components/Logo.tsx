@@ -3,5 +3,16 @@ export interface LogoProps {
 }
 
 export default function Logo({ className }: LogoProps) {
-  return <h1 className={className}>LexHub</h1>
+  return (
+    <span
+      className={className}
+      style={{
+        fontSize: 'var(--font-size-xl)',
+        fontWeight: 'var(--font-weight-bold)',
+        color: 'var(--color-text-primary)',
+      }}
+    >
+      LexHub
+    </span>
+  )
 }

@@ -94,7 +94,7 @@ export default function HomePage() {
     <div className={styles.container}>
       <header className={styles.header}>
         <div className={styles.headerContent}>
-          <Logo className={styles.title} />
+          <Logo />
           <div className={styles.socialLinks}>
             <a
               href="https://bsky.app"
