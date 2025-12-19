@@ -2,7 +2,7 @@ import clsx from '@/common/clsx'
 import styles from '@/components/Readme.module.css'
 
 import { readFile } from 'fs/promises'
-import { join } from 'path'
+import { join, resolve } from 'path'
 import type { HTMLAttributes } from 'react'
 import rehypeSanitize from 'rehype-sanitize'
 import rehypeStringify from 'rehype-stringify'
@@ -38,8 +38,14 @@ const MISSING_README_FILENAME = '_missing.md'
  * "missing" README file.
  */
 async function getReadmeContent(nsid: string): Promise<string> {
+  const filePath = resolve(READMES_DIR, `${nsid}.md`)
+
+  // Prevent path traversal attacks
+  if (!filePath.startsWith(READMES_DIR + '/')) {
+    throw new Error('Invalid NSID')
+  }
+
   try {
-    const filePath = join(READMES_DIR, `${nsid}.md`)
     return await readFile(filePath, 'utf-8')
   } catch (error: any) {
     if (error?.code === 'ENOENT') {
