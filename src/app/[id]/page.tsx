@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { getPageData, type PageData } from './data'
+import Header from '@/components/Header'
 import { LexiconPage } from '@/components/LexiconPage'
 import { NamespacePage } from '@/components/NamespacePage'
 import { NamespaceTree } from '@/components/NamespaceTree'
@@ -36,11 +37,14 @@ function PageLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className={styles.layout}>
-      <aside className={styles.sidebar}>
-        <NamespaceTree {...data.treeData} />
-      </aside>
-      <main className={styles.main}>{children}</main>
-    </div>
+    <>
+      <Header />
+      <div className={styles.layout}>
+        <aside className={styles.sidebar}>
+          <NamespaceTree {...data.treeData} />
+        </aside>
+        <main className={styles.main}>{children}</main>
+      </div>
+    </>
   )
 }

@@ -1,12 +1,6 @@
 import Link from '@/components/Link'
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/components/Table'
+import { Card } from '@/components/Card'
+import CubeIcon from '@/components/CubeIcon'
 import styles from './NamespacePage.module.css'
 
 export interface NamespacePageProps {
@@ -25,49 +19,51 @@ export function NamespacePage({ prefix, children }: NamespacePageProps) {
     <article className={styles.root}>
       <header className={styles.header}>
         <h1 className={styles.title}>{prefix}</h1>
-        <p className={styles.subtitle}>
-          {children.length} {children.length === 1 ? 'item' : 'items'}
-        </p>
+        <div className={styles.versionDropdown}>
+          <span>Version History</span>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </div>
       </header>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Lexicons</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead>
-              <span className="visually-hidden">Actions</span>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+      <Card width="full" className={styles.card}>
+        <div className={styles.grid}>
           {children.map((child) => (
-            <TableRow key={child.segment}>
-              <TableCell>
-                <code className={styles.segmentName}>{child.segment}</code>
-              </TableCell>
-              <TableCell>
-                <span className={styles.typeTag}>
-                  {child.isLexicon ? 'lexicon' : 'namespace'}
-                </span>
-              </TableCell>
-              <TableCell>{child.lexiconCount.toLocaleString()}</TableCell>
-              <TableCell>
-                <span className={styles.description}>
-                  {child.description || '-'}
-                </span>
-              </TableCell>
-              <TableCell>
-                <Link href={`/${child.fullPath}`} variant="primary">
-                  View
-                </Link>
-              </TableCell>
-            </TableRow>
+            <Link
+              key={child.segment}
+              href={`/${child.fullPath}`}
+              variant="default"
+              className={styles.gridItem}
+            >
+              <div className={styles.itemLeft}>
+                <CubeIcon size={18} className={styles.itemIcon} />
+                <span className={styles.itemName}>{child.segment}</span>
+              </div>
+              <span className={styles.itemType}>
+                {child.isLexicon ? 'QUERY' : '—'}
+              </span>
+            </Link>
           ))}
-        </TableBody>
-      </Table>
+        </div>
+
+        <section className={styles.readme}>
+          <h2 className={styles.readmeTitle}>README</h2>
+          <h3 className={styles.readmeSubtitle}>{prefix}</h3>
+          <p className={styles.readmePlaceholder}>
+            Oh no, there&apos;s no README for this namespace yet.
+          </p>
+        </section>
+      </Card>
     </article>
   )
 }
