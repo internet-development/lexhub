@@ -1,14 +1,8 @@
 import Link from '@/components/Link'
-import type { TreeNode } from '@/db/queries'
+import type { TreeData, TreeNode } from '@/app/[id]/data'
 import styles from './NamespaceTree.module.css'
 
-export interface NamespaceTreeProps {
-  parent: string | null
-  subject: string
-  subjectPath: string
-  siblings: TreeNode[]
-  children: TreeNode[]
-}
+export type NamespaceTreeProps = TreeData
 
 const ITEM_HEIGHT = 28
 const INDENT_WIDTH = 16
@@ -18,18 +12,45 @@ const LABEL_GAP = 4
 const CHILD_TRUNK_OFFSET_Y = 12
 const TRUNK_START_Y = 0
 
-type TreeItem = {
-  key: string
-  segment: string
-  fullPath: string
+type PositionedNode = {
+  node: TreeNode
   depth: number
-  isSubject?: boolean
-  isChildOfSubject?: boolean
+  index: number
+}
+
+type ConnectorPathData = {
+  key: string
+  startY: number
+  endY: number
+  endX: number
+  depth: number
+  active: boolean
 }
 
 /**
+ * Walks a tree depth-first, calling visitor for each node.
+ * Returns the next index after processing the subtree.
+ */
+function walkTree(
+  nodes: TreeNode[],
+  depth: number,
+  startIndex: number,
+  visitor: (node: TreeNode, depth: number, index: number) => void,
+): number {
+  let index = startIndex
+  for (const node of nodes) {
+    visitor(node, depth, index)
+    index++
+    index = walkTree(node.children, depth + 1, index, visitor)
+  }
+  return index
+}
+
+const getY = (index: number) => index * ITEM_HEIGHT + ITEM_HEIGHT / 2
+const getX = (depth: number) => (depth + 1) * INDENT_WIDTH
+
+/**
  * Draws an L-shaped path from the trunk to an item.
- * Path goes: vertical down to item's Y, then horizontal to item.
  */
 function ConnectorPath({
   startY,
@@ -37,46 +58,10 @@ function ConnectorPath({
   endX,
   depth,
   active,
-}: {
-  startY: number
-  endY: number
-  endX: number
-  depth: number
-  active?: boolean
-}) {
-  // For depth > 0, offset trunk by LABEL_GAP to align with parent text
+}: Omit<ConnectorPathData, 'key'>) {
   const trunkOffset = depth > 0 ? LABEL_GAP : 0
   const x = endX - INDENT_WIDTH + TRUNK_X + trunkOffset
 
-  // Calculate path length for consistent animation timing
-  const verticalLength = Math.abs(endY - startY) - CURVE_RADIUS
-  const horizontalLength = endX - x - CURVE_RADIUS
-  // Approximate quarter circle arc length: (π/2) * r ≈ 1.57 * r
-  const curveLength = CURVE_RADIUS * 1.57
-  const pathLength =
-    startY === endY
-      ? endX - x // horizontal only
-      : verticalLength + curveLength + horizontalLength
-
-  // If this is the first item at this depth, just draw horizontal
-  if (startY === endY) {
-    const path = `M ${x} ${endY} L ${endX} ${endY}`
-    return (
-      <path
-        d={path}
-        className={active ? styles.connectorActive : styles.connector}
-        style={
-          active
-            ? ({
-                '--path-length': pathLength,
-              } as React.CSSProperties)
-            : undefined
-        }
-      />
-    )
-  }
-
-  // L-shape with curved corner: down then right
   const path = `
     M ${x} ${startY}
     L ${x} ${endY - CURVE_RADIUS}
@@ -84,130 +69,93 @@ function ConnectorPath({
     L ${endX} ${endY}
   `
 
+  // Path length: vertical + curve (π/2 * r) + horizontal
+  const pathLength =
+    Math.abs(endY - startY) -
+    CURVE_RADIUS +
+    CURVE_RADIUS * 1.57 +
+    (endX - x - CURVE_RADIUS)
+
   return (
     <path
       d={path}
       className={active ? styles.connectorActive : styles.connector}
       style={
         active
-          ? ({
-              '--path-length': pathLength,
-            } as React.CSSProperties)
+          ? ({ '--path-length': pathLength } as React.CSSProperties)
           : undefined
       }
     />
   )
 }
 
-function ItemLabel({
-  item,
-  variant = 'default',
-}: {
-  item: TreeItem
-  variant?: 'default' | 'muted'
-}) {
+function ItemLabel({ node }: { node: TreeNode }) {
   const style = { marginLeft: LABEL_GAP }
+  const prefix = node.isSchemaDefinition ? '#' : ''
+  const variant =
+    node.isSubject || node.children.length > 0 ? 'default' : 'muted'
 
-  if (item.isSubject) {
+  if (node.isSubject) {
     return (
       <span className={styles.itemLabel} style={style} data-subject>
-        {item.segment}
+        {prefix}
+        {node.segment}
       </span>
     )
   }
 
   return (
     <Link
-      href={`/${item.fullPath}`}
+      href={`/${node.fullPath}`}
       variant={variant}
       className={styles.itemLabel}
       style={style}
     >
-      {item.segment}
+      {prefix}
+      {node.segment}
     </Link>
   )
 }
 
 export function NamespaceTree({
   parent,
-  subject,
   subjectPath,
-  siblings,
-  children,
+  root,
 }: NamespaceTreeProps) {
-  const isRootNamespace = !parent && siblings.length === 0
+  const isRootNamespace = !parent && root.every((n) => !n.isSubject)
 
-  // Build items list - all at depth 0, sorted alphabetically
-  // Subject stays in its alphabetical position
-  const depth0Items: TreeItem[] = [
-    ...siblings.map((s) => ({
-      key: s.segment,
-      segment: s.segment,
-      fullPath: s.fullPath,
-      depth: 0,
-    })),
-    ...(isRootNamespace
-      ? []
-      : [
-          {
-            key: 'subject',
-            segment: subject,
-            fullPath: subjectPath,
-            depth: 0,
-            isSubject: true,
-          },
-        ]),
-  ].sort((a, b) => a.segment.localeCompare(b.segment))
+  // Collect positioned nodes and connector paths via tree walk
+  const items: PositionedNode[] = []
+  const paths: ConnectorPathData[] = []
+  const trunkStartIndex = new Map<number, number>()
 
-  // Children of subject at depth 1, sorted alphabetically
-  const depth1Items: TreeItem[] = children
-    .map((c) => ({
-      key: `child-${c.segment}`,
-      segment: c.segment,
-      fullPath: c.fullPath,
-      depth: 1,
-      isChildOfSubject: true,
-    }))
-    .sort((a, b) => a.segment.localeCompare(b.segment))
+  walkTree(root, 0, 0, (node, depth, index) => {
+    items.push({ node, depth, index })
 
-  // For root namespace, just show children at depth 0
-  const rootItems: TreeItem[] = isRootNamespace
-    ? children
-        .map((c) => ({
-          key: c.segment,
-          segment: c.segment,
-          fullPath: c.fullPath,
-          depth: 0,
-        }))
-        .sort((a, b) => a.segment.localeCompare(b.segment))
-    : []
+    // Track trunk start for each depth level
+    // For children (depth > 0), trunk starts from parent (subject)
+    if (!trunkStartIndex.has(depth)) {
+      trunkStartIndex.set(depth, index)
+    }
 
-  // Build final flat list with children inserted after subject
-  const items: TreeItem[] = isRootNamespace
-    ? rootItems
-    : depth0Items.flatMap((item) =>
-        item.isSubject ? [item, ...depth1Items] : [item],
-      )
+    const startY =
+      depth === 0
+        ? TRUNK_START_Y
+        : getY(trunkStartIndex.get(depth)! - 1) + CHILD_TRUNK_OFFSET_Y
 
-  // Calculate positions
-  const getY = (index: number) => index * ITEM_HEIGHT + ITEM_HEIGHT / 2
-  const getX = (depth: number) => (depth + 1) * INDENT_WIDTH
+    paths.push({
+      key: node.fullPath,
+      startY,
+      endY: getY(index),
+      endX: getX(depth),
+      depth,
+      active: node.isSubject,
+    })
+  })
 
   const svgHeight = items.length * ITEM_HEIGHT
   const maxDepth = Math.max(...items.map((i) => i.depth), 0)
   const svgWidth = (maxDepth + 2) * INDENT_WIDTH
-
-  // Find trunk start positions:
-  // - Depth 0: first item at depth 0 (siblings share a trunk)
-  // - Depth 1: subject's position (children branch from subject)
-  const subjectIndex = items.findIndex((item) => item.isSubject)
-  const firstIndexAtDepth: Record<number, number> = {}
-  items.forEach((item, index) => {
-    if (firstIndexAtDepth[item.depth] === undefined) {
-      // Children (depth 1) should start from subject, not first child
-      firstIndexAtDepth[item.depth] = item.depth === 1 ? subjectIndex : index
-    }
-  })
 
   return (
     <nav className={styles.root} aria-label="Namespace navigation">
@@ -236,53 +184,22 @@ export function NamespaceTree({
           height={svgHeight}
           aria-hidden="true"
         >
-          {/* Inactive paths first (background) */}
-          {items.map((item, index) => {
-            if (item.isSubject) return null
-            const startIndex = firstIndexAtDepth[item.depth]
-            const startY =
-              item.depth === 0
-                ? TRUNK_START_Y
-                : getY(startIndex) + CHILD_TRUNK_OFFSET_Y
-            return (
-              <ConnectorPath
-                key={item.key}
-                startY={startY}
-                endY={getY(index)}
-                endX={getX(item.depth)}
-                depth={item.depth}
-              />
-            )
-          })}
-          {/* Subject path last (foreground, animated) */}
-          {items.map((item, index) => {
-            if (!item.isSubject) return null
-            return (
-              <ConnectorPath
-                key={item.key}
-                startY={TRUNK_START_Y}
-                endY={getY(index)}
-                endX={getX(item.depth)}
-                depth={item.depth}
-                active
-              />
-            )
-          })}
+          {/* Sort so active paths render last (on top) */}
+          {paths
+            .toSorted((a, b) => Number(a.active) - Number(b.active))
+            .map(({ key, ...rest }) => (
+              <ConnectorPath key={key} {...rest} />
+            ))}
         </svg>
 
         <ul className={styles.tree}>
-          {items.map((item) => (
+          {items.map(({ node, depth }) => (
             <li
-              key={item.key}
+              key={node.fullPath}
               className={styles.item}
-              style={{ paddingLeft: getX(item.depth) }}
+              style={{ paddingLeft: getX(depth) }}
             >
-              <ItemLabel
-                item={item}
-                variant={
-                  item.isSubject || item.isChildOfSubject ? 'default' : 'muted'
-                }
-              />
+              <ItemLabel node={node} />
             </li>
           ))}
         </ul>

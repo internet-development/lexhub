@@ -78,7 +78,7 @@
   white-space: nowrap;
 }
 
-.itemLabel:hover {
+a.itemLabel:hover {
   text-decoration: underline;
 }
 
