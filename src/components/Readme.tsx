@@ -31,7 +31,7 @@ export async function Readme(props: ReadmeProps) {
 }
 
 const READMES_DIR = join(process.cwd(), 'content', 'readmes')
-const MISSING_README_FILENAME = '_missing.md'
+const MISSING_README_PATH = join(READMES_DIR, '_missing.md')
 
 /** Fetches the README content for a given namespace ID (nsid).
  * If the README file does not exist, it falls back to a default
@@ -49,8 +49,7 @@ async function getReadmeContent(nsid: string): Promise<string> {
     return await readFile(filePath, 'utf-8')
   } catch (error: any) {
     if (error?.code === 'ENOENT') {
-      const missingReadmePath = join(READMES_DIR, MISSING_README_FILENAME)
-      return await readFile(missingReadmePath, 'utf-8')
+      return await readFile(MISSING_README_PATH, 'utf-8')
     }
     throw error
   }
