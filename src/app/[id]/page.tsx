@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getPageData, type PageData } from '@/db/queries'
+import { getPageData, type PageData } from './data'
 import { LexiconPage } from '@/components/LexiconPage'
 import { NamespacePage } from '@/components/NamespacePage'
 import { NamespaceTree } from '@/components/NamespaceTree'

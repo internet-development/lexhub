@@ -1,5 +1,5 @@
 import Link from '@/components/Link'
-import type { TreeData, TreeNode } from '@/db/queries'
+import type { TreeData, TreeNode } from '@/app/[id]/data'
 import styles from './NamespaceTree.module.css'
 
 export type NamespaceTreeProps = TreeData
