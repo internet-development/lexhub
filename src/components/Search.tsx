@@ -58,7 +58,7 @@ export default function Search(props: SearchProps) {
   const {
     onChange,
     onSearch,
-    placeholder = 'Lexicons, Namespaces, CIDs...',
+    placeholder = 'Search Lexicons, Namespaces...',
     buttonText = 'Search',
   } = props
 

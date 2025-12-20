@@ -6,12 +6,6 @@
 .layout {
   display: grid;
   grid-template-columns: 1fr 3fr;
-}
-
-.sidebar {
   padding: 2rem;
-}
-
-.main {
-  padding: 2rem;
+  gap: 1rem;
 }
