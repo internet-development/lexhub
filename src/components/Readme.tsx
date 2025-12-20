@@ -21,12 +21,11 @@ export async function Readme(props: ReadmeProps) {
   const html = await markdownToHtml(markdown)
 
   return (
-    <article className={clsx(styles.root, className)} {...restProps}>
-      <div
-        className={styles.content}
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
-    </article>
+    <article
+      className={clsx(styles.content, className)}
+      dangerouslySetInnerHTML={{ __html: html }}
+      {...restProps}
+    ></article>
   )
 }
 
