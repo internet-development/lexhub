@@ -1,17 +1,10 @@
 import clsx from '@/common/clsx'
 import styles from '@/components/Search.module.css'
 import { useSearchSuggestions } from '@/components/useSearchSuggestions'
+import { useRouter } from 'next/navigation'
 
-import { useEffect, useId, useReducer, useRef } from 'react'
+import { useEffect, useId, useReducer, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
-
-export interface SearchProps {
-  value: string
-  onChange: (value: string) => void
-  onSearch: () => void
-  placeholder?: string
-  buttonText?: string
-}
 
 type State = {
   isOpen: boolean
@@ -54,18 +47,27 @@ function reducer(state: State, action: Action): State {
   }
 }
 
+export interface SearchProps {
+  onChange?: (value: string) => void
+  onSearch?: (value: string) => void
+  placeholder?: string
+  buttonText?: string
+}
+
 export default function Search(props: SearchProps) {
   const {
-    value,
     onChange,
     onSearch,
-    placeholder = 'Search...',
+    placeholder = 'Lexicons, Namespaces, CIDs...',
     buttonText = 'Search',
   } = props
+
+  const router = useRouter()
 
   const listboxId = useId()
   const inputRef = useRef<HTMLInputElement | null>(null)
 
+  const [value, setValue] = useState('')
   const [state, dispatch] = useReducer(reducer, initialState)
   const close = () => dispatch({ type: 'close' })
   const open = () => dispatch({ type: 'open' })
@@ -74,13 +76,26 @@ export default function Search(props: SearchProps) {
     dispatch({ type: 'resetActive' })
   }, [value])
 
+  const handleChange = (next: string) => {
+    setValue(next)
+    onChange?.(next)
+  }
+
+  const handleSearch = () => {
+    if (onSearch) {
+      onSearch(value)
+    } else if (value.trim()) {
+      router.push(`/${value.trim()}`)
+    }
+  }
+
   const { suggestions, isLoading, error } = useSearchSuggestions(value, {
     enabled: state.isOpen,
     limit: 20,
   })
 
   const commitSelection = (next: string) => {
-    onChange(next)
+    handleChange(next)
     close()
     inputRef.current?.focus()
   }
@@ -101,7 +116,7 @@ export default function Search(props: SearchProps) {
         }
         e.preventDefault()
         close()
-        onSearch()
+        handleSearch()
         return
       case 'Escape':
         close()
@@ -132,7 +147,7 @@ export default function Search(props: SearchProps) {
       onSubmit={(e) => {
         e.preventDefault()
         close()
-        onSearch()
+        handleSearch()
       }}
     >
       <div className={clsx(styles.wrapper, showPopup && styles.wrapperOpen)}>
@@ -152,7 +167,7 @@ export default function Search(props: SearchProps) {
               : undefined
           }
           onChange={(e) => {
-            onChange(e.target.value)
+            handleChange(e.target.value)
             open()
           }}
           onFocus={open}

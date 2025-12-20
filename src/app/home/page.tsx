@@ -86,9 +86,7 @@ const namespaces: Namespace[] = [
 ]
 
 export default function HomePage() {
-  const router = useRouter()
   const [activeTab, setActiveTab] = useState<TabType>('featured')
-  const [searchQuery, setSearchQuery] = useState('')
 
   return (
     <div className={styles.container}>
@@ -138,16 +136,7 @@ export default function HomePage() {
           </div>
 
           <div className={styles.searchContainer}>
-            <Search
-              value={searchQuery}
-              onChange={setSearchQuery}
-              onSearch={() => {
-                const q = searchQuery.trim()
-                if (!q) return
-                router.push(`/${encodeURIComponent(q)}`)
-              }}
-              placeholder="Lexicons, Namespaces, CIDs..."
-            />
+            <Search />
           </div>
         </div>
       </section>
