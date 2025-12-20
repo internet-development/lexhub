@@ -1,21 +1,16 @@
 .layout {
   display: grid;
-  grid-template-columns: 380px 1fr;
-  min-height: calc(100dvh - 73px);
+  grid-template-columns: auto 1fr;
 }
 
 .sidebar {
-  border-right: 1px solid var(--border-color, #e5e5e5);
   padding: 1.5rem;
-  background: var(--sidebar-bg, #fafafa);
-  overflow-y: auto;
 }
 
 .main {
   padding: 2rem;
+  margin: 0 auto;
   overflow-y: auto;
-  background: var(--color-background-light, #f9fafb);
-  min-height: 100dvh;
 }
 
 @media (max-width: 768px) {
