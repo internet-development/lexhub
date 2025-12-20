@@ -37,7 +37,7 @@ function PageLayout({
   children: React.ReactNode
 }) {
   return (
-    <>
+    <div className={styles.page}>
       <Header />
       <div className={styles.layout}>
         <aside className={styles.sidebar}>
@@ -45,6 +45,6 @@ function PageLayout({
         </aside>
         <main className={styles.main}>{children}</main>
       </div>
-    </>
+    </div>
   )
 }

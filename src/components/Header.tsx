@@ -11,14 +11,14 @@ import styles from './Header.module.css'
 
 export default function Header() {
   return (
-    <header>
-      <div className={styles.container}>
-        <div className={styles.logo}>
-          <Link href="/" variant="default">
-            <Logo className={styles.logoText} />
-          </Link>
-        </div>
+    <header className={styles.container}>
+      <div className={styles.logo}>
+        <Link href="/" variant="default">
+          <Logo />
+        </Link>
+      </div>
 
+      <div className={styles.rightSection}>
         <div className={styles.search}>
           <Search />
         </div>
