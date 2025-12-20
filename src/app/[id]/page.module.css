@@ -1,25 +1,13 @@
 .layout {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 1fr 3fr;
 }
 
 .sidebar {
-  padding: 1.5rem;
+  padding: 2rem;
 }
 
 .main {
   padding: 2rem;
   margin: 0 auto;
-  overflow-y: auto;
-}
-
-@media (max-width: 768px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    border-right: none;
-    border-bottom: 1px solid var(--border-color, #e5e5e5);
-  }
 }
