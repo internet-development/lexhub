@@ -24,7 +24,7 @@ export default function Header({ initialSearchValue = '' }: HeaderProps) {
   }
 
   return (
-    <header className={styles.header}>
+    <header>
       <div className={styles.container}>
         <div className={styles.logo}>
           <Link href="/" variant="default">
