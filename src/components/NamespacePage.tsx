@@ -1,6 +1,7 @@
 import Link from '@/components/Link'
 import { Card } from '@/components/Card'
 import CubeIcon from '@/components/CubeIcon'
+import { VersionDropdown } from '@/components/VersionDropdown'
 import styles from './NamespacePage.module.css'
 import { Readme } from './Readme'
 
@@ -52,22 +53,3 @@ export function NamespacePage({ prefix, children }: NamespacePageProps) {
   )
 }
 
-function VersionDropdown() {
-  return (
-    <div className={styles.versionDropdown}>
-      <span>Version History</span>
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <polyline points="6 9 12 15 18 9" />
-      </svg>
-    </div>
-  )
-}
