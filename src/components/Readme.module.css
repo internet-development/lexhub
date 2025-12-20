@@ -1,9 +1,3 @@
-.root {
-  margin-top: var(--space-8);
-  padding-top: var(--space-6);
-  border-top: 0.0625rem solid var(--color-border);
-}
-
 .content {
   font-size: var(--font-size-base);
   line-height: var(--line-height-relaxed);

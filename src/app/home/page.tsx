@@ -86,15 +86,13 @@ const namespaces: Namespace[] = [
 ]
 
 export default function HomePage() {
-  const router = useRouter()
   const [activeTab, setActiveTab] = useState<TabType>('featured')
-  const [searchQuery, setSearchQuery] = useState('')
 
   return (
     <div className={styles.container}>
       <header className={styles.header}>
         <div className={styles.headerContent}>
-          <Logo className={styles.title} />
+          <Logo />
           <div className={styles.socialLinks}>
             <a
               href="https://bsky.app"
@@ -138,16 +136,7 @@ export default function HomePage() {
           </div>
 
           <div className={styles.searchContainer}>
-            <Search
-              value={searchQuery}
-              onChange={setSearchQuery}
-              onSearch={() => {
-                const q = searchQuery.trim()
-                if (!q) return
-                router.push(`/${encodeURIComponent(q)}`)
-              }}
-              placeholder="Lexicons, Namespaces, CIDs..."
-            />
+            <Search />
           </div>
         </div>
       </section>

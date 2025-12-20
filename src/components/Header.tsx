@@ -9,37 +9,18 @@ import GitHubIcon from '@/components/GitHubIcon'
 import Link from '@/components/Link'
 import styles from './Header.module.css'
 
-export interface HeaderProps {
-  initialSearchValue?: string
-}
-
-export default function Header({ initialSearchValue = '' }: HeaderProps) {
-  const router = useRouter()
-  const [searchValue, setSearchValue] = useState(initialSearchValue)
-
-  const handleSearch = () => {
-    if (searchValue.trim()) {
-      router.push(`/${searchValue.trim()}`)
-    }
-  }
-
+export default function Header() {
   return (
-    <header className={styles.header}>
-      <div className={styles.container}>
-        <div className={styles.logo}>
-          <Link href="/" variant="default">
-            <Logo className={styles.logoText} />
-          </Link>
-        </div>
+    <header className={styles.container}>
+      <div className={styles.logo}>
+        <Link href="/" variant="default">
+          <Logo />
+        </Link>
+      </div>
 
+      <div className={styles.rightSection}>
         <div className={styles.search}>
-          <Search
-            value={searchValue}
-            onChange={setSearchValue}
-            onSearch={handleSearch}
-            placeholder="Search Lexicons, Namespaces..."
-            buttonText="Search"
-          />
+          <Search />
         </div>
 
         <div className={styles.icons}>

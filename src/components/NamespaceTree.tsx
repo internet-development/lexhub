@@ -159,13 +159,11 @@ export function NamespaceTree({
 
   return (
     <nav className={styles.root} aria-label="Namespace navigation">
-      {isRootNamespace ? (
-        <div className={styles.header}>
+      <div className={styles.header}>
+        {isRootNamespace ? (
           <span className={styles.headerName}>{subjectPath}</span>
-        </div>
-      ) : (
-        parent && (
-          <div className={styles.header}>
+        ) : (
+          parent && (
             <Link
               href={`/${parent}`}
               variant="muted"
@@ -173,9 +171,9 @@ export function NamespaceTree({
             >
               {parent}
             </Link>
-          </div>
-        )
-      )}
+          )
+        )}
+      </div>
 
       <div className={styles.treeContainer}>
         <svg
