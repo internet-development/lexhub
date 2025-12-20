@@ -19,22 +19,8 @@ export function NamespacePage({ prefix, children }: NamespacePageProps) {
   return (
     <article className={styles.root}>
       <header className={styles.header}>
-        <h1 className={styles.title}>{prefix}</h1>
-        <div className={styles.versionDropdown}>
-          <span>Version History</span>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </div>
+        <span className={styles.title}>{prefix}</span>
+        <VersionDropdown />
       </header>
 
       <Card width="full" className={styles.card}>
@@ -63,5 +49,25 @@ export function NamespacePage({ prefix, children }: NamespacePageProps) {
         </section>
       </Card>
     </article>
+  )
+}
+
+function VersionDropdown() {
+  return (
+    <div className={styles.versionDropdown}>
+      <span>Version History</span>
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <polyline points="6 9 12 15 18 9" />
+      </svg>
+    </div>
   )
 }
