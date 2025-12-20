@@ -6,8 +6,6 @@
 
 .header {
   margin-bottom: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border-color, #e5e5e5);
 }
 
 .headerName {
