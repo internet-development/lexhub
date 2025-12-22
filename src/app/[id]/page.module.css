@@ -9,3 +9,7 @@
   padding: 2rem;
   gap: 1rem;
 }
+
+.main {
+  min-width: 0;
+}
