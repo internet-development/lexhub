@@ -96,6 +96,7 @@
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-light);
+  transition: color var(--transition-fast);
 }
 
 .defDetails[open] .defName {
@@ -103,15 +104,16 @@
 }
 
 .defType {
-  font-weight: var(--font-weight-normal);
   color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  user-select: none;
+  transition: color var(--transition-fast);
 }
 
 .defDetails[open] .defType {
   color: var(--color-text-primary);
-  font-weight: var(--font-weight-medium);
 }
 
 .chevron {
