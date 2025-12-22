@@ -163,15 +163,13 @@ export function NamespaceTree({
         {isRootNamespace ? (
           <span className={styles.headerName}>{subjectPath}</span>
         ) : (
-          parent && (
-            <Link
-              href={`/${parent}`}
-              variant="muted"
-              className={styles.headerLink}
-            >
-              {parent}
-            </Link>
-          )
+          <Link
+            href={`/${parent}`}
+            variant="muted"
+            className={styles.headerLink}
+          >
+            {parent}
+          </Link>
         )}
       </div>
 

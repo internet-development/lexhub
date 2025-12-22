@@ -1,6 +1,5 @@
 .root {
   font-family: var(--font-mono, monospace);
-  font-size: 0.875rem;
   line-height: 1;
 }
 
@@ -9,17 +8,18 @@
 }
 
 .headerName {
-  font-weight: 600;
+  font-weight: var(--font-weight-medium);
   color: var(--color-primary);
 }
 
 .headerLink {
-  text-decoration: none;
+  font-weight: var(--font-weight-medium);
   color: var(--color-primary);
-}
+  text-decoration: none;
 
-.headerLink:hover {
-  text-decoration: underline;
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .treeContainer {
@@ -64,10 +64,11 @@
   padding: 0;
   margin: 0;
   position: relative;
+  font-size: var(--font-size-sm);
 }
 
 .item {
-  height: 28px;
+  height: 1.75rem;
   display: flex;
   align-items: center;
 }
@@ -82,6 +83,6 @@ a.itemLabel:hover {
 }
 
 .itemLabel[data-subject] {
-  font-weight: 600;
+  font-weight: var(--font-weight-medium);
   color: var(--color-primary);
 }
