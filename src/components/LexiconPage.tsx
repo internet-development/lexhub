@@ -64,7 +64,7 @@ function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
           </div>
         </summary>
         <div className={styles.defContent}>
-          {'description' in def && def.description && (
+          {def.description && (
             <div className={styles.defDescriptionSection}>
               <span className={styles.defDescriptionLabel}>DESCRIPTION</span>
               <p className={styles.defDescription}>{def.description}</p>
@@ -78,4 +78,3 @@ function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
     </li>
   )
 }
-
