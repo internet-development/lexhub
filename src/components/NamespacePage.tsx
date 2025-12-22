@@ -38,7 +38,7 @@ export function NamespacePage({ prefix, children }: NamespacePageProps) {
                 <span className={styles.itemName}>{child.segment}</span>
               </div>
               <span className={styles.itemType}>
-                {child.isLexicon ? 'QUERY' : '—'}
+                {child.isLexicon ? 'LEXICON' : 'NAMESPACE'}
               </span>
             </Link>
           ))}
@@ -52,4 +52,3 @@ export function NamespacePage({ prefix, children }: NamespacePageProps) {
     </article>
   )
 }
-
