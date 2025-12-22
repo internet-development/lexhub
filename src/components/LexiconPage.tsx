@@ -70,9 +70,7 @@ function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
               <p className={styles.defDescription}>{def.description}</p>
             </div>
           )}
-          <div className={styles.defSchema}>
-            <pre className={styles.schema}>{JSON.stringify(def, null, 2)}</pre>
-          </div>
+          <pre className={styles.schema}>{JSON.stringify(def, null, 2)}</pre>
         </div>
       </details>
     </li>
