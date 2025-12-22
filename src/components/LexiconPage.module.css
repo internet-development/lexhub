@@ -54,10 +54,6 @@
   border-bottom: 0.0625rem solid var(--color-border);
 }
 
-.defItem:last-child {
-  border-bottom: none;
-}
-
 .defDetails {
   padding: var(--space-4);
   transition: background-color var(--transition-fast);
