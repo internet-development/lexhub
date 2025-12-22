@@ -1,4 +1,7 @@
 import type { LexiconDoc, LexUserType } from '@atproto/lexicon'
+import { Card } from '@/components/Card'
+import { VersionDropdown } from '@/components/VersionDropdown'
+import { Readme } from '@/components/Readme'
 import styles from './LexiconPage.module.css'
 
 export interface LexiconPageProps {
@@ -12,19 +15,20 @@ export function LexiconPage({ lexicon }: LexiconPageProps) {
     <article className={styles.root}>
       <header className={styles.header}>
         <h1 className={styles.title}>{lexicon.id}</h1>
-        {lexicon.description && (
-          <p className={styles.description}>{lexicon.description}</p>
-        )}
+        <VersionDropdown />
       </header>
 
-      <section className={styles.definitions}>
-        <h2 className={styles.sectionTitle}>Definitions</h2>
+      <Card width="full" className={styles.card}>
+        <section className={styles.readme}>
+          <h2 className={styles.sectionTitle}>README</h2>
+          <Readme nsid={lexicon.id} type="lexicon" />
+        </section>
         <ul className={styles.defList}>
           {defs.map(([name, def]) => (
             <SchemaDefinition key={name} name={name} def={def} />
           ))}
         </ul>
-      </section>
+      </Card>
     </article>
   )
 }
@@ -35,19 +39,43 @@ interface SchemaDefinitionProps {
 }
 
 function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
+  const type = 'type' in def ? def.type : 'unknown'
+
   return (
     <li className={styles.defItem} id={name}>
-      <div className={styles.defHeader}>
-        <code className={styles.defName}>{name}</code>
-        {'type' in def && <span className={styles.defType}>{def.type}</span>}
-      </div>
-      {'description' in def && def.description && (
-        <p className={styles.defDescription}>{def.description}</p>
-      )}
       <details className={styles.defDetails}>
-        <summary>Schema</summary>
-        <pre className={styles.schema}>{JSON.stringify(def, null, 2)}</pre>
+        <summary className={styles.defHeader}>
+          <span className={styles.defName}>{name}</span>
+          <div className={styles.defHeaderRight}>
+            <span className={styles.defType}>{type.toUpperCase()}</span>
+            <svg
+              className={styles.chevron}
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+        </summary>
+        <div className={styles.defContent}>
+          {'description' in def && def.description && (
+            <div className={styles.defDescriptionSection}>
+              <span className={styles.defDescriptionLabel}>DESCRIPTION</span>
+              <p className={styles.defDescription}>{def.description}</p>
+            </div>
+          )}
+          <div className={styles.defSchema}>
+            <pre className={styles.schema}>{JSON.stringify(def, null, 2)}</pre>
+          </div>
+        </div>
       </details>
     </li>
   )
 }
+
