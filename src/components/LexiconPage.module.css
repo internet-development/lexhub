@@ -55,7 +55,6 @@
 }
 
 .defDetails {
-  padding: var(--space-4);
   transition: background-color var(--transition-fast);
 }
 
@@ -64,6 +63,7 @@
 }
 
 .defHeader {
+  padding: var(--space-4);
   display: flex;
   align-items: center;
   justify-content: space-between;
