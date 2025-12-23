@@ -211,10 +211,6 @@
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);
   color: var(--color-text-primary);
-  background-color: var(--color-background-light);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-  display: inline-block;
 }
 
 .fieldRequired {
