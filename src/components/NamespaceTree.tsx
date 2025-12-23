@@ -7,7 +7,7 @@ export type NamespaceTreeProps = TreeData
 
 const ITEM_HEIGHT = 28
 const INDENT_WIDTH = 16
-const TRUNK_X = 4
+const TRUNK_X = 6
 const CURVE_RADIUS = 1
 const LABEL_GAP = 4
 const CHILD_TRUNK_OFFSET_Y = 12

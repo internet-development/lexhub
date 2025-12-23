@@ -76,6 +76,9 @@
 .itemLabel {
   text-decoration: none;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
 }
 
 a.itemLabel:hover {
@@ -85,10 +88,4 @@ a.itemLabel:hover {
 .itemLabel[data-subject] {
   font-weight: var(--font-weight-medium);
   color: var(--color-primary);
-}
-
-.itemIcon {
-  margin-right: var(--space-1);
-  vertical-align: middle;
-  flex-shrink: 0;
 }
