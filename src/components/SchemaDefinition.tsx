@@ -226,10 +226,13 @@ function constraint(
 }
 
 /** Filter out null values from constraint list */
-const compact = (...items: (string | null)[]): string[] =>
-  items.filter((x): x is string => x !== null)
+function compact(...items: (string | null)[]): string[] {
+  return items.filter((x): x is string => x !== null)
+}
 
-const join = (v: string[]) => v.join(', ')
+function join(v: string[]) {
+  return v.join(', ')
+}
 
 function getConstraints(prop: LexProperty): string[] {
   switch (prop.type) {
