@@ -6,13 +6,13 @@ export interface IconProps extends SVGProps<SVGSVGElement> {
 }
 
 export default function CubeIcon(props: IconProps) {
-  const { size = 17, className = '', ...restProps } = props
+  const { size = 16, className = '', ...restProps } = props
 
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 17 16"
+      viewBox="0 0 16 16"
       fill="none"
       className={className}
       {...restProps}
