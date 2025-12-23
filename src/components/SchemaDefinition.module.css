@@ -262,57 +262,6 @@
   border-radius: var(--radius-sm);
 }
 
-/* Scalar type view - property list */
-.propertyList {
-  margin-top: var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.propertyRow {
-  display: flex;
-  gap: var(--space-4);
-}
-
-.propertyLabel {
-  flex: 0 0 8rem;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-}
-
-.propertyValue {
-  flex: 1;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.propertyValue code {
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-primary);
-}
-
-.constraintList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-}
-
-.constraintList li {
-  font-size: var(--font-size-xs);
-  font-family: var(--font-family-mono);
-  color: var(--color-text-muted);
-  background-color: var(--color-background-light);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-}
-
 /* Token type view */
 .tokenMessage {
   margin-top: var(--space-4);

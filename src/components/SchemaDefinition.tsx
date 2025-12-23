@@ -146,124 +146,117 @@ function StructuredTypeView({ def }: ViewProps) {
 }
 
 function ScalarTypeView({ def }: ViewProps) {
-  const typeInfo = getScalarTypeInfo(def)
+  const properties = getScalarProperties(def)
+
+  if (properties.length === 0) {
+    return (
+      <div className={styles.noFields}>
+        No additional type information available.
+      </div>
+    )
+  }
 
   return (
-    <dl className={styles.propertyList}>
-      <div className={styles.propertyRow}>
-        <dt className={styles.propertyLabel}>Type</dt>
-        <dd className={styles.propertyValue}>
-          <code>{typeInfo.type}</code>
-        </dd>
-      </div>
-      {typeInfo.format && (
-        <div className={styles.propertyRow}>
-          <dt className={styles.propertyLabel}>Format</dt>
-          <dd className={styles.propertyValue}>
-            <code>{typeInfo.format}</code>
-          </dd>
-        </div>
-      )}
-      {typeInfo.constraints.length > 0 && (
-        <div className={styles.propertyRow}>
-          <dt className={styles.propertyLabel}>Constraints</dt>
-          <dd className={styles.propertyValue}>
-            <ul className={styles.constraintList}>
-              {typeInfo.constraints.map((c, i) => (
-                <li key={i}>{c}</li>
-              ))}
-            </ul>
-          </dd>
-        </div>
-      )}
-      {typeInfo.itemType && (
-        <div className={styles.propertyRow}>
-          <dt className={styles.propertyLabel}>Items</dt>
-          <dd className={styles.propertyValue}>
-            <code>{typeInfo.itemType}</code>
-          </dd>
-        </div>
-      )}
-    </dl>
+    <table className={styles.fieldTable}>
+      <thead>
+        <tr>
+          <th className={styles.fieldTableHead}>Property</th>
+          <th className={styles.fieldTableHead}>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        {properties.map((prop) => (
+          <tr key={prop.name} className={styles.fieldTableRow}>
+            <td className={styles.fieldTableCell}>
+              <code className={styles.fieldName}>{prop.name}</code>
+            </td>
+            <td className={styles.fieldTableCell}>
+              <code className={styles.fieldType}>{prop.value}</code>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   )
 }
 
-interface ScalarTypeInfo {
-  type: string
-  format?: string
-  constraints: string[]
-  itemType?: string
+interface ScalarProperty {
+  name: string
+  value: string
 }
 
-function getScalarTypeInfo(def: LexUserType): ScalarTypeInfo {
+/** Return a property if value is defined, otherwise null */
+function property(
+  name: string,
+  value: unknown,
+  format: (v: never) => string = String,
+): ScalarProperty | null {
+  if (value === undefined) return null
+  return { name, value: format(value as never) }
+}
+
+function compactProperties(
+  ...items: (ScalarProperty | null)[]
+): ScalarProperty[] {
+  return items.filter((x): x is ScalarProperty => x !== null)
+}
+
+function getScalarProperties(def: LexUserType): ScalarProperty[] {
   switch (def.type) {
     case 'string':
-      return {
-        type: 'string',
-        format: def.format,
-        constraints: compact(
-          constraint('default', def.default, JSON.stringify),
-          constraint('const', def.const, JSON.stringify),
-          constraint('enum', def.enum, join),
-          constraint('known values', def.knownValues, join),
-          constraint('minLength', def.minLength),
-          constraint('maxLength', def.maxLength),
-          constraint('minGraphemes', def.minGraphemes),
-          constraint('maxGraphemes', def.maxGraphemes),
-        ),
-      }
+      return compactProperties(
+        property('type', def.format ? `string (${def.format})` : 'string'),
+        property('default', def.default, JSON.stringify),
+        property('const', def.const, JSON.stringify),
+        property('enum', def.enum, join),
+        property('known values', def.knownValues, join),
+        property('minLength', def.minLength),
+        property('maxLength', def.maxLength),
+        property('minGraphemes', def.minGraphemes),
+        property('maxGraphemes', def.maxGraphemes),
+      )
     case 'integer':
-      return {
-        type: 'integer',
-        constraints: compact(
-          constraint('default', def.default, JSON.stringify),
-          constraint('const', def.const, JSON.stringify),
-          constraint('enum', def.enum, join),
-          constraint('min', def.minimum),
-          constraint('max', def.maximum),
-        ),
-      }
+      return compactProperties(
+        property('type', 'integer'),
+        property('default', def.default, JSON.stringify),
+        property('const', def.const, JSON.stringify),
+        property('enum', def.enum, join),
+        property('min', def.minimum),
+        property('max', def.maximum),
+      )
     case 'boolean':
-      return {
-        type: 'boolean',
-        constraints: compact(
-          constraint('default', def.default, JSON.stringify),
-          constraint('const', def.const, JSON.stringify),
-        ),
-      }
+      return compactProperties(
+        property('type', 'boolean'),
+        property('default', def.default, JSON.stringify),
+        property('const', def.const, JSON.stringify),
+      )
     case 'bytes':
-      return {
-        type: 'bytes',
-        constraints: compact(
-          constraint('minLength', def.minLength),
-          constraint('maxLength', def.maxLength),
-        ),
-      }
+      return compactProperties(
+        property('type', 'bytes'),
+        property('minLength', def.minLength),
+        property('maxLength', def.maxLength),
+      )
     case 'blob':
-      return {
-        type: 'blob',
-        constraints: compact(
-          constraint('accept', def.accept, join),
-          constraint('maxSize', def.maxSize),
-        ),
-      }
+      return compactProperties(
+        property('type', 'blob'),
+        property('accept', def.accept, join),
+        property('maxSize', def.maxSize),
+      )
     case 'array':
-      return {
-        type: 'array',
-        itemType: getTypeString(def.items),
-        constraints: compact(
-          constraint('minLength', def.minLength),
-          constraint('maxLength', def.maxLength),
-        ),
-      }
+      return compactProperties(
+        property('type', 'array'),
+        property('items', getTypeString(def.items)),
+        property('minLength', def.minLength),
+        property('maxLength', def.maxLength),
+      )
     case 'cid-link':
-      return { type: 'cid-link', constraints: [] }
+      return compactProperties(property('type', 'cid-link'))
     case 'unknown':
-      return { type: 'unknown', constraints: [] }
+      return compactProperties(property('type', 'unknown'))
     case 'permission-set':
-      return { type: 'permission-set', constraints: [] }
+      return compactProperties(property('type', 'permission-set'))
     default:
-      return { type: def.type, constraints: [] }
+      return compactProperties(property('type', def.type))
   }
 }
 
