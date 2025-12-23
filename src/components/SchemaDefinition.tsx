@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { LexUserType } from '@atproto/lexicon'
+import type { LexUserType, LexObject } from '@atproto/lexicon'
 import styles from './SchemaDefinition.module.css'
 
 export interface SchemaDefinitionProps {
@@ -139,23 +139,18 @@ interface FieldInfo {
   constraints: string[]
 }
 
-// Use a looser type for property objects to avoid complex union type issues
-type PropertyDef = Record<string, unknown> & {
-  type?: string
-  description?: string
-}
+/** Property type for object/record fields - derived from LexObject */
+type LexProperty = LexObject['properties'][string]
 
 function extractFields(def: LexUserType): FieldInfo[] {
   const fields: FieldInfo[] = []
-  const defAny = def as Record<string, unknown>
 
   // Handle object type
-  if (defAny.type === 'object' && defAny.properties) {
-    const properties = defAny.properties as Record<string, PropertyDef>
-    const required = new Set((defAny.required as string[]) ?? [])
-    const nullable = new Set((defAny.nullable as string[]) ?? [])
+  if (def.type === 'object' && def.properties) {
+    const required = new Set(def.required ?? [])
+    const nullable = new Set(def.nullable ?? [])
 
-    for (const [name, prop] of Object.entries(properties)) {
+    for (const [name, prop] of Object.entries(def.properties)) {
       fields.push({
         name,
         type: getTypeString(prop),
@@ -168,41 +163,28 @@ function extractFields(def: LexUserType): FieldInfo[] {
   }
 
   // Handle record type (has a nested record property with properties)
-  if (defAny.type === 'record' && defAny.record) {
-    const record = defAny.record as Record<string, unknown>
-    const properties = record.properties as
-      | Record<string, PropertyDef>
-      | undefined
-    if (properties) {
-      const required = new Set((record.required as string[]) ?? [])
-      const nullable = new Set((record.nullable as string[]) ?? [])
+  if (def.type === 'record' && def.record.properties) {
+    const required = new Set(def.record.required ?? [])
+    const nullable = new Set(def.record.nullable ?? [])
 
-      for (const [name, prop] of Object.entries(properties)) {
-        fields.push({
-          name,
-          type: getTypeString(prop),
-          description: prop.description,
-          required: required.has(name),
-          nullable: nullable.has(name),
-          constraints: getConstraints(prop),
-        })
-      }
+    for (const [name, prop] of Object.entries(def.record.properties)) {
+      fields.push({
+        name,
+        type: getTypeString(prop),
+        description: prop.description,
+        required: required.has(name),
+        nullable: nullable.has(name),
+        constraints: getConstraints(prop),
+      })
     }
   }
 
   // Handle query/procedure parameters
-  if (
-    (defAny.type === 'query' || defAny.type === 'procedure') &&
-    defAny.parameters
-  ) {
-    const params = defAny.parameters as Record<string, unknown>
-    const properties = params.properties as
-      | Record<string, PropertyDef>
-      | undefined
-    if (properties) {
-      const required = new Set((params.required as string[]) ?? [])
+  if ((def.type === 'query' || def.type === 'procedure') && def.parameters) {
+    if (def.parameters.properties) {
+      const required = new Set(def.parameters.required ?? [])
 
-      for (const [name, prop] of Object.entries(properties)) {
+      for (const [name, prop] of Object.entries(def.parameters.properties)) {
         fields.push({
           name: `param: ${name}`,
           type: getTypeString(prop),
@@ -218,81 +200,64 @@ function extractFields(def: LexUserType): FieldInfo[] {
   return fields
 }
 
-function getTypeString(prop: PropertyDef): string {
-  if (!prop.type) return 'unknown'
-
+function getTypeString(prop: LexProperty): string {
   switch (prop.type) {
-    case 'array': {
-      const items = prop.items as PropertyDef | undefined
-      if (items) {
-        const itemType = getTypeString(items)
-        return `array<${itemType}>`
-      }
-      return 'array'
-    }
-    case 'ref': {
-      const ref = prop.ref as string | undefined
-      return ref ? `ref(${ref})` : 'ref'
-    }
-    case 'union': {
-      const refs = prop.refs as string[] | undefined
-      return refs ? `union[${refs.length}]` : 'union'
-    }
-    case 'string': {
-      const format = prop.format as string | undefined
-      if (format) {
-        return `string (${format})`
-      }
-      return 'string'
-    }
+    case 'array':
+      return `array<${getTypeString(prop.items)}>`
+    case 'ref':
+      return `ref(${prop.ref})`
+    case 'union':
+      return `union[${prop.refs.length}]`
+    case 'string':
+      return prop.format ? `string (${prop.format})` : 'string'
     default:
       return prop.type
   }
 }
 
-function getConstraints(prop: PropertyDef): string[] {
+function getConstraints(prop: LexProperty): string[] {
   const constraints: string[] = []
 
-  if (prop.default !== undefined) {
+  if ('default' in prop && prop.default !== undefined) {
     constraints.push(`default: ${JSON.stringify(prop.default)}`)
   }
-  if (prop.const !== undefined) {
+  if ('const' in prop && prop.const !== undefined) {
     constraints.push(`const: ${JSON.stringify(prop.const)}`)
   }
-  if (prop.enum && Array.isArray(prop.enum)) {
+  if ('enum' in prop && prop.enum) {
     constraints.push(`enum: ${prop.enum.join(', ')}`)
   }
-  if (prop.knownValues && Array.isArray(prop.knownValues)) {
+  if ('knownValues' in prop && prop.knownValues) {
     constraints.push(`known values: ${prop.knownValues.join(', ')}`)
   }
-  if (prop.minimum !== undefined) {
+  if ('minimum' in prop && prop.minimum !== undefined) {
     constraints.push(`min: ${prop.minimum}`)
   }
-  if (prop.maximum !== undefined) {
+  if ('maximum' in prop && prop.maximum !== undefined) {
     constraints.push(`max: ${prop.maximum}`)
   }
-  if (prop.minLength !== undefined) {
+  if ('minLength' in prop && prop.minLength !== undefined) {
     constraints.push(`minLength: ${prop.minLength}`)
   }
-  if (prop.maxLength !== undefined) {
+  if ('maxLength' in prop && prop.maxLength !== undefined) {
     constraints.push(`maxLength: ${prop.maxLength}`)
   }
-  if (prop.minGraphemes !== undefined) {
+  if ('minGraphemes' in prop && prop.minGraphemes !== undefined) {
     constraints.push(`minGraphemes: ${prop.minGraphemes}`)
   }
-  if (prop.maxGraphemes !== undefined) {
+  if ('maxGraphemes' in prop && prop.maxGraphemes !== undefined) {
     constraints.push(`maxGraphemes: ${prop.maxGraphemes}`)
   }
-  if (prop.ref) {
+  if ('ref' in prop) {
     constraints.push(`ref: ${prop.ref}`)
   }
-  if (prop.refs && Array.isArray(prop.refs)) {
+  if ('refs' in prop) {
     constraints.push(`refs: ${prop.refs.join(', ')}`)
   }
-  if (prop.accept && Array.isArray(prop.accept)) {
+  if ('accept' in prop && prop.accept) {
     constraints.push(`accept: ${prop.accept.join(', ')}`)
   }
-  if (prop.maxSize !== undefined) {
+  if ('maxSize' in prop && prop.maxSize !== undefined) {
     constraints.push(`maxSize: ${prop.maxSize}`)
   }
 
