@@ -90,17 +90,23 @@ function ConnectorPath({
   )
 }
 
+function ItemPrefix({ node }: { node: TreeNode }) {
+  if (node.isLexicon) {
+    return <CubeIcon size={14} style={{ marginLeft: -1 }} />
+  }
+  if (node.isSchemaDefinition) return <span>#</span>
+  return null
+}
+
 function ItemLabel({ node }: { node: TreeNode }) {
   const style = { marginLeft: LABEL_GAP }
-  const prefix = node.isSchemaDefinition ? '#' : ''
   const variant =
     node.isSubject || node.children.length > 0 ? 'default' : 'muted'
 
   if (node.isSubject) {
     return (
       <span className={styles.itemLabel} style={style} data-subject>
-        {node.isLexicon && <CubeIcon size={14} className={styles.itemIcon} />}
-        {prefix}
+        <ItemPrefix node={node} />
         {node.segment}
       </span>
     )
@@ -113,8 +119,7 @@ function ItemLabel({ node }: { node: TreeNode }) {
       className={styles.itemLabel}
       style={style}
     >
-      {node.isLexicon && <CubeIcon size={14} className={styles.itemIcon} />}
-      {prefix}
+      <ItemPrefix node={node} />
       {node.segment}
     </Link>
   )
