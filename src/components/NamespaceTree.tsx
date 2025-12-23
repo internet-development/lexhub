@@ -94,7 +94,7 @@ function ItemPrefix({ node }: { node: TreeNode }) {
   if (node.isLexicon) {
     return <CubeIcon size={14} style={{ marginLeft: -1 }} />
   }
-  if (node.isSchemaDefinition) return <span>#</span>
+  if (node.isSchemaDefinition) return '#'
   return null
 }
 
