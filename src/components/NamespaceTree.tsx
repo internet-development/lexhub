@@ -1,4 +1,5 @@
 import Link from '@/components/Link'
+import CubeIcon from '@/components/CubeIcon'
 import type { TreeData, TreeNode } from '@/app/[id]/data'
 import styles from './NamespaceTree.module.css'
 
@@ -98,6 +99,7 @@ function ItemLabel({ node }: { node: TreeNode }) {
   if (node.isSubject) {
     return (
       <span className={styles.itemLabel} style={style} data-subject>
+        {node.isLexicon && <CubeIcon size={14} className={styles.itemIcon} />}
         {prefix}
         {node.segment}
       </span>
@@ -111,6 +113,7 @@ function ItemLabel({ node }: { node: TreeNode }) {
       className={styles.itemLabel}
       style={style}
     >
+      {node.isLexicon && <CubeIcon size={14} className={styles.itemIcon} />}
       {prefix}
       {node.segment}
     </Link>

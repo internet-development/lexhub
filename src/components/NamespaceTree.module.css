@@ -86,3 +86,9 @@ a.itemLabel:hover {
   font-weight: var(--font-weight-medium);
   color: var(--color-primary);
 }
+
+.itemIcon {
+  margin-right: var(--space-1);
+  vertical-align: middle;
+  flex-shrink: 0;
+}
