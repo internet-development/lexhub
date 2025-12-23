@@ -1,7 +1,7 @@
 'use client'
 
+import type { LexObject, LexUserType } from '@atproto/lexicon'
 import { useState } from 'react'
-import type { LexUserType, LexObject } from '@atproto/lexicon'
 import styles from './SchemaDefinition.module.css'
 
 export interface SchemaDefinitionProps {
@@ -143,61 +143,111 @@ interface FieldInfo {
 type LexProperty = LexObject['properties'][string]
 
 function extractFields(def: LexUserType): FieldInfo[] {
-  const fields: FieldInfo[] = []
+  switch (def.type) {
+    case 'object':
+      return extractObjectFields(def.properties, def.required, def.nullable)
 
-  // Handle object type
-  if (def.type === 'object' && def.properties) {
-    const required = new Set(def.required ?? [])
-    const nullable = new Set(def.nullable ?? [])
+    case 'record':
+      return extractObjectFields(
+        def.record.properties,
+        def.record.required,
+        def.record.nullable,
+      )
 
-    for (const [name, prop] of Object.entries(def.properties)) {
-      fields.push({
-        name,
-        type: getTypeString(prop),
-        description: prop.description,
-        required: required.has(name),
-        nullable: nullable.has(name),
-        constraints: getConstraints(prop),
-      })
-    }
+    case 'query':
+      return [
+        ...extractParamFields(def.parameters),
+        ...extractBodyFields(def.output, 'output'),
+      ]
+
+    case 'procedure':
+      return [
+        ...extractParamFields(def.parameters),
+        ...extractBodyFields(def.input, 'input'),
+        ...extractBodyFields(def.output, 'output'),
+      ]
+
+    case 'subscription':
+      return extractParamFields(def.parameters)
+
+    default:
+      return []
   }
+}
 
-  // Handle record type (has a nested record property with properties)
-  if (def.type === 'record' && def.record.properties) {
-    const required = new Set(def.record.required ?? [])
-    const nullable = new Set(def.record.nullable ?? [])
+function extractObjectFields(
+  properties: LexObject['properties'] | undefined,
+  required: string[] | undefined,
+  nullable: string[] | undefined,
+): FieldInfo[] {
+  if (!properties) return []
 
-    for (const [name, prop] of Object.entries(def.record.properties)) {
-      fields.push({
-        name,
-        type: getTypeString(prop),
-        description: prop.description,
-        required: required.has(name),
-        nullable: nullable.has(name),
-        constraints: getConstraints(prop),
-      })
-    }
-  }
+  const requiredSet = new Set(required ?? [])
+  const nullableSet = new Set(nullable ?? [])
 
-  // Handle query/procedure parameters
-  if ((def.type === 'query' || def.type === 'procedure') && def.parameters) {
-    if (def.parameters.properties) {
-      const required = new Set(def.parameters.required ?? [])
+  return Object.entries(properties).map(([name, prop]) => ({
+    name,
+    type: getTypeString(prop),
+    description: prop.description,
+    required: requiredSet.has(name),
+    nullable: nullableSet.has(name),
+    constraints: getConstraints(prop),
+  }))
+}
 
-      for (const [name, prop] of Object.entries(def.parameters.properties)) {
-        fields.push({
-          name: `param: ${name}`,
-          type: getTypeString(prop),
-          description: prop.description,
-          required: required.has(name),
-          nullable: false,
-          constraints: getConstraints(prop),
-        })
+type LexParams = {
+  properties?: Record<string, LexProperty>
+  required?: string[]
+}
+type LexBody = {
+  schema?:
+    | {
+        type: 'object'
+        properties?: LexObject['properties']
+        required?: string[]
+        nullable?: string[]
       }
-    }
+    | { type: 'ref' | 'union' }
+}
+
+function extractParamFields(params: LexParams | undefined): FieldInfo[] {
+  if (!params?.properties) return []
+
+  const requiredSet = new Set(params.required ?? [])
+
+  return Object.entries(params.properties).map(([name, prop]) => ({
+    name: `param: ${name}`,
+    type: getTypeString(prop),
+    description: prop.description,
+    required: requiredSet.has(name),
+    nullable: false,
+    constraints: getConstraints(prop),
+  }))
+}
+
+function extractBodyFields(
+  body: LexBody | undefined,
+  prefix: 'input' | 'output',
+): FieldInfo[] {
+  if (
+    !body?.schema ||
+    body.schema.type !== 'object' ||
+    !body.schema.properties
+  ) {
+    return []
   }
 
-  return fields
+  const requiredSet = new Set(body.schema.required ?? [])
+  const nullableSet = new Set(body.schema.nullable ?? [])
+
+  return Object.entries(body.schema.properties).map(([name, prop]) => ({
+    name: `${prefix}: ${name}`,
+    type: getTypeString(prop),
+    description: prop.description,
+    required: requiredSet.has(name),
+    nullable: nullableSet.has(name),
+    constraints: getConstraints(prop),
+  }))
 }
 
 function getTypeString(prop: LexProperty): string {
