@@ -2,6 +2,7 @@ import './reset.css'
 import './globals.css'
 
 import type { Metadata } from 'next'
+import Footer from '@/components/Footer'
 
 export const metadata: Metadata = {
   title: 'LexHub',
@@ -13,7 +14,12 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body
+        style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}
+      >
+        <div style={{ flex: 1 }}>{children}</div>
+        <Footer />
+      </body>
     </html>
   )
 }
