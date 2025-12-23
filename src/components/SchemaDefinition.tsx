@@ -215,51 +215,69 @@ function getTypeString(prop: LexProperty): string {
   }
 }
 
+/** Format a constraint as "label: value", or return null if value is undefined */
+function constraint(
+  label: string,
+  value: unknown,
+  format: (v: never) => string = String,
+): string | null {
+  if (value === undefined) return null
+  return `${label}: ${format(value as never)}`
+}
+
+/** Filter out null values from constraint list */
+const compact = (...items: (string | null)[]): string[] =>
+  items.filter((x): x is string => x !== null)
+
+const join = (v: string[]) => v.join(', ')
+
 function getConstraints(prop: LexProperty): string[] {
-  const constraints: string[] = []
-
-  if ('default' in prop && prop.default !== undefined) {
-    constraints.push(`default: ${JSON.stringify(prop.default)}`)
+  switch (prop.type) {
+    case 'string':
+      return compact(
+        constraint('default', prop.default, JSON.stringify),
+        constraint('const', prop.const, JSON.stringify),
+        constraint('enum', prop.enum, join),
+        constraint('known values', prop.knownValues, join),
+        constraint('minLength', prop.minLength),
+        constraint('maxLength', prop.maxLength),
+        constraint('minGraphemes', prop.minGraphemes),
+        constraint('maxGraphemes', prop.maxGraphemes),
+      )
+    case 'integer':
+      return compact(
+        constraint('default', prop.default, JSON.stringify),
+        constraint('const', prop.const, JSON.stringify),
+        constraint('enum', prop.enum, join),
+        constraint('min', prop.minimum),
+        constraint('max', prop.maximum),
+      )
+    case 'boolean':
+      return compact(
+        constraint('default', prop.default, JSON.stringify),
+        constraint('const', prop.const, JSON.stringify),
+      )
+    case 'array':
+      return compact(
+        constraint('minLength', prop.minLength),
+        constraint('maxLength', prop.maxLength),
+      )
+    case 'blob':
+      return compact(
+        constraint('accept', prop.accept, join),
+        constraint('maxSize', prop.maxSize),
+      )
+    case 'bytes':
+      return compact(
+        constraint('minLength', prop.minLength),
+        constraint('maxLength', prop.maxLength),
+      )
+    case 'ref':
+      return compact(constraint('ref', prop.ref))
+    case 'union':
+      return compact(constraint('refs', prop.refs, join))
+    case 'cid-link':
+    case 'unknown':
+      return []
   }
-  if ('const' in prop && prop.const !== undefined) {
-    constraints.push(`const: ${JSON.stringify(prop.const)}`)
-  }
-  if ('enum' in prop && prop.enum) {
-    constraints.push(`enum: ${prop.enum.join(', ')}`)
-  }
-  if ('knownValues' in prop && prop.knownValues) {
-    constraints.push(`known values: ${prop.knownValues.join(', ')}`)
-  }
-  if ('minimum' in prop && prop.minimum !== undefined) {
-    constraints.push(`min: ${prop.minimum}`)
-  }
-  if ('maximum' in prop && prop.maximum !== undefined) {
-    constraints.push(`max: ${prop.maximum}`)
-  }
-  if ('minLength' in prop && prop.minLength !== undefined) {
-    constraints.push(`minLength: ${prop.minLength}`)
-  }
-  if ('maxLength' in prop && prop.maxLength !== undefined) {
-    constraints.push(`maxLength: ${prop.maxLength}`)
-  }
-  if ('minGraphemes' in prop && prop.minGraphemes !== undefined) {
-    constraints.push(`minGraphemes: ${prop.minGraphemes}`)
-  }
-  if ('maxGraphemes' in prop && prop.maxGraphemes !== undefined) {
-    constraints.push(`maxGraphemes: ${prop.maxGraphemes}`)
-  }
-  if ('ref' in prop) {
-    constraints.push(`ref: ${prop.ref}`)
-  }
-  if ('refs' in prop) {
-    constraints.push(`refs: ${prop.refs.join(', ')}`)
-  }
-  if ('accept' in prop && prop.accept) {
-    constraints.push(`accept: ${prop.accept.join(', ')}`)
-  }
-  if ('maxSize' in prop && prop.maxSize !== undefined) {
-    constraints.push(`maxSize: ${prop.maxSize}`)
-  }
-
-  return constraints
 }
