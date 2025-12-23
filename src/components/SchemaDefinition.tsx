@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import type { LexUserType } from '@atproto/lexicon'
-import styles from './LexiconPage.module.css'
+import styles from './SchemaDefinition.module.css'
 
 export interface SchemaDefinitionProps {
   name: string
