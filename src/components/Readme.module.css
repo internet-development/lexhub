@@ -130,3 +130,35 @@
   background: var(--color-background-light);
   font-weight: var(--font-weight-semibold);
 }
+
+/* Wrapper and truncation styles */
+.wrapper {
+  position: relative;
+}
+
+.truncated {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.seeMore {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-2);
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.seeMore:hover {
+  color: var(--color-primary-hover);
+}

@@ -2,6 +2,7 @@ import type { LexiconDoc } from '@atproto/lexicon'
 import { Card } from '@/components/Card'
 import { VersionDropdown } from '@/components/VersionDropdown'
 import { Readme } from '@/components/Readme'
+import { ReadmeContent } from '@/components/ReadmeContent'
 import { SchemaDefinition } from '@/components/SchemaDefinition'
 import styles from './LexiconPage.module.css'
 
@@ -22,7 +23,9 @@ export function LexiconPage({ lexicon }: LexiconPageProps) {
       <Card width="full" className={styles.card}>
         <section className={styles.readme}>
           <h2 className={styles.sectionTitle}>README</h2>
-          <Readme nsid={lexicon.id} type="lexicon" />
+          <Readme type="lexicon">
+            <ReadmeContent nsid={lexicon.id} type="lexicon" />
+          </Readme>
         </section>
         <ul className={styles.defList}>
           {defs.map(([name, def]) => (

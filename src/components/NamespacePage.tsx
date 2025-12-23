@@ -4,6 +4,7 @@ import CubeIcon from '@/components/CubeIcon'
 import { VersionDropdown } from '@/components/VersionDropdown'
 import styles from './NamespacePage.module.css'
 import { Readme } from './Readme'
+import { ReadmeContent } from './ReadmeContent'
 
 export interface NamespacePageProps {
   prefix: string
@@ -46,7 +47,9 @@ export function NamespacePage({ prefix, children }: NamespacePageProps) {
 
         <section className={styles.readme}>
           <h2 className={styles.readmeTitle}>README</h2>
-          <Readme nsid={prefix} />
+          <Readme type="namespace">
+            <ReadmeContent nsid={prefix} type="namespace" />
+          </Readme>
         </section>
       </Card>
     </article>
