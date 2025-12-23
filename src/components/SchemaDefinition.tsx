@@ -11,6 +11,8 @@ export interface SchemaDefinitionProps {
 
 export function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
   const [activeTab, setActiveTab] = useState<'fields' | 'json'>('fields')
+  const category = getTypeCategory(def)
+  const fieldsTabLabel = category === 'structured' ? 'DATA FIELDS' : 'TYPE INFO'
 
   return (
     <li className={styles.defItem} id={name}>
@@ -46,7 +48,7 @@ export function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
               className={`${styles.tab} ${activeTab === 'fields' ? styles.tabActive : ''}`}
               onClick={() => setActiveTab('fields')}
             >
-              DATA FIELDS
+              {fieldsTabLabel}
             </button>
             <button
               className={`${styles.tab} ${activeTab === 'json' ? styles.tabActive : ''}`}
@@ -75,6 +77,19 @@ function JsonView({ def }: ViewProps) {
 }
 
 function NiceView({ def }: ViewProps) {
+  const category = getTypeCategory(def)
+
+  switch (category) {
+    case 'structured':
+      return <StructuredTypeView def={def} />
+    case 'scalar':
+      return <ScalarTypeView def={def} />
+    case 'token':
+      return <TokenTypeView def={def} />
+  }
+}
+
+function StructuredTypeView({ def }: ViewProps) {
   const fields = extractFields(def)
 
   if (fields.length === 0) {
@@ -115,9 +130,9 @@ function NiceView({ def }: ViewProps) {
               )}
               {field.constraints.length > 0 && (
                 <ul className={styles.fieldConstraints}>
-                  {field.constraints.map((constraint, i) => (
+                  {field.constraints.map((c, i) => (
                     <li key={i} className={styles.fieldConstraint}>
-                      {constraint}
+                      {c}
                     </li>
                   ))}
                 </ul>
@@ -127,6 +142,139 @@ function NiceView({ def }: ViewProps) {
         ))}
       </tbody>
     </table>
+  )
+}
+
+function ScalarTypeView({ def }: ViewProps) {
+  const typeInfo = getScalarTypeInfo(def)
+
+  return (
+    <dl className={styles.propertyList}>
+      <div className={styles.propertyRow}>
+        <dt className={styles.propertyLabel}>Type</dt>
+        <dd className={styles.propertyValue}>
+          <code>{typeInfo.type}</code>
+        </dd>
+      </div>
+      {typeInfo.format && (
+        <div className={styles.propertyRow}>
+          <dt className={styles.propertyLabel}>Format</dt>
+          <dd className={styles.propertyValue}>
+            <code>{typeInfo.format}</code>
+          </dd>
+        </div>
+      )}
+      {typeInfo.constraints.length > 0 && (
+        <div className={styles.propertyRow}>
+          <dt className={styles.propertyLabel}>Constraints</dt>
+          <dd className={styles.propertyValue}>
+            <ul className={styles.constraintList}>
+              {typeInfo.constraints.map((c, i) => (
+                <li key={i}>{c}</li>
+              ))}
+            </ul>
+          </dd>
+        </div>
+      )}
+      {typeInfo.itemType && (
+        <div className={styles.propertyRow}>
+          <dt className={styles.propertyLabel}>Items</dt>
+          <dd className={styles.propertyValue}>
+            <code>{typeInfo.itemType}</code>
+          </dd>
+        </div>
+      )}
+    </dl>
+  )
+}
+
+interface ScalarTypeInfo {
+  type: string
+  format?: string
+  constraints: string[]
+  itemType?: string
+}
+
+function getScalarTypeInfo(def: LexUserType): ScalarTypeInfo {
+  switch (def.type) {
+    case 'string':
+      return {
+        type: 'string',
+        format: def.format,
+        constraints: compact(
+          constraint('default', def.default, JSON.stringify),
+          constraint('const', def.const, JSON.stringify),
+          constraint('enum', def.enum, join),
+          constraint('known values', def.knownValues, join),
+          constraint('minLength', def.minLength),
+          constraint('maxLength', def.maxLength),
+          constraint('minGraphemes', def.minGraphemes),
+          constraint('maxGraphemes', def.maxGraphemes),
+        ),
+      }
+    case 'integer':
+      return {
+        type: 'integer',
+        constraints: compact(
+          constraint('default', def.default, JSON.stringify),
+          constraint('const', def.const, JSON.stringify),
+          constraint('enum', def.enum, join),
+          constraint('min', def.minimum),
+          constraint('max', def.maximum),
+        ),
+      }
+    case 'boolean':
+      return {
+        type: 'boolean',
+        constraints: compact(
+          constraint('default', def.default, JSON.stringify),
+          constraint('const', def.const, JSON.stringify),
+        ),
+      }
+    case 'bytes':
+      return {
+        type: 'bytes',
+        constraints: compact(
+          constraint('minLength', def.minLength),
+          constraint('maxLength', def.maxLength),
+        ),
+      }
+    case 'blob':
+      return {
+        type: 'blob',
+        constraints: compact(
+          constraint('accept', def.accept, join),
+          constraint('maxSize', def.maxSize),
+        ),
+      }
+    case 'array':
+      return {
+        type: 'array',
+        itemType: getTypeString(def.items),
+        constraints: compact(
+          constraint('minLength', def.minLength),
+          constraint('maxLength', def.maxLength),
+        ),
+      }
+    case 'cid-link':
+      return { type: 'cid-link', constraints: [] }
+    case 'unknown':
+      return { type: 'unknown', constraints: [] }
+    case 'permission-set':
+      return { type: 'permission-set', constraints: [] }
+    default:
+      return { type: def.type, constraints: [] }
+  }
+}
+
+function TokenTypeView({ def }: ViewProps) {
+  return (
+    <div className={styles.tokenMessage}>
+      <p>
+        This is a <strong>token</strong> type. Tokens are named constants used
+        as identifiers or enum-like values in the AT Protocol.
+      </p>
+    </div>
   )
 }
 
@@ -141,6 +289,37 @@ interface FieldInfo {
 
 /** Property type for object/record fields - derived from LexObject */
 type LexProperty = LexObject['properties'][string]
+
+/** Categories of lexicon types for determining which view to render */
+type TypeCategory = 'structured' | 'scalar' | 'token'
+
+function getTypeCategory(def: LexUserType): TypeCategory {
+  switch (def.type) {
+    // Structured types - have nested properties/fields
+    case 'object':
+    case 'record':
+    case 'query':
+    case 'procedure':
+    case 'subscription':
+      return 'structured'
+
+    // Scalar/primitive types - just constraints, no nested structure
+    case 'string':
+    case 'integer':
+    case 'boolean':
+    case 'bytes':
+    case 'blob':
+    case 'cid-link':
+    case 'unknown':
+    case 'array':
+    case 'permission-set':
+      return 'scalar'
+
+    // Token type - named constant marker
+    case 'token':
+      return 'token'
+  }
+}
 
 function extractFields(def: LexUserType): FieldInfo[] {
   switch (def.type) {
