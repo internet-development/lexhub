@@ -130,7 +130,7 @@
   left: 0;
   right: 0;
   height: 0.125rem;
-  background-color: var(--color-primary);
+  background-color: var(--color-text-primary);
 }
 
 .schema {
