@@ -56,10 +56,10 @@
 
 .defDetails {
   transition: background-color var(--transition-fast);
-}
 
-.defDetails:not([open]):hover {
-  background-color: var(--color-background-light);
+  &:not([open]):hover {
+    background-color: var(--color-background-light);
+  }
 }
 
 .defHeader {
@@ -122,8 +122,8 @@
   transform: rotate(-180deg);
 }
 
-.defDescriptionSection {
-  margin-top: var(--space-4);
+.defContent {
+  padding: 0 var(--space-4);
 }
 
 .defDescriptionLabel {
