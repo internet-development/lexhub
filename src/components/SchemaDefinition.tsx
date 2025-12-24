@@ -222,7 +222,9 @@ function FieldTable({ fields }: FieldTableProps) {
               )}
             </td>
             <td className={styles.fieldTableCell}>
-              <span className={styles.fieldType}>{field.type}</span>
+              <span className={styles.fieldType}>
+                <TypeDisplay prop={field.prop} />
+              </span>
             </td>
             <td className={styles.fieldTableCell}>
               {field.description && (
@@ -232,19 +234,7 @@ function FieldTable({ fields }: FieldTableProps) {
                 <ul className={styles.fieldConstraints}>
                   {field.constraints.map((c, i) => (
                     <li key={i} className={styles.fieldConstraint}>
-                      {c.type === 'ref' ? (
-                        <>
-                          {c.label}:{' '}
-                          <a
-                            href={refToHref(c.ref)}
-                            className={styles.fieldRefLink}
-                          >
-                            {c.ref}
-                          </a>
-                        </>
-                      ) : (
-                        `${c.label}: ${c.value}`
-                      )}
+                      {c.label}: {c.value}
                     </li>
                   ))}
                 </ul>
@@ -385,17 +375,18 @@ function TokenTypeView({ def }: ViewProps) {
 
 interface FieldInfo {
   name: string
-  type: string
+  prop: LexProperty
   description?: string
   required: boolean
   nullable: boolean
   constraints: FieldConstraint[]
 }
 
-/** A constraint can be plain text or a ref link */
-type FieldConstraint =
-  | { type: 'text'; label: string; value: string }
-  | { type: 'ref'; label: string; ref: string }
+/** A constraint is a label-value pair */
+interface FieldConstraint {
+  label: string
+  value: string
+}
 
 /** Property type for object/record fields - derived from LexObject */
 type LexProperty = LexObject['properties'][string]
@@ -487,7 +478,7 @@ function extractObjectFields(
 
   return Object.entries(properties).map(([name, prop]) => ({
     name,
-    type: getTypeString(prop),
+    prop,
     description: prop.description,
     required: requiredSet.has(name),
     nullable: nullableSet.has(name),
@@ -517,7 +508,7 @@ function extractParamFields(params: LexParams | undefined): FieldInfo[] {
 
   return Object.entries(params.properties).map(([name, prop]) => ({
     name,
-    type: getTypeString(prop),
+    prop,
     description: prop.description,
     required: requiredSet.has(name),
     nullable: false,
@@ -539,7 +530,7 @@ function extractBodyFields(body: LexBody | undefined): FieldInfo[] {
 
   return Object.entries(body.schema.properties).map(([name, prop]) => ({
     name,
-    type: getTypeString(prop),
+    prop,
     description: prop.description,
     required: requiredSet.has(name),
     nullable: nullableSet.has(name),
@@ -559,6 +550,36 @@ function getTypeString(prop: LexProperty): string {
       return prop.format ? `string (${prop.format})` : 'string'
     default:
       return prop.type
+  }
+}
+
+/** Renders a type with linkable refs */
+function TypeDisplay({ prop }: { prop: LexProperty }) {
+  switch (prop.type) {
+    case 'array':
+      return (
+        <>
+          array&lt;
+          <TypeDisplay prop={prop.items} />
+          &gt;
+        </>
+      )
+    case 'ref':
+      return (
+        <>
+          ref(
+          <a href={refToHref(prop.ref)} className={styles.fieldRefLink}>
+            {prop.ref}
+          </a>
+          )
+        </>
+      )
+    case 'union':
+      return <>union[{prop.refs.length}]</>
+    case 'string':
+      return <>{prop.format ? `string (${prop.format})` : 'string'}</>
+    default:
+      return <>{prop.type}</>
   }
 }
 
@@ -583,16 +604,7 @@ function textConstraint(
   format: (v: never) => string = String,
 ): FieldConstraint | null {
   if (value === undefined) return null
-  return { type: 'text', label, value: format(value as never) }
-}
-
-/** Format a ref constraint, or return null if ref is undefined */
-function refConstraint(
-  label: string,
-  ref: string | undefined,
-): FieldConstraint | null {
-  if (ref === undefined) return null
-  return { type: 'ref', label, ref }
+  return { label, value: format(value as never) }
 }
 
 /** Filter out null values from constraint list */
@@ -648,11 +660,9 @@ function getConstraints(prop: LexProperty): FieldConstraint[] {
         textConstraint('Max length', prop.maxLength),
       )
     case 'ref':
-      return compactConstraints(refConstraint('Reference', prop.ref))
+      return []
     case 'union':
-      return prop.refs.map(
-        (ref) => ({ type: 'ref', label: 'Union', ref }) as FieldConstraint,
-      )
+      return []
     case 'cid-link':
     case 'unknown':
       return []
