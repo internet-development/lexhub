@@ -7,7 +7,8 @@ import type {
   LexXrpcProcedure,
   LexXrpcSubscription,
 } from '@atproto/lexicon'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useHash } from '@/util/useHash'
 import styles from './SchemaDefinition.module.css'
 
 export interface SchemaDefinitionProps {
@@ -17,13 +18,28 @@ export interface SchemaDefinitionProps {
 
 export function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
   const [activeTab, setActiveTab] = useState<'fields' | 'json'>('fields')
+  const detailsRef = useRef<HTMLDetailsElement>(null)
+  const hash = useHash()
   const category = getTypeCategory(def)
   const fieldsTabLabel =
     category === 'scalar' || category === 'token' ? 'TYPE INFO' : 'DATA FIELDS'
 
+  // Auto-open when URL hash matches this schema's name
+  useEffect(() => {
+    if (hash === name && detailsRef.current) {
+      detailsRef.current.open = true
+      setTimeout(() => {
+        detailsRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        })
+      }, 0)
+    }
+  }, [hash, name])
+
   return (
     <li className={styles.defItem} id={name}>
-      <details className={styles.defDetails}>
+      <details ref={detailsRef} className={styles.defDetails}>
         <summary className={styles.defHeader}>
           <span className={styles.defName}>{name}</span>
           <div className={styles.defHeaderRight}>
