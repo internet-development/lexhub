@@ -6,7 +6,7 @@
   transition: background-color var(--transition-fast);
 
   &:not([open]):hover {
-    background-color: var(--color-background-light);
+    background-color: var(--color-background-subtle);
   }
 }
 
@@ -39,7 +39,7 @@
 .defName {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
-  color: var(--color-text-light);
+  color: var(--color-text-tertiary);
   transition: color var(--transition-fast);
 }
 
@@ -48,7 +48,7 @@
 }
 
 .defType {
-  color: var(--color-text-light);
+  color: var(--color-text-tertiary);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -61,7 +61,7 @@
 }
 
 .chevron {
-  color: var(--color-text-light);
+  color: var(--color-text-tertiary);
   transition: transform var(--transition-fast);
   flex-shrink: 0;
 }
@@ -105,7 +105,7 @@
   padding: var(--space-2) var(--space-4);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  color: var(--color-text-light);
+  color: var(--color-text-tertiary);
   background: none;
   border: none;
   cursor: pointer;
@@ -136,7 +136,7 @@
 .schema {
   margin-top: var(--space-4);
   padding: var(--space-4);
-  background-color: var(--color-background-light);
+  background-color: var(--color-background-subtle);
   border-radius: var(--radius-md);
   overflow-x: auto;
   font-size: var(--font-size-xs);
@@ -165,7 +165,7 @@
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
-  background-color: var(--color-background-light);
+  background-color: var(--color-background-subtle);
   border-bottom: 0.0625rem solid var(--color-border);
 }
 
@@ -183,7 +183,7 @@
 }
 
 .fieldTableRow:hover {
-  background-color: var(--color-background-light);
+  background-color: var(--color-background-subtle);
 }
 
 .fieldTableRow:last-child {
@@ -257,7 +257,7 @@
   font-size: var(--font-size-xs);
   font-family: var(--font-family-mono);
   color: var(--color-text-muted);
-  background-color: var(--color-background-light);
+  background-color: var(--color-background-subtle);
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
 }
@@ -266,7 +266,7 @@
 .tokenMessage {
   margin-top: var(--space-4);
   padding: var(--space-4);
-  background-color: var(--color-background-light);
+  background-color: var(--color-background-subtle);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);

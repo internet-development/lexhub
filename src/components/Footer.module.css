@@ -8,7 +8,7 @@
 }
 
 .copyright {
-  color: var(--color-text-light);
+  color: var(--color-text-tertiary);
 }
 
 .links {
@@ -23,7 +23,7 @@
 }
 
 .link:hover {
-  color: var(--color-text-light);
+  color: var(--color-text-tertiary);
 }
 
 .separator {

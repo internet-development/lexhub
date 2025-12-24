@@ -60,14 +60,14 @@
 .content code {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
-  background: var(--color-background-gray);
+  background: var(--color-background-muted);
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
 }
 
 /* Code blocks */
 .content pre {
-  background: var(--color-background-gray);
+  background: var(--color-background-muted);
   padding: var(--space-4);
   border-radius: var(--radius-md);
   overflow-x: auto;
@@ -127,7 +127,7 @@
 }
 
 .content th {
-  background: var(--color-background-light);
+  background: var(--color-background-subtle);
   font-weight: var(--font-weight-semibold);
 }
 

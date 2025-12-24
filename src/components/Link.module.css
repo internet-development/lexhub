@@ -22,7 +22,7 @@
 }
 
 .muted {
-  color: var(--color-text-light);
+  color: var(--color-text-tertiary);
   text-decoration: underline;
 }
 

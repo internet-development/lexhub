@@ -43,7 +43,7 @@
 }
 
 .gridItem:hover {
-  background-color: var(--color-background-light);
+  background-color: var(--color-background-subtle);
   box-shadow: var(--shadow-sm);
 }
 

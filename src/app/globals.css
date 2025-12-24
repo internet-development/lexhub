@@ -16,20 +16,22 @@
   --color-white: rgba(255, 255, 255, 1);
   --color-black: rgba(0, 0, 0, 1);
 
-  /* Color Variables */
+  /* Color Variables  */
   --color-primary: #3758f9;
   --color-primary-hover: #1e4fd6;
   --color-text-primary: #1f1f1f;
   --color-text-secondary: #4d5562;
+  --color-text-tertiary: #9da3ae;
   --color-text-muted: #6b7280;
-  --color-text-light: #9da3ae;
   --color-text-hover: #374151;
   --color-text-footer: #ced4da;
+  --color-text-inverse: #ffffff;
   --color-border: #e5e7eb;
+  --color-border-strong: #dfe4ea;
   --color-background: #ffffff;
-  --color-background-light: #f9fafb;
-  --color-background-gray: #f3f4f6;
-  --color-background-blue: #eff6ff;
+  --color-background-subtle: #f9fafb;
+  --color-background-muted: #f3f4f6;
+  --color-background-accent: #eff6ff;
 
   /* Typography */
   --font-family-sans:

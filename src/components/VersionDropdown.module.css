@@ -12,5 +12,5 @@
 }
 
 .root:hover {
-  background: var(--color-background-light);
+  background: var(--color-background-subtle);
 }
