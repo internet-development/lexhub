@@ -12,7 +12,8 @@ export interface SchemaDefinitionProps {
 export function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
   const [activeTab, setActiveTab] = useState<'fields' | 'json'>('fields')
   const category = getTypeCategory(def)
-  const fieldsTabLabel = category === 'structured' ? 'DATA FIELDS' : 'TYPE INFO'
+  const fieldsTabLabel =
+    category === 'scalar' || category === 'token' ? 'TYPE INFO' : 'DATA FIELDS'
 
   return (
     <li className={styles.defItem} id={name}>
@@ -80,8 +81,14 @@ function NiceView({ def }: ViewProps) {
   const category = getTypeCategory(def)
 
   switch (category) {
-    case 'structured':
-      return <StructuredTypeView def={def} />
+    case 'object':
+      return <ObjectTypeView def={def} />
+    case 'query':
+      return <QueryTypeView def={def} />
+    case 'procedure':
+      return <ProcedureTypeView def={def} />
+    case 'subscription':
+      return <SubscriptionTypeView def={def} />
     case 'scalar':
       return <ScalarTypeView def={def} />
     case 'token':
@@ -89,7 +96,7 @@ function NiceView({ def }: ViewProps) {
   }
 }
 
-function StructuredTypeView({ def }: ViewProps) {
+function ObjectTypeView({ def }: ViewProps) {
   const fields = extractFields(def)
 
   if (fields.length === 0) {
@@ -100,6 +107,33 @@ function StructuredTypeView({ def }: ViewProps) {
     )
   }
 
+  return <FieldTable fields={fields} />
+}
+
+function QueryTypeView({ def }: ViewProps) {
+  // TODO: implement with separate sections
+  const fields = extractFields(def)
+  if (fields.length === 0) {
+    return <div className={styles.noFields}>No data fields available.</div>
+  }
+  return <FieldTable fields={fields} />
+}
+
+function ProcedureTypeView({ def }: ViewProps) {
+  // TODO: implement with separate sections
+  const fields = extractFields(def)
+  if (fields.length === 0) {
+    return <div className={styles.noFields}>No data fields available.</div>
+  }
+  return <FieldTable fields={fields} />
+}
+
+function SubscriptionTypeView({ def }: ViewProps) {
+  // TODO: implement with separate sections
+  const fields = extractFields(def)
+  if (fields.length === 0) {
+    return <div className={styles.noFields}>No data fields available.</div>
+  }
   return <FieldTable fields={fields} />
 }
 
@@ -292,17 +326,28 @@ interface FieldInfo {
 type LexProperty = LexObject['properties'][string]
 
 /** Categories of lexicon types for determining which view to render */
-type TypeCategory = 'structured' | 'scalar' | 'token'
+type TypeCategory =
+  | 'object'
+  | 'query'
+  | 'procedure'
+  | 'subscription'
+  | 'scalar'
+  | 'token'
 
 function getTypeCategory(def: LexUserType): TypeCategory {
   switch (def.type) {
-    // Structured types - have nested properties/fields
+    // Object-like types - have properties
     case 'object':
     case 'record':
+      return 'object'
+
+    // API types - have params/input/output sections
     case 'query':
+      return 'query'
     case 'procedure':
+      return 'procedure'
     case 'subscription':
-      return 'structured'
+      return 'subscription'
 
     // Scalar/primitive types - just constraints, no nested structure
     case 'string':
