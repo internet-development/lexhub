@@ -100,6 +100,14 @@ function StructuredTypeView({ def }: ViewProps) {
     )
   }
 
+  return <FieldTable fields={fields} />
+}
+
+interface FieldTableProps {
+  fields: FieldInfo[]
+}
+
+function FieldTable({ fields }: FieldTableProps) {
   return (
     <table className={styles.fieldTable}>
       <thead>
