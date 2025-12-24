@@ -13,10 +13,7 @@
 }
 
 :root {
-  --color-white: rgba(255, 255, 255, 1);
-  --color-black: rgba(0, 0, 0, 1);
-
-  /* Color Variables  */
+  /* Color Variables */
   --color-primary: #3758f9;
   --color-primary-hover: #1e4fd6;
   --color-text-primary: #1f1f1f;
@@ -95,13 +92,10 @@
   --line-height-normal: 1.5;
   --line-height-relaxed: 1.8;
 
-  --theme-background: var(--color-white);
-  --theme-text: var(--color-black);
-
   /* NOTE(caidanw): Disabled automatic dark mode for now */
   /* @media (prefers-color-scheme: dark) { */
-  /*   --theme-background: var(--color-black); */
-  /*   --theme-text: var(--color-white); */
+  /*   --theme-background: var(--color-background); */
+  /*   --theme-text: var(--color-text-inverse); */
   /* } */
 }
 
@@ -113,8 +107,8 @@
 /* } */
 
 body {
-  background: var(--theme-background);
-  color: var(--theme-text);
+  background: var(--color-background);
+  color: var(--color-text-primary);
   font-family: var(--font-family-sans);
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
