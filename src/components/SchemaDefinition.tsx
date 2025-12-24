@@ -211,18 +211,18 @@ function FieldTable({ fields }: FieldTableProps) {
         {fields.map((field) => (
           <tr key={field.name} className={styles.fieldTableRow}>
             <td className={styles.fieldTableCell}>
-              <code className={styles.fieldName}>
+              <span className={styles.fieldName}>
                 {field.name}
                 {field.required && (
                   <span className={styles.fieldRequired}>*</span>
                 )}
-              </code>
+              </span>
               {field.nullable && (
                 <span className={styles.fieldNullable}>nullable</span>
               )}
             </td>
             <td className={styles.fieldTableCell}>
-              <code className={styles.fieldType}>{field.type}</code>
+              <span className={styles.fieldType}>{field.type}</span>
             </td>
             <td className={styles.fieldTableCell}>
               {field.description && (
@@ -268,10 +268,10 @@ function ScalarTypeView({ def }: ViewProps) {
         {properties.map((prop) => (
           <tr key={prop.name} className={styles.fieldTableRow}>
             <td className={styles.fieldTableCell}>
-              <code className={styles.fieldName}>{prop.name}</code>
+              <span className={styles.fieldName}>{prop.name}</span>
             </td>
             <td className={styles.fieldTableCell}>
-              <code className={styles.fieldType}>{prop.value}</code>
+              <span className={styles.fieldType}>{prop.value}</span>
             </td>
           </tr>
         ))}
