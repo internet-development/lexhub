@@ -11,6 +11,11 @@
   gap: 1rem;
 }
 
+.sidebar {
+  min-width: 0;
+  overflow: hidden;
+}
+
 .main {
   min-width: 0;
 }

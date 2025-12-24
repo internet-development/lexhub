@@ -1,6 +1,7 @@
 .root {
   font-family: var(--font-mono, monospace);
   line-height: 1;
+  overflow: hidden;
 }
 
 .header {
@@ -24,6 +25,7 @@
 
 .treeContainer {
   position: relative;
+  overflow: hidden;
 }
 
 .connectors {
@@ -65,20 +67,29 @@
   margin: 0;
   position: relative;
   font-size: var(--font-size-sm);
+  overflow: hidden;
 }
 
 .item {
   height: 1.75rem;
   display: flex;
   align-items: center;
+  min-width: 0;
 }
 
 .itemLabel {
   text-decoration: none;
   white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 100%;
+}
+
+.itemLabel > svg {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: var(--space-1);
 }
 
 a.itemLabel:hover {
