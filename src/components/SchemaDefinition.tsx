@@ -211,10 +211,12 @@ function FieldTable({ fields }: FieldTableProps) {
         {fields.map((field) => (
           <tr key={field.name} className={styles.fieldTableRow}>
             <td className={styles.fieldTableCell}>
-              <code className={styles.fieldName}>{field.name}</code>
-              {field.required && (
-                <span className={styles.fieldRequired}>required</span>
-              )}
+              <code className={styles.fieldName}>
+                {field.name}
+                {field.required && (
+                  <span className={styles.fieldRequired}>*</span>
+                )}
+              </code>
               {field.nullable && (
                 <span className={styles.fieldNullable}>nullable</span>
               )}

@@ -240,12 +240,9 @@
 }
 
 .fieldRequired {
-  display: inline-block;
-  margin-left: var(--space-2);
-  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  color: var(--color-primary);
-  text-transform: uppercase;
+  margin-left: var(--space-1);
+  vertical-align: top;
 }
 
 .fieldNullable {
