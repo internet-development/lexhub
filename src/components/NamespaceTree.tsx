@@ -1,4 +1,5 @@
 import Link from '@/components/Link'
+import CubeIcon from '@/components/CubeIcon'
 import type { TreeData, TreeNode } from '@/app/[id]/data'
 import styles from './NamespaceTree.module.css'
 
@@ -6,7 +7,7 @@ export type NamespaceTreeProps = TreeData
 
 const ITEM_HEIGHT = 28
 const INDENT_WIDTH = 16
-const TRUNK_X = 4
+const TRUNK_X = 6
 const CURVE_RADIUS = 1
 const LABEL_GAP = 4
 const CHILD_TRUNK_OFFSET_Y = 12
@@ -89,16 +90,23 @@ function ConnectorPath({
   )
 }
 
+function ItemPrefix({ node }: { node: TreeNode }) {
+  if (node.isLexicon) {
+    return <CubeIcon size={14} />
+  }
+  if (node.isSchemaDefinition) return '#'
+  return null
+}
+
 function ItemLabel({ node }: { node: TreeNode }) {
   const style = { marginLeft: LABEL_GAP }
-  const prefix = node.isSchemaDefinition ? '#' : ''
   const variant =
     node.isSubject || node.children.length > 0 ? 'default' : 'muted'
 
   if (node.isSubject) {
     return (
       <span className={styles.itemLabel} style={style} data-subject>
-        {prefix}
+        <ItemPrefix node={node} />
         {node.segment}
       </span>
     )
@@ -111,7 +119,7 @@ function ItemLabel({ node }: { node: TreeNode }) {
       className={styles.itemLabel}
       style={style}
     >
-      {prefix}
+      <ItemPrefix node={node} />
       {node.segment}
     </Link>
   )
@@ -163,15 +171,13 @@ export function NamespaceTree({
         {isRootNamespace ? (
           <span className={styles.headerName}>{subjectPath}</span>
         ) : (
-          parent && (
-            <Link
-              href={`/${parent}`}
-              variant="muted"
-              className={styles.headerLink}
-            >
-              {parent}
-            </Link>
-          )
+          <Link
+            href={`/${parent}`}
+            variant="muted"
+            className={styles.headerLink}
+          >
+            {parent}
+          </Link>
         )}
       </div>
 

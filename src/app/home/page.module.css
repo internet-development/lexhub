@@ -2,10 +2,10 @@
   min-height: 100vh;
   background: linear-gradient(
     to bottom,
-    var(--color-background-blue) 0%,
+    var(--color-background-accent) 0%,
     var(--color-background) 20%,
     var(--color-background) 80%,
-    var(--color-background-blue) 100%
+    var(--color-background-accent) 100%
   );
   font-family: var(--font-family-sans);
 }
@@ -56,7 +56,7 @@
 }
 
 .heroDescription {
-  color: var(--color-text-light);
+  color: var(--color-text-tertiary);
   margin-bottom: var(--space-8);
   max-width: 43.75rem;
   margin-left: auto;
@@ -113,7 +113,7 @@
 .tabs {
   display: flex;
   gap: var(--space-4);
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background-muted);
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-sm);
 }
@@ -143,7 +143,7 @@
 }
 
 .codeBlock {
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background-muted);
   border-radius: var(--radius-md);
   padding: var(--space-4);
   margin-bottom: var(--space-4);
@@ -183,7 +183,7 @@
   justify-content: space-between;
   align-items: center;
   font-size: var(--font-size-sm);
-  color: var(--color-text-light);
+  color: var(--color-text-tertiary);
 }
 
 .footerLinks {
@@ -193,5 +193,5 @@
 }
 
 .footerSeparator {
-  color: var(--color-text-light);
+  color: var(--color-text-tertiary);
 }

@@ -60,14 +60,14 @@
 .content code {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
-  background: var(--color-background-gray);
+  background: var(--color-background-muted);
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
 }
 
 /* Code blocks */
 .content pre {
-  background: var(--color-background-gray);
+  background: var(--color-background-muted);
   padding: var(--space-4);
   border-radius: var(--radius-md);
   overflow-x: auto;
@@ -127,6 +127,38 @@
 }
 
 .content th {
-  background: var(--color-background-light);
+  background: var(--color-background-subtle);
   font-weight: var(--font-weight-semibold);
+}
+
+/* Wrapper and truncation styles */
+.wrapper {
+  position: relative;
+}
+
+.truncated {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.seeMore {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-2);
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.seeMore:hover {
+  color: var(--color-primary-hover);
 }
