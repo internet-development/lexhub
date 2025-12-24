@@ -1,5 +1,5 @@
 .defItem {
-  border-bottom: 0.0625rem solid var(--color-border);
+  border-bottom: 0.0625rem solid var(--color-border-strong);
 }
 
 .defDetails {
@@ -103,9 +103,11 @@
 
 .tab {
   padding: var(--space-2) var(--space-4);
-  font-size: var(--font-size-xs);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-tertiary);
+  text-transform: uppercase;
   background: none;
   border: none;
   cursor: pointer;
@@ -129,7 +131,7 @@
   bottom: -0.0625rem;
   left: 0;
   right: 0;
-  height: 0.125rem;
+  height: 0.1875rem;
   background-color: var(--color-text-primary);
 }
 
@@ -181,7 +183,8 @@
 .fieldTable {
   width: 100%;
   margin-top: var(--space-4);
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: var(--font-size-sm);
 }
 
@@ -190,35 +193,28 @@
   text-align: left;
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  color: var(--color-text-muted);
-  background-color: var(--color-background-subtle);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  background-color: var(--color-border);
   border-bottom: 0.0625rem solid var(--color-border);
 }
 
 .fieldTableHead:first-child {
-  border-radius: var(--radius-sm) 0 0 0;
+  border-radius: var(--radius-xs) 0 0 var(--radius-xs);
 }
 
 .fieldTableHead:last-child {
-  border-radius: 0 var(--radius-sm) 0 0;
-}
-
-.fieldTableRow {
-  border-bottom: 0.0625rem solid var(--color-border);
-  transition: background-color var(--transition-fast);
-}
-
-.fieldTableRow:hover {
-  background-color: var(--color-background-subtle);
-}
-
-.fieldTableRow:last-child {
-  border-bottom: none;
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
 }
 
 .fieldTableCell {
   padding: var(--space-3);
   vertical-align: top;
+  border-bottom: 0.0625rem solid var(--color-border);
+}
+
+.fieldTableRow:last-child .fieldTableCell {
+  border-bottom: none;
 }
 
 .fieldTableCell:first-child {
@@ -234,9 +230,8 @@
 }
 
 .fieldName {
-  font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);
-  color: var(--color-text-primary);
+  color: var(--color-text-secondary);
 }
 
 .fieldRequired {
@@ -272,17 +267,13 @@
   padding: 0;
   margin: 0;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: var(--space-1);
 }
 
 .fieldConstraint {
   font-size: var(--font-size-xs);
-  font-family: var(--font-family-mono);
   color: var(--color-text-muted);
-  background-color: var(--color-background-subtle);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
 }
 
 /* Token type view */

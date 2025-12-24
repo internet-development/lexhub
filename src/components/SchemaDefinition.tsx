@@ -568,47 +568,47 @@ function getConstraints(prop: LexProperty): string[] {
   switch (prop.type) {
     case 'string':
       return compact(
-        constraint('default', prop.default, JSON.stringify),
-        constraint('const', prop.const, JSON.stringify),
-        constraint('enum', prop.enum, join),
-        constraint('known values', prop.knownValues, join),
-        constraint('minLength', prop.minLength),
-        constraint('maxLength', prop.maxLength),
-        constraint('minGraphemes', prop.minGraphemes),
-        constraint('maxGraphemes', prop.maxGraphemes),
+        constraint('Default', prop.default, JSON.stringify),
+        constraint('Const', prop.const, JSON.stringify),
+        constraint('Enum', prop.enum, join),
+        constraint('Known values', prop.knownValues, join),
+        constraint('Min length', prop.minLength),
+        constraint('Max length', prop.maxLength),
+        constraint('Min graphemes', prop.minGraphemes),
+        constraint('Max graphemes', prop.maxGraphemes),
       )
     case 'integer':
       return compact(
-        constraint('default', prop.default, JSON.stringify),
-        constraint('const', prop.const, JSON.stringify),
-        constraint('enum', prop.enum, join),
-        constraint('min', prop.minimum),
-        constraint('max', prop.maximum),
+        constraint('Default', prop.default, JSON.stringify),
+        constraint('Const', prop.const, JSON.stringify),
+        constraint('Enum', prop.enum, join),
+        constraint('Min', prop.minimum),
+        constraint('Max', prop.maximum),
       )
     case 'boolean':
       return compact(
-        constraint('default', prop.default, JSON.stringify),
-        constraint('const', prop.const, JSON.stringify),
+        constraint('Default', prop.default, JSON.stringify),
+        constraint('Const', prop.const, JSON.stringify),
       )
     case 'array':
       return compact(
-        constraint('minLength', prop.minLength),
-        constraint('maxLength', prop.maxLength),
+        constraint('Min length', prop.minLength),
+        constraint('Max length', prop.maxLength),
       )
     case 'blob':
       return compact(
-        constraint('accept', prop.accept, join),
-        constraint('maxSize', prop.maxSize),
+        constraint('Accept', prop.accept, join),
+        constraint('Max size', prop.maxSize),
       )
     case 'bytes':
       return compact(
-        constraint('minLength', prop.minLength),
-        constraint('maxLength', prop.maxLength),
+        constraint('Min length', prop.minLength),
+        constraint('Max length', prop.maxLength),
       )
     case 'ref':
-      return compact(constraint('ref', prop.ref))
+      return compact(constraint('Reference', prop.ref))
     case 'union':
-      return compact(constraint('refs', prop.refs, join))
+      return compact(constraint('Refs', prop.refs, join))
     case 'cid-link':
     case 'unknown':
       return []
