@@ -33,51 +33,51 @@ interface Namespace {
 
 const namespaces: Namespace[] = [
   {
-    name: 'bsky.app',
+    name: 'app.bsky',
     icon: 'bluesky',
     lexicons: 4827,
     description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
   },
   {
-    name: 'bsky.chat',
+    name: 'chat.bsky',
     icon: 'bluesky',
     lexicons: 1394,
     description:
       'Curabitur fringilla erat a leo imperdiet, vitae vehicula erat vehicula...',
   },
   {
-    name: 'atproto.com',
+    name: 'com.atproto',
     icon: 'bluesky',
     lexicons: 7502,
     description:
       'Suspendisse quis orci nec velit pretium tempor et sit amet tellus',
   },
   {
-    name: 'ozone.tools',
+    name: 'tools.ozone',
     icon: 'at',
     lexicons: 9041,
     description: 'Maecenas congue diam eget mi posuere vestibulum',
   },
   {
-    name: 'statusphere.xyz',
+    name: 'xyz.statusphere',
     icon: 'at',
     lexicons: 2678,
     description: 'Cras nec ligula consequat, tristique eros ac, euismod enim',
   },
   {
-    name: 'robocracy.org',
+    name: 'org.robocracy',
     icon: 'at',
     lexicons: 5180,
     description: 'Donec venenatis dolor ut quam pretium sodales',
   },
   {
-    name: 'atprofile.com',
+    name: 'com.atprofile',
     icon: 'globe',
     lexicons: 3409,
     description: 'Aenean consectetur orci vitae orci semper eleifend',
   },
   {
-    name: 'skyblur.uk',
+    name: 'uk.skyblur',
     icon: 'globe',
     lexicons: 7713,
     description: 'Aenean ut nisi a augue venenatis egestas',
