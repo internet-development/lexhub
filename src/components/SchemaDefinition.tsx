@@ -1,6 +1,12 @@
 'use client'
 
-import type { LexObject, LexUserType } from '@atproto/lexicon'
+import type {
+  LexObject,
+  LexUserType,
+  LexXrpcQuery,
+  LexXrpcProcedure,
+  LexXrpcSubscription,
+} from '@atproto/lexicon'
 import { useState } from 'react'
 import styles from './SchemaDefinition.module.css'
 
@@ -111,30 +117,80 @@ function ObjectTypeView({ def }: ViewProps) {
 }
 
 function QueryTypeView({ def }: ViewProps) {
-  // TODO: implement with separate sections
-  const fields = extractFields(def)
-  if (fields.length === 0) {
+  if (def.type !== 'query') return null
+  const query = def as LexXrpcQuery
+
+  const paramFields = extractParamFields(query.parameters)
+  const outputFields = extractBodyFields(query.output)
+
+  if (paramFields.length === 0 && outputFields.length === 0) {
     return <div className={styles.noFields}>No data fields available.</div>
   }
-  return <FieldTable fields={fields} />
+
+  return (
+    <div className={styles.fieldSections}>
+      <FieldSection title="Parameters" fields={paramFields} />
+      <FieldSection title="Output" fields={outputFields} />
+    </div>
+  )
 }
 
 function ProcedureTypeView({ def }: ViewProps) {
-  // TODO: implement with separate sections
-  const fields = extractFields(def)
-  if (fields.length === 0) {
+  if (def.type !== 'procedure') return null
+  const procedure = def as LexXrpcProcedure
+
+  const paramFields = extractParamFields(procedure.parameters)
+  const inputFields = extractBodyFields(procedure.input)
+  const outputFields = extractBodyFields(procedure.output)
+
+  if (
+    paramFields.length === 0 &&
+    inputFields.length === 0 &&
+    outputFields.length === 0
+  ) {
     return <div className={styles.noFields}>No data fields available.</div>
   }
-  return <FieldTable fields={fields} />
+
+  return (
+    <div className={styles.fieldSections}>
+      <FieldSection title="Parameters" fields={paramFields} />
+      <FieldSection title="Input" fields={inputFields} />
+      <FieldSection title="Output" fields={outputFields} />
+    </div>
+  )
 }
 
 function SubscriptionTypeView({ def }: ViewProps) {
-  // TODO: implement with separate sections
-  const fields = extractFields(def)
-  if (fields.length === 0) {
+  if (def.type !== 'subscription') return null
+  const subscription = def as LexXrpcSubscription
+
+  const paramFields = extractParamFields(subscription.parameters)
+
+  if (paramFields.length === 0) {
     return <div className={styles.noFields}>No data fields available.</div>
   }
-  return <FieldTable fields={fields} />
+
+  return (
+    <div className={styles.fieldSections}>
+      <FieldSection title="Parameters" fields={paramFields} />
+    </div>
+  )
+}
+
+interface FieldSectionProps {
+  title: string
+  fields: FieldInfo[]
+}
+
+function FieldSection({ title, fields }: FieldSectionProps) {
+  if (fields.length === 0) return null
+
+  return (
+    <section className={styles.fieldSection}>
+      <h4 className={styles.fieldSectionTitle}>{title}</h4>
+      <FieldTable fields={fields} />
+    </section>
+  )
 }
 
 interface FieldTableProps {
@@ -382,14 +438,14 @@ function extractFields(def: LexUserType): FieldInfo[] {
     case 'query':
       return [
         ...extractParamFields(def.parameters),
-        ...extractBodyFields(def.output, 'output'),
+        ...extractBodyFields(def.output),
       ]
 
     case 'procedure':
       return [
         ...extractParamFields(def.parameters),
-        ...extractBodyFields(def.input, 'input'),
-        ...extractBodyFields(def.output, 'output'),
+        ...extractBodyFields(def.input),
+        ...extractBodyFields(def.output),
       ]
 
     case 'subscription':
@@ -441,7 +497,7 @@ function extractParamFields(params: LexParams | undefined): FieldInfo[] {
   const requiredSet = new Set(params.required ?? [])
 
   return Object.entries(params.properties).map(([name, prop]) => ({
-    name: `param: ${name}`,
+    name,
     type: getTypeString(prop),
     description: prop.description,
     required: requiredSet.has(name),
@@ -450,10 +506,7 @@ function extractParamFields(params: LexParams | undefined): FieldInfo[] {
   }))
 }
 
-function extractBodyFields(
-  body: LexBody | undefined,
-  prefix: 'input' | 'output',
-): FieldInfo[] {
+function extractBodyFields(body: LexBody | undefined): FieldInfo[] {
   if (
     !body?.schema ||
     body.schema.type !== 'object' ||
@@ -466,7 +519,7 @@ function extractBodyFields(
   const nullableSet = new Set(body.schema.nullable ?? [])
 
   return Object.entries(body.schema.properties).map(([name, prop]) => ({
-    name: `${prefix}: ${name}`,
+    name,
     type: getTypeString(prop),
     description: prop.description,
     required: requiredSet.has(name),

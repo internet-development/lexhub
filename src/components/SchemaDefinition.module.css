@@ -152,6 +152,32 @@
   font-style: italic;
 }
 
+/* Field sections for query/procedure/subscription */
+.fieldSections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  margin-top: var(--space-4);
+}
+
+.fieldSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.fieldSectionTitle {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--space-2) 0;
+}
+
+.fieldSection .fieldTable {
+  margin-top: 0;
+}
+
 .fieldTable {
   width: 100%;
   margin-top: var(--space-4);
