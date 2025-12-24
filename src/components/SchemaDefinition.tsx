@@ -232,7 +232,19 @@ function FieldTable({ fields }: FieldTableProps) {
                 <ul className={styles.fieldConstraints}>
                   {field.constraints.map((c, i) => (
                     <li key={i} className={styles.fieldConstraint}>
-                      {c}
+                      {c.type === 'ref' ? (
+                        <>
+                          {c.label}:{' '}
+                          <a
+                            href={refToHref(c.ref)}
+                            className={styles.fieldRefLink}
+                          >
+                            {c.ref}
+                          </a>
+                        </>
+                      ) : (
+                        `${c.label}: ${c.value}`
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -377,8 +389,13 @@ interface FieldInfo {
   description?: string
   required: boolean
   nullable: boolean
-  constraints: string[]
+  constraints: FieldConstraint[]
 }
+
+/** A constraint can be plain text or a ref link */
+type FieldConstraint =
+  | { type: 'text'; label: string; value: string }
+  | { type: 'ref'; label: string; ref: string }
 
 /** Property type for object/record fields - derived from LexObject */
 type LexProperty = LexObject['properties'][string]
@@ -545,70 +562,97 @@ function getTypeString(prop: LexProperty): string {
   }
 }
 
-/** Format a constraint as "label: value", or return null if value is undefined */
-function constraint(
+/**
+ * Convert a ref string to a URL href.
+ * Refs can be:
+ * - Full NSID with fragment: "app.bsky.actor.defs#profileView" -> "/app.bsky.actor.defs#profileView"
+ * - Just a fragment (same lexicon): "#profileView" -> "#profileView"
+ */
+function refToHref(ref: string): string {
+  if (ref.startsWith('#')) {
+    return ref
+  }
+  const [nsid, fragment] = ref.split('#')
+  return fragment ? `/${nsid}#${fragment}` : `/${nsid}`
+}
+
+/** Format a text constraint, or return null if value is undefined */
+function textConstraint(
   label: string,
   value: unknown,
   format: (v: never) => string = String,
-): string | null {
+): FieldConstraint | null {
   if (value === undefined) return null
-  return `${label}: ${format(value as never)}`
+  return { type: 'text', label, value: format(value as never) }
+}
+
+/** Format a ref constraint, or return null if ref is undefined */
+function refConstraint(
+  label: string,
+  ref: string | undefined,
+): FieldConstraint | null {
+  if (ref === undefined) return null
+  return { type: 'ref', label, ref }
 }
 
 /** Filter out null values from constraint list */
-function compact(...items: (string | null)[]): string[] {
-  return items.filter((x): x is string => x !== null)
+function compactConstraints(
+  ...items: (FieldConstraint | null)[]
+): FieldConstraint[] {
+  return items.filter((x): x is FieldConstraint => x !== null)
 }
 
 function join(v: string[]) {
   return v.join(', ')
 }
 
-function getConstraints(prop: LexProperty): string[] {
+function getConstraints(prop: LexProperty): FieldConstraint[] {
   switch (prop.type) {
     case 'string':
-      return compact(
-        constraint('Default', prop.default, JSON.stringify),
-        constraint('Const', prop.const, JSON.stringify),
-        constraint('Enum', prop.enum, join),
-        constraint('Known values', prop.knownValues, join),
-        constraint('Min length', prop.minLength),
-        constraint('Max length', prop.maxLength),
-        constraint('Min graphemes', prop.minGraphemes),
-        constraint('Max graphemes', prop.maxGraphemes),
+      return compactConstraints(
+        textConstraint('Default', prop.default, JSON.stringify),
+        textConstraint('Const', prop.const, JSON.stringify),
+        textConstraint('Enum', prop.enum, join),
+        textConstraint('Known values', prop.knownValues, join),
+        textConstraint('Min length', prop.minLength),
+        textConstraint('Max length', prop.maxLength),
+        textConstraint('Min graphemes', prop.minGraphemes),
+        textConstraint('Max graphemes', prop.maxGraphemes),
       )
     case 'integer':
-      return compact(
-        constraint('Default', prop.default, JSON.stringify),
-        constraint('Const', prop.const, JSON.stringify),
-        constraint('Enum', prop.enum, join),
-        constraint('Min', prop.minimum),
-        constraint('Max', prop.maximum),
+      return compactConstraints(
+        textConstraint('Default', prop.default, JSON.stringify),
+        textConstraint('Const', prop.const, JSON.stringify),
+        textConstraint('Enum', prop.enum, join),
+        textConstraint('Min', prop.minimum),
+        textConstraint('Max', prop.maximum),
       )
     case 'boolean':
-      return compact(
-        constraint('Default', prop.default, JSON.stringify),
-        constraint('Const', prop.const, JSON.stringify),
+      return compactConstraints(
+        textConstraint('Default', prop.default, JSON.stringify),
+        textConstraint('Const', prop.const, JSON.stringify),
       )
     case 'array':
-      return compact(
-        constraint('Min length', prop.minLength),
-        constraint('Max length', prop.maxLength),
+      return compactConstraints(
+        textConstraint('Min length', prop.minLength),
+        textConstraint('Max length', prop.maxLength),
       )
     case 'blob':
-      return compact(
-        constraint('Accept', prop.accept, join),
-        constraint('Max size', prop.maxSize),
+      return compactConstraints(
+        textConstraint('Accept', prop.accept, join),
+        textConstraint('Max size', prop.maxSize),
       )
     case 'bytes':
-      return compact(
-        constraint('Min length', prop.minLength),
-        constraint('Max length', prop.maxLength),
+      return compactConstraints(
+        textConstraint('Min length', prop.minLength),
+        textConstraint('Max length', prop.maxLength),
       )
     case 'ref':
-      return compact(constraint('Reference', prop.ref))
+      return compactConstraints(refConstraint('Reference', prop.ref))
     case 'union':
-      return compact(constraint('Refs', prop.refs, join))
+      return prop.refs.map(
+        (ref) => ({ type: 'ref', label: 'Union', ref }) as FieldConstraint,
+      )
     case 'cid-link':
     case 'unknown':
       return []

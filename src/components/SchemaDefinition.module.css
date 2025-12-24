@@ -278,6 +278,15 @@
   color: var(--color-text-secondary);
 }
 
+.fieldRefLink {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.fieldRefLink:hover {
+  color: var(--color-primary-hover);
+}
+
 /* Token type view */
 .tokenMessage {
   margin-top: var(--space-4);
