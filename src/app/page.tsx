@@ -184,7 +184,7 @@ export default function HomePage() {
                       name={namespace.name}
                       lexicons={namespace.lexicons}
                       description={namespace.description}
-                      href={`/namespace/${namespace.name}`}
+                      href={`/${namespace.name}`}
                     />
                   ))}
                 </TableBody>
