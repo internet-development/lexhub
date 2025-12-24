@@ -5,8 +5,9 @@ import type { Metadata } from 'next'
 import Footer from '@/components/Footer'
 
 export const metadata: Metadata = {
-  title: 'LexHub',
-  description: 'ATProto lexicon explorer',
+  title: 'LexHub - Explore ideas. Remix code. Build amazing protocols.',
+  description:
+    'Jump into the ecosystem and explore real examples. See how builders solve problems, test ideas, and turn concepts into protocols.',
 }
 
 export default function RootLayout({
