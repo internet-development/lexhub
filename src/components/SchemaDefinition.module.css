@@ -277,10 +277,10 @@
 
 .fieldRefLink {
   color: var(--color-primary);
-  text-decoration: underline;
+  text-decoration: none;
 
   &:hover {
-    color: var(--color-primary-hover);
+    text-decoration: underline;
   }
 }
 

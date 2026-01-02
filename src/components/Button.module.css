@@ -2,9 +2,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-weight: 500;
-  border-radius: 0.5rem;
-  transition: all 0.2s;
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
   cursor: pointer;
   border: none;
   outline: none;
@@ -16,77 +16,77 @@
 }
 
 .primary {
-  background-color: #4f46e5;
-  color: white;
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
 }
 
 .primary:hover {
-  background-color: #4338ca;
+  background-color: color-mix(in srgb, var(--color-primary) 85%, black);
 }
 
 .primary:focus {
   box-shadow:
-    0 0 0 0.125rem white,
-    0 0 0 0.25rem #4f46e5;
+    0 0 0 0.125rem var(--color-background),
+    0 0 0 0.25rem var(--color-primary);
 }
 
 .secondary {
-  background-color: #4b5563;
-  color: white;
+  background-color: var(--color-text-muted);
+  color: var(--color-text-inverse);
 }
 
 .secondary:hover {
-  background-color: #374151;
+  background-color: color-mix(in srgb, var(--color-text-muted) 85%, black);
 }
 
 .secondary:focus {
   box-shadow:
-    0 0 0 0.125rem white,
-    0 0 0 0.25rem #6b7280;
+    0 0 0 0.125rem var(--color-background),
+    0 0 0 0.25rem var(--color-text-muted);
 }
 
 .outline {
-  border: 0.125rem solid #d1d5db;
+  border: 0.125rem solid var(--color-border);
   background-color: transparent;
-  color: #374151;
+  color: var(--color-text-hover);
 }
 
 .outline:hover {
-  background-color: #f9fafb;
+  background-color: var(--color-background-subtle);
 }
 
 .outline:focus {
   box-shadow:
-    0 0 0 0.125rem white,
-    0 0 0 0.25rem #6b7280;
+    0 0 0 0.125rem var(--color-background),
+    0 0 0 0.25rem var(--color-text-muted);
 }
 
 .ghost {
   background-color: transparent;
-  color: #374151;
+  color: var(--color-text-hover);
 }
 
 .ghost:hover {
-  background-color: #f3f4f6;
+  background-color: var(--color-background-muted);
 }
 
 .ghost:focus {
   box-shadow:
-    0 0 0 0.125rem white,
-    0 0 0 0.25rem #6b7280;
+    0 0 0 0.125rem var(--color-background),
+    0 0 0 0.25rem var(--color-text-muted);
 }
 
 .sm {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.875rem;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-sm);
 }
 
 .md {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-base);
 }
 
 .lg {
-  padding: 0.75rem 1.5rem;
-  font-size: 1.125rem;
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--font-size-lg);
 }
