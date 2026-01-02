@@ -3,23 +3,15 @@ import { Card } from '@/components/Card'
 import { VersionDropdown } from '@/components/VersionDropdown'
 import { Readme } from '@/components/Readme'
 import { SchemaDefinition } from '@/components/SchemaDefinition'
+import { sortDefEntries } from '@/util/sort'
 import styles from './LexiconPage.module.css'
 
 export interface LexiconPageProps {
   lexicon: LexiconDoc
 }
 
-/** Sorts def entries with "main" first, then alphabetically */
-function sortDefs<T>(entries: [string, T][]): [string, T][] {
-  return entries.sort(([a], [b]) => {
-    if (a === 'main') return -1
-    if (b === 'main') return 1
-    return a.localeCompare(b)
-  })
-}
-
 export function LexiconPage({ lexicon }: LexiconPageProps) {
-  const defs = sortDefs(Object.entries(lexicon.defs ?? {}))
+  const defs = sortDefEntries(Object.entries(lexicon.defs ?? {}))
 
   return (
     <article className={styles.root}>

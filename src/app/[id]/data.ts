@@ -7,6 +7,7 @@ import {
   type NamespaceChild,
 } from '@/db/queries'
 import { getParentPath, isValidNamespacePrefix } from '@/util/nsid'
+import { sortDefNames } from '@/util/sort'
 
 // Tree types
 
@@ -75,15 +76,6 @@ async function getSubjectChildren(
 
   const children = await getDirectChildren(subjectPath)
   return children.map(childToTreeNode(subjectPath))
-}
-
-/** Sorts def names with "main" first, then alphabetically */
-function sortDefNames(names: string[]): string[] {
-  return names.sort((a, b) => {
-    if (a === 'main') return -1
-    if (b === 'main') return 1
-    return a.localeCompare(b)
-  })
 }
 
 /**
