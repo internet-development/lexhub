@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     const rows = await db
       .selectDistinct({ value: combinedNsids.nsid })
       .from(combinedNsids)
-      .where(sql`${combinedNsids.nsid} like ${prefix + '%'}`)
+      .where(sql`${combinedNsids.nsid} ilike ${'%' + prefix + '%'}`)
       .orderBy(combinedNsids.nsid)
       .limit(limit)
 
