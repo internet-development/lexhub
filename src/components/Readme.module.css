@@ -171,5 +171,5 @@
 }
 
 .seeMore:hover {
-  filter: brightness(0.85);
+  color: color-mix(in srgb, var(--color-primary) 85%, black);
 }

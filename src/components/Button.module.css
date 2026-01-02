@@ -21,7 +21,7 @@
 }
 
 .primary:hover {
-  filter: brightness(0.85);
+  background-color: color-mix(in srgb, var(--color-primary) 85%, black);
 }
 
 .primary:focus {
@@ -36,7 +36,7 @@
 }
 
 .secondary:hover {
-  filter: brightness(0.85);
+  background-color: color-mix(in srgb, var(--color-text-muted) 85%, black);
 }
 
 .secondary:focus {
