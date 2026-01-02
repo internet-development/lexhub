@@ -39,7 +39,7 @@ export function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
 
   return (
     <li className={styles.defItem} id={name}>
-      <details ref={detailsRef} className={styles.defDetails}>
+      <details ref={detailsRef} className={styles.defDetails} open>
         <summary className={styles.defHeader}>
           <span className={styles.defName}>{name}</span>
           <div className={styles.defHeaderRight}>

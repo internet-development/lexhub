@@ -66,17 +66,24 @@ async function getSubjectChildren(
   lexicon: LexiconDoc | null,
 ): Promise<TreeNode[]> {
   if (lexicon) {
-    return Object.keys(lexicon.defs ?? {})
-      .sort()
-      .map((defName) =>
-        makeTreeNode(defName, `${subjectPath}#${defName}`, {
-          isSchemaDefinition: true,
-        }),
-      )
+    return sortDefNames(Object.keys(lexicon.defs ?? {})).map((defName) =>
+      makeTreeNode(defName, `${subjectPath}#${defName}`, {
+        isSchemaDefinition: true,
+      }),
+    )
   }
 
   const children = await getDirectChildren(subjectPath)
   return children.map(childToTreeNode(subjectPath))
+}
+
+/** Sorts def names with "main" first, then alphabetically */
+function sortDefNames(names: string[]): string[] {
+  return names.sort((a, b) => {
+    if (a === 'main') return -1
+    if (b === 'main') return 1
+    return a.localeCompare(b)
+  })
 }
 
 /**

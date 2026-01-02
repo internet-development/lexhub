@@ -9,8 +9,17 @@ export interface LexiconPageProps {
   lexicon: LexiconDoc
 }
 
+/** Sorts def entries with "main" first, then alphabetically */
+function sortDefs<T>(entries: [string, T][]): [string, T][] {
+  return entries.sort(([a], [b]) => {
+    if (a === 'main') return -1
+    if (b === 'main') return 1
+    return a.localeCompare(b)
+  })
+}
+
 export function LexiconPage({ lexicon }: LexiconPageProps) {
-  const defs = Object.entries(lexicon.defs ?? {}).sort()
+  const defs = sortDefs(Object.entries(lexicon.defs ?? {}))
 
   return (
     <article className={styles.root}>
