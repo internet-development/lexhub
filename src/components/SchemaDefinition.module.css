@@ -278,10 +278,10 @@
 .fieldRefLink {
   color: var(--color-primary);
   text-decoration: underline;
-}
 
-.fieldRefLink:hover {
-  color: var(--color-primary-hover);
+  &:hover {
+    color: var(--color-primary-hover);
+  }
 }
 
 /* Token type view */
@@ -305,34 +305,21 @@
 }
 
 /* Permission set type view */
-.permissionSetHeader {
-  margin-bottom: var(--space-2);
-}
+/* .permissionSetHeader {} */
 
 .permissionSetTitle {
-  margin: 0 0 var(--space-2) 0;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
 
 .permissionSetDetail {
-  margin: 0;
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-  line-height: 1.5;
-}
-
-.permissionGroup {
-  margin-bottom: var(--space-4);
-}
-
-.permissionGroup:last-child {
-  margin-bottom: 0;
 }
 
 .permissionActions {
-  margin: 0 0 var(--space-2) 0;
+  margin-bottom: var(--space-2);
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
 }
@@ -341,9 +328,6 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
 }
 
 .permissionItem {
