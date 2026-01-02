@@ -23,7 +23,6 @@
 
 .muted {
   color: var(--color-text-tertiary);
-  text-decoration: underline;
 }
 
 .muted:hover {
