@@ -2,6 +2,7 @@
 
 import type {
   LexObject,
+  LexPermissionSet,
   LexUserType,
   LexXrpcQuery,
   LexXrpcProcedure,
@@ -393,30 +394,30 @@ function TokenTypeView({ def }: ViewProps) {
   )
 }
 
-/** Type definition for permission-set lexicon type */
-interface LexPermissionSet {
-  type: 'permission-set'
-  title?: string
-  detail?: string
-  permissions?: Array<{
-    type: 'permission'
-    resource: string
-    lxm?: string[]
-    action?: string[]
-    collection?: string[]
-    inheritAud?: boolean
-  }>
-}
-
 function PermissionSetTypeView({ def }: ViewProps) {
   if (def.type !== 'permission-set') return null
-  const permSet = def as unknown as LexPermissionSet
+  const permSet = def as LexPermissionSet
 
-  const rpcPermissions = permSet.permissions?.filter(
-    (p) => p.resource === 'rpc',
-  )
-  const repoPermissions = permSet.permissions?.filter(
+  // Helper to safely get string array from permission record
+  const getStringArray = (
+    perm: LexPermissionSet['permissions'][number],
+    key: string,
+  ): string[] => {
+    const value = (perm as Record<string, unknown>)[key]
+    if (Array.isArray(value)) {
+      return value.filter((v): v is string => typeof v === 'string')
+    }
+    return []
+  }
+
+  const rpcPermissions = permSet.permissions.filter((p) => p.resource === 'rpc')
+  const repoPermissions = permSet.permissions.filter(
     (p) => p.resource === 'repo',
+  )
+
+  const allRpcMethods = rpcPermissions.flatMap((p) => getStringArray(p, 'lxm'))
+  const allCollections = repoPermissions.flatMap((p) =>
+    getStringArray(p, 'collection'),
   )
 
   return (
@@ -430,53 +431,54 @@ function PermissionSetTypeView({ def }: ViewProps) {
         </div>
       )}
 
-      {rpcPermissions && rpcPermissions.length > 0 && (
+      {allRpcMethods.length > 0 && (
         <section className={styles.fieldSection}>
           <h4 className={styles.fieldSectionTitle}>
-            RPC Methods ({rpcPermissions.flatMap((p) => p.lxm ?? []).length})
+            RPC Methods ({allRpcMethods.length})
           </h4>
           <ul className={styles.permissionList}>
-            {rpcPermissions.flatMap((p) =>
-              (p.lxm ?? []).map((method) => (
-                <li key={method} className={styles.permissionItem}>
-                  <a href={`/${method}`} className={styles.fieldRefLink}>
-                    {method}
-                  </a>
-                </li>
-              )),
-            )}
+            {allRpcMethods.map((method) => (
+              <li key={method} className={styles.permissionItem}>
+                <a href={`/${method}`} className={styles.fieldRefLink}>
+                  {method}
+                </a>
+              </li>
+            ))}
           </ul>
         </section>
       )}
 
-      {repoPermissions && repoPermissions.length > 0 && (
+      {allCollections.length > 0 && (
         <section className={styles.fieldSection}>
           <h4 className={styles.fieldSectionTitle}>
-            Repo Collections (
-            {repoPermissions.flatMap((p) => p.collection ?? []).length})
+            Repo Collections ({allCollections.length})
           </h4>
-          {repoPermissions.map((p, i) => (
-            <div key={i} className={styles.permissionGroup}>
-              {p.action && p.action.length > 0 && (
-                <p className={styles.permissionActions}>
-                  Actions: {p.action.join(', ')}
-                </p>
-              )}
-              <ul className={styles.permissionList}>
-                {(p.collection ?? []).map((col) => (
-                  <li key={col} className={styles.permissionItem}>
-                    <a href={`/${col}`} className={styles.fieldRefLink}>
-                      {col}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {repoPermissions.map((p, i) => {
+            const actions = getStringArray(p, 'action')
+            const collections = getStringArray(p, 'collection')
+            return (
+              <div key={i} className={styles.permissionGroup}>
+                {actions.length > 0 && (
+                  <p className={styles.permissionActions}>
+                    Actions: {actions.join(', ')}
+                  </p>
+                )}
+                <ul className={styles.permissionList}>
+                  {collections.map((col) => (
+                    <li key={col} className={styles.permissionItem}>
+                      <a href={`/${col}`} className={styles.fieldRefLink}>
+                        {col}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          })}
         </section>
       )}
 
-      {(!permSet.permissions || permSet.permissions.length === 0) && (
+      {permSet.permissions.length === 0 && (
         <div className={styles.noFields}>No permissions defined.</div>
       )}
     </div>
