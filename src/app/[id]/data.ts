@@ -7,7 +7,7 @@ import {
   type NamespaceChild,
 } from '@/db/queries'
 import { getParentPath, isValidNamespacePrefix } from '@/util/nsid'
-import { sortDefNames } from '@/util/sort'
+import { compareDefNames } from '@/util/sort'
 
 // Tree types
 
@@ -67,11 +67,13 @@ async function getSubjectChildren(
   lexicon: LexiconDoc | null,
 ): Promise<TreeNode[]> {
   if (lexicon) {
-    return sortDefNames(Object.keys(lexicon.defs ?? {})).map((defName) =>
-      makeTreeNode(defName, `${subjectPath}#${defName}`, {
-        isSchemaDefinition: true,
-      }),
-    )
+    return Object.keys(lexicon.defs ?? {})
+      .sort(compareDefNames)
+      .map((defName) =>
+        makeTreeNode(defName, `${subjectPath}#${defName}`, {
+          isSchemaDefinition: true,
+        }),
+      )
   }
 
   const children = await getDirectChildren(subjectPath)

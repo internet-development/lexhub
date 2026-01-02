@@ -3,7 +3,7 @@ import { Card } from '@/components/Card'
 import { VersionDropdown } from '@/components/VersionDropdown'
 import { Readme } from '@/components/Readme'
 import { SchemaDefinition } from '@/components/SchemaDefinition'
-import { sortDefEntries } from '@/util/sort'
+import { compareDefNames } from '@/util/sort'
 import styles from './LexiconPage.module.css'
 
 export interface LexiconPageProps {
@@ -11,7 +11,9 @@ export interface LexiconPageProps {
 }
 
 export function LexiconPage({ lexicon }: LexiconPageProps) {
-  const defs = sortDefEntries(Object.entries(lexicon.defs ?? {}))
+  const defs = Object.entries(lexicon.defs ?? {}).sort(([a], [b]) =>
+    compareDefNames(a, b),
+  )
 
   return (
     <article className={styles.root}>
