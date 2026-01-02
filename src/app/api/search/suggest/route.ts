@@ -9,15 +9,15 @@ import { union } from 'drizzle-orm/pg-core'
 const DEFAULT_LIMIT = 20
 const MAX_LIMIT = 100
 
-function parsePrefix(searchParams: URLSearchParams): string {
-  const prefix = (searchParams.get('prefix') ?? '').trim()
+function parseQuery(searchParams: URLSearchParams): string {
+  const query = (searchParams.get('query') ?? '').trim()
 
   // For typeahead, we require at least 1 char
-  if (!prefix) {
-    throw new ValidationError('MISSING_PREFIX', 'prefix parameter is required')
+  if (!query) {
+    throw new ValidationError('MISSING_QUERY', 'query parameter is required')
   }
 
-  return prefix
+  return query
 }
 
 export async function GET(request: NextRequest) {
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       throw new ValidationError('INVALID_TYPE', "type must be 'nsid'")
     }
 
-    const prefix = parsePrefix(searchParams)
+    const query = parseQuery(searchParams)
     const limit = parseIntegerParam(searchParams, 'limit', DEFAULT_LIMIT, {
       min: 1,
       max: MAX_LIMIT,
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     const rows = await db
       .selectDistinct({ value: combinedNsids.nsid })
       .from(combinedNsids)
-      .where(sql`${combinedNsids.nsid} ilike ${'%' + prefix + '%'}`)
+      .where(sql`${combinedNsids.nsid} ilike ${'%' + query + '%'}`)
       .orderBy(combinedNsids.nsid)
       .limit(limit)
 
