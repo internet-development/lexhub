@@ -27,20 +27,6 @@
   margin-bottom: var(--space-8);
 }
 
-.sectionTitle {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  margin: 0 0 var(--space-4);
-  color: var(--color-text-primary);
-}
-
-.readmeContent {
-  margin: 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  line-height: 1.6;
-}
-
 .defList {
   list-style: none;
   padding: 0;

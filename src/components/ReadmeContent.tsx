@@ -1,3 +1,5 @@
+'use server'
+
 import clsx from '@/common/clsx'
 import styles from '@/components/Readme.module.css'
 
@@ -12,13 +14,16 @@ import { unified } from 'unified'
 
 export interface ReadmeContentProps extends HTMLAttributes<HTMLElement> {
   nsid: string
-  type?: 'namespace' | 'lexicon'
 }
 
 export async function ReadmeContent(props: ReadmeContentProps) {
-  const { nsid, type = 'namespace', className, ...restProps } = props
+  const { nsid, className, ...restProps } = props
 
-  const markdown = await getReadmeContent(nsid, type)
+  const markdown = await getReadmeContent(nsid)
+  if (!markdown) {
+    return null
+  }
+
   const html = await markdownToHtml(markdown)
 
   return (
@@ -32,21 +37,10 @@ export async function ReadmeContent(props: ReadmeContentProps) {
 
 const READMES_DIR = join(process.cwd(), 'content', 'readmes')
 
-const MISSING_README_MESSAGES = {
-  namespace:
-    'This namespace does not have a README file. You can add one by opening a PR [here](#).',
-  lexicon:
-    'This lexicon does not have a README file. You can add one by opening a PR [here](#).',
-}
-
 /** Fetches the README content for a given namespace ID (nsid).
- * If the README file does not exist, it falls back to a default
- * "missing" README message based on the type.
+ * Returns null if the README file does not exist.
  */
-async function getReadmeContent(
-  nsid: string,
-  type: 'namespace' | 'lexicon',
-): Promise<string> {
+async function getReadmeContent(nsid: string): Promise<string | null> {
   const filePath = resolve(READMES_DIR, `${nsid}.md`)
 
   // Prevent path traversal attacks
@@ -58,7 +52,7 @@ async function getReadmeContent(
     return await readFile(filePath, 'utf-8')
   } catch (error: any) {
     if (error?.code === 'ENOENT') {
-      return MISSING_README_MESSAGES[type]
+      return null
     }
     throw error
   }

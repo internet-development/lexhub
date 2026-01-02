@@ -80,10 +80,3 @@
   padding-top: var(--space-8);
   border-top: 1px solid var(--color-border);
 }
-
-.readmeTitle {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  margin-bottom: var(--space-4);
-  color: var(--color-text-primary);
-}

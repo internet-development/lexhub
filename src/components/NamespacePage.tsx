@@ -45,12 +45,9 @@ export function NamespacePage({ prefix, children }: NamespacePageProps) {
           ))}
         </div>
 
-        <section className={styles.readme}>
-          <h2 className={styles.readmeTitle}>README</h2>
-          <Readme type="namespace">
-            <ReadmeContent nsid={prefix} type="namespace" />
-          </Readme>
-        </section>
+        <Readme type="namespace" className={styles.readme}>
+          <ReadmeContent nsid={prefix} />
+        </Readme>
       </Card>
     </article>
   )

@@ -21,12 +21,9 @@ export function LexiconPage({ lexicon }: LexiconPageProps) {
       </header>
 
       <Card width="full" className={styles.card}>
-        <section className={styles.readme}>
-          <h2 className={styles.sectionTitle}>README</h2>
-          <Readme type="lexicon">
-            <ReadmeContent nsid={lexicon.id} type="lexicon" />
-          </Readme>
-        </section>
+        <Readme type="lexicon" className={styles.readme}>
+          <ReadmeContent nsid={lexicon.id} />
+        </Readme>
         <ul className={styles.defList}>
           {defs.map(([name, def]) => (
             <SchemaDefinition key={name} name={name} def={def} />
