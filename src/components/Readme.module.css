@@ -94,11 +94,11 @@
 /* Links */
 .content a {
   color: var(--color-primary);
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .content a:hover {
-  color: var(--color-primary-hover);
+  text-decoration: underline;
 }
 
 /* Blockquotes */
@@ -171,5 +171,5 @@
 }
 
 .seeMore:hover {
-  color: var(--color-primary-hover);
+  filter: brightness(0.85);
 }
