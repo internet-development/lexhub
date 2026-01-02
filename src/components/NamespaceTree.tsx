@@ -17,14 +17,15 @@ type PositionedNode = {
   node: TreeNode
   depth: number
   index: number
+  itemX: number
 }
 
 type ConnectorPathData = {
   key: string
   startY: number
   endY: number
+  trunkX: number
   endX: number
-  depth: number
   active: boolean
 }
 
@@ -48,7 +49,8 @@ function walkTree(
 }
 
 const getY = (index: number) => index * ITEM_HEIGHT + ITEM_HEIGHT / 2
-const getX = (depth: number) => (depth + 1) * INDENT_WIDTH
+const getBaseX = (depth: number) => (depth + 1) * INDENT_WIDTH
+const getTrunkOffset = (depth: number) => (depth > 0 ? LABEL_GAP : 0)
 
 /**
  * Draws an L-shaped path from the trunk to an item.
@@ -56,17 +58,14 @@ const getX = (depth: number) => (depth + 1) * INDENT_WIDTH
 function ConnectorPath({
   startY,
   endY,
+  trunkX,
   endX,
-  depth,
   active,
 }: Omit<ConnectorPathData, 'key'>) {
-  const trunkOffset = depth > 0 ? LABEL_GAP : 0
-  const x = endX - INDENT_WIDTH + TRUNK_X + trunkOffset
-
   const path = `
-    M ${x} ${startY}
-    L ${x} ${endY - CURVE_RADIUS}
-    Q ${x} ${endY} ${x + CURVE_RADIUS} ${endY}
+    M ${trunkX} ${startY}
+    L ${trunkX} ${endY - CURVE_RADIUS}
+    Q ${trunkX} ${endY} ${trunkX + CURVE_RADIUS} ${endY}
     L ${endX} ${endY}
   `
 
@@ -75,7 +74,7 @@ function ConnectorPath({
     Math.abs(endY - startY) -
     CURVE_RADIUS +
     CURVE_RADIUS * 1.57 +
-    (endX - x - CURVE_RADIUS)
+    (endX - trunkX - CURVE_RADIUS)
 
   return (
     <path
@@ -138,7 +137,11 @@ export function NamespaceTree({
   const trunkStartIndex = new Map<number, number>()
 
   walkTree(root, 0, 0, (node, depth, index) => {
-    items.push({ node, depth, index })
+    const trunkOffset = getTrunkOffset(depth)
+    const baseX = getBaseX(depth)
+    const itemX = baseX + trunkOffset
+
+    items.push({ node, depth, index, itemX })
 
     // Track trunk start for each depth level
     // For children (depth > 0), trunk starts from parent (subject)
@@ -155,8 +158,8 @@ export function NamespaceTree({
       key: node.fullPath,
       startY,
       endY: getY(index),
-      endX: getX(depth),
-      depth,
+      trunkX: baseX - INDENT_WIDTH + TRUNK_X + trunkOffset,
+      endX: itemX,
       active: node.isSubject,
     })
   })
@@ -197,11 +200,11 @@ export function NamespaceTree({
         </svg>
 
         <ul className={styles.tree}>
-          {items.map(({ node, depth }) => (
+          {items.map(({ node, itemX }) => (
             <li
               key={node.fullPath}
               className={styles.item}
-              style={{ paddingLeft: getX(depth) }}
+              style={{ paddingLeft: itemX }}
             >
               <ItemLabel node={node} />
             </li>
