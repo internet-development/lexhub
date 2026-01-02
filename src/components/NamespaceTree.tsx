@@ -173,7 +173,7 @@ export function NamespaceTree({
         ) : (
           <Link
             href={`/${parent}`}
-            variant="muted"
+            variant="primary"
             className={styles.headerLink}
           >
             {parent}

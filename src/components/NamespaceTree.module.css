@@ -15,12 +15,6 @@
 
 .headerLink {
   font-weight: var(--font-weight-medium);
-  color: var(--color-primary);
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
 }
 
 .treeContainer {
@@ -94,6 +88,7 @@
 
 a.itemLabel:hover {
   text-decoration: underline;
+  color: var(--color-text-hover);
 }
 
 .itemLabel[data-subject] {
