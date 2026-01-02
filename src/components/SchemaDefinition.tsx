@@ -22,7 +22,11 @@ export function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
   const hash = useHash()
   const category = getTypeCategory(def)
   const fieldsTabLabel =
-    category === 'scalar' || category === 'token' ? 'TYPE INFO' : 'DATA FIELDS'
+    category === 'scalar' || category === 'token'
+      ? 'TYPE INFO'
+      : category === 'permission-set'
+        ? 'PERMISSIONS'
+        : 'DATA FIELDS'
 
   // Auto-open when URL hash matches this schema's name
   useEffect(() => {
@@ -111,6 +115,8 @@ function NiceView({ def }: ViewProps) {
       return <ProcedureTypeView def={def} />
     case 'subscription':
       return <SubscriptionTypeView def={def} />
+    case 'permission-set':
+      return <PermissionSetTypeView def={def} />
     case 'scalar':
       return <ScalarTypeView def={def} />
     case 'token':
@@ -371,8 +377,6 @@ function getScalarProperties(def: LexUserType): ScalarProperty[] {
       return compactProperties(property('type', 'cid-link'))
     case 'unknown':
       return compactProperties(property('type', 'unknown'))
-    case 'permission-set':
-      return compactProperties(property('type', 'permission-set'))
     default:
       return compactProperties(property('type', def.type))
   }
@@ -385,6 +389,96 @@ function TokenTypeView({ def }: ViewProps) {
         This is a <strong>token</strong> type. Tokens are named constants used
         as identifiers or enum-like values in the AT Protocol.
       </p>
+    </div>
+  )
+}
+
+/** Type definition for permission-set lexicon type */
+interface LexPermissionSet {
+  type: 'permission-set'
+  title?: string
+  detail?: string
+  permissions?: Array<{
+    type: 'permission'
+    resource: string
+    lxm?: string[]
+    action?: string[]
+    collection?: string[]
+    inheritAud?: boolean
+  }>
+}
+
+function PermissionSetTypeView({ def }: ViewProps) {
+  if (def.type !== 'permission-set') return null
+  const permSet = def as unknown as LexPermissionSet
+
+  const rpcPermissions = permSet.permissions?.filter(
+    (p) => p.resource === 'rpc',
+  )
+  const repoPermissions = permSet.permissions?.filter(
+    (p) => p.resource === 'repo',
+  )
+
+  return (
+    <div className={styles.fieldSections}>
+      {permSet.title && (
+        <div className={styles.permissionSetHeader}>
+          <h3 className={styles.permissionSetTitle}>{permSet.title}</h3>
+          {permSet.detail && (
+            <p className={styles.permissionSetDetail}>{permSet.detail}</p>
+          )}
+        </div>
+      )}
+
+      {rpcPermissions && rpcPermissions.length > 0 && (
+        <section className={styles.fieldSection}>
+          <h4 className={styles.fieldSectionTitle}>
+            RPC Methods ({rpcPermissions.flatMap((p) => p.lxm ?? []).length})
+          </h4>
+          <ul className={styles.permissionList}>
+            {rpcPermissions.flatMap((p) =>
+              (p.lxm ?? []).map((method) => (
+                <li key={method} className={styles.permissionItem}>
+                  <a href={`/${method}`} className={styles.fieldRefLink}>
+                    {method}
+                  </a>
+                </li>
+              )),
+            )}
+          </ul>
+        </section>
+      )}
+
+      {repoPermissions && repoPermissions.length > 0 && (
+        <section className={styles.fieldSection}>
+          <h4 className={styles.fieldSectionTitle}>
+            Repo Collections (
+            {repoPermissions.flatMap((p) => p.collection ?? []).length})
+          </h4>
+          {repoPermissions.map((p, i) => (
+            <div key={i} className={styles.permissionGroup}>
+              {p.action && p.action.length > 0 && (
+                <p className={styles.permissionActions}>
+                  Actions: {p.action.join(', ')}
+                </p>
+              )}
+              <ul className={styles.permissionList}>
+                {(p.collection ?? []).map((col) => (
+                  <li key={col} className={styles.permissionItem}>
+                    <a href={`/${col}`} className={styles.fieldRefLink}>
+                      {col}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {(!permSet.permissions || permSet.permissions.length === 0) && (
+        <div className={styles.noFields}>No permissions defined.</div>
+      )}
     </div>
   )
 }
@@ -415,6 +509,7 @@ type TypeCategory =
   | 'subscription'
   | 'scalar'
   | 'token'
+  | 'permission-set'
 
 function getTypeCategory(def: LexUserType): TypeCategory {
   switch (def.type) {
@@ -431,6 +526,10 @@ function getTypeCategory(def: LexUserType): TypeCategory {
     case 'subscription':
       return 'subscription'
 
+    // Permission set type - has title, detail, and permissions
+    case 'permission-set':
+      return 'permission-set'
+
     // Scalar/primitive types - just constraints, no nested structure
     case 'string':
     case 'integer':
@@ -440,7 +539,6 @@ function getTypeCategory(def: LexUserType): TypeCategory {
     case 'cid-link':
     case 'unknown':
     case 'array':
-    case 'permission-set':
       return 'scalar'
 
     // Token type - named constant marker
