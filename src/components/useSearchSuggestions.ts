@@ -46,7 +46,7 @@ export function useSearchSuggestions(
     setError(null)
 
     fetch(
-      `/api/search/suggest?type=nsid&prefix=${encodeURIComponent(debounced)}&limit=${limit}`,
+      `/api/search/suggest?type=nsid&query=${encodeURIComponent(debounced)}&limit=${limit}`,
       { signal: controller.signal },
     )
       .then(async (res) => {

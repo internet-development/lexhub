@@ -2,9 +2,8 @@ import Link from '@/components/Link'
 import { Card } from '@/components/Card'
 import CubeIcon from '@/components/CubeIcon'
 import { VersionDropdown } from '@/components/VersionDropdown'
+import { Readme } from '@/components/Readme'
 import styles from './NamespacePage.module.css'
-import { Readme } from './Readme'
-import { ReadmeContent } from './ReadmeContent'
 
 export interface NamespacePageProps {
   prefix: string
@@ -45,12 +44,7 @@ export function NamespacePage({ prefix, children }: NamespacePageProps) {
           ))}
         </div>
 
-        <section className={styles.readme}>
-          <h2 className={styles.readmeTitle}>README</h2>
-          <Readme type="namespace">
-            <ReadmeContent nsid={prefix} type="namespace" />
-          </Readme>
-        </section>
+        <Readme type="namespace" nsid={prefix} className={styles.readme} />
       </Card>
     </article>
   )

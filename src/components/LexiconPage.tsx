@@ -2,8 +2,8 @@ import type { LexiconDoc } from '@atproto/lexicon'
 import { Card } from '@/components/Card'
 import { VersionDropdown } from '@/components/VersionDropdown'
 import { Readme } from '@/components/Readme'
-import { ReadmeContent } from '@/components/ReadmeContent'
 import { SchemaDefinition } from '@/components/SchemaDefinition'
+import { compareDefNames } from '@/util/sort'
 import styles from './LexiconPage.module.css'
 
 export interface LexiconPageProps {
@@ -11,7 +11,9 @@ export interface LexiconPageProps {
 }
 
 export function LexiconPage({ lexicon }: LexiconPageProps) {
-  const defs = Object.entries(lexicon.defs ?? {}).sort()
+  const defs = Object.entries(lexicon.defs ?? {}).sort(([a], [b]) =>
+    compareDefNames(a, b),
+  )
 
   return (
     <article className={styles.root}>
@@ -21,12 +23,7 @@ export function LexiconPage({ lexicon }: LexiconPageProps) {
       </header>
 
       <Card width="full" className={styles.card}>
-        <section className={styles.readme}>
-          <h2 className={styles.sectionTitle}>README</h2>
-          <Readme type="lexicon">
-            <ReadmeContent nsid={lexicon.id} type="lexicon" />
-          </Readme>
-        </section>
+        <Readme type="lexicon" nsid={lexicon.id} className={styles.readme} />
         <ul className={styles.defList}>
           {defs.map(([name, def]) => (
             <SchemaDefinition key={name} name={name} def={def} />
