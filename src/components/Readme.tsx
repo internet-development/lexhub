@@ -1,20 +1,17 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import clsx from '@/common/clsx'
 import styles from '@/components/Readme.module.css'
+import { ReadmeContent } from '@/components/ReadmeContent'
 
 export interface ReadmeProps {
+  nsid: string
   type?: 'namespace' | 'lexicon'
   className?: string
-  children: ReactNode
 }
 
-export function Readme({
-  type = 'namespace',
-  className,
-  children,
-}: ReadmeProps) {
+export function Readme({ nsid, type = 'namespace', className }: ReadmeProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const isTruncatable = type === 'lexicon'
 
@@ -22,7 +19,9 @@ export function Readme({
     return (
       <section className={clsx(styles.section, className)}>
         <h2 className={styles.title}>README</h2>
-        <div className={styles.wrapper}>{children}</div>
+        <div className={styles.wrapper}>
+          <ReadmeContent nsid={nsid} />
+        </div>
       </section>
     )
   }
@@ -31,7 +30,9 @@ export function Readme({
     <section className={clsx(styles.section, className)}>
       <h2 className={styles.title}>README</h2>
       <div className={styles.wrapper}>
-        <div className={styles.truncated}>{children}</div>
+        <div className={styles.truncated}>
+          <ReadmeContent nsid={nsid} />
+        </div>
         <button
           className={styles.seeMore}
           onClick={() => setIsExpanded(true)}
