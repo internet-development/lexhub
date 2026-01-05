@@ -25,7 +25,7 @@ This setup runs PostgreSQL and TAP in Docker while running the Next.js app local
 1. **Clone the repository**
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/internet-development/lexhub.git
    cd lexhub
    ```
 
