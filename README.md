@@ -14,7 +14,7 @@ LexHub consists of three main components:
 
 - **LexHub (Next.js)** - The web application that serves the UI and API
 - **PostgreSQL** - Database for storing lexicon data
-- **TAP** - AT Protocol firehose consumer that ingests lexicon records and sends them to LexHub via webhook
+- **[TAP](https://github.com/bluesky-social/indigo/tree/main/cmd/tap)** - AT Protocol firehose consumer that listens for lexicon records and delivers them to LexHub via webhook
 
 ## Development Setup
 
@@ -90,7 +90,6 @@ Note: This skips `compose.override.yaml`, so all services run in containers. The
    DATABASE_URL=postgresql://lexhub:your_secure_password@postgres:5432/lexhub
    NODE_ENV=production
    PORT=10000
-   TAP_URL=http://tap:2480
    TAP_ADMIN_PASSWORD=your_tap_admin_password
    ```
 
@@ -121,14 +120,29 @@ docker build -t lexhub .
 
 ## Environment Variables
 
-| Variable             | Description                                          | Default                                                     |
-| -------------------- | ---------------------------------------------------- | ----------------------------------------------------------- |
-| `DATABASE_URL`       | PostgreSQL connection string                         | `postgresql://lexhub:lexhub_password@localhost:5432/lexhub` |
-| `DATABASE_SSL`       | SSL mode override: `require` or `disable` (optional) | Auto-detected (disabled for localhost, required otherwise)  |
-| `NODE_ENV`           | Environment: `development` or `production`           | `development`                                               |
-| `PORT`               | Port for the Next.js server                          | `10000`                                                     |
-| `TAP_URL`            | URL of the TAP service                               | `http://localhost:2480`                                     |
-| `TAP_ADMIN_PASSWORD` | Admin password for TAP (optional)                    | -                                                           |
+### LexHub
+
+| Variable             | Description                                             | Default                                                     |
+| -------------------- | ------------------------------------------------------- | ----------------------------------------------------------- |
+| `DATABASE_URL`       | PostgreSQL connection string                            | `postgresql://lexhub:lexhub_password@localhost:5432/lexhub` |
+| `DATABASE_SSL`       | SSL mode override: `require` or `disable` (optional)    | Auto-detected (disabled for localhost, required otherwise)  |
+| `NODE_ENV`           | Environment: `development` or `production`              | `development`                                               |
+| `PORT`               | Port for the Next.js server                             | `10000`                                                     |
+| `TAP_ADMIN_PASSWORD` | Shared secret for TAP webhook authentication (optional) | -                                                           |
+
+### TAP Configuration
+
+TAP must be configured to send webhooks to LexHub. The following environment variables configure TAP (set in `compose.yaml`):
+
+| Variable                 | Description                              | Example                          |
+| ------------------------ | ---------------------------------------- | -------------------------------- |
+| `TAP_WEBHOOK_URL`        | URL where TAP sends lexicon events       | `http://lexhub:10000/api/ingest` |
+| `TAP_SIGNAL_COLLECTION`  | Collection type to signal interest in    | `com.atproto.lexicon.schema`     |
+| `TAP_COLLECTION_FILTERS` | Collection types to filter and deliver   | `com.atproto.lexicon.schema`     |
+| `TAP_ADMIN_PASSWORD`     | Shared secret for webhook authentication | -                                |
+| `TAP_LOG_LEVEL`          | Log verbosity (debug, info, warn, error) | `info`                           |
+
+For a complete list of TAP options, see the [TAP documentation](https://github.com/bluesky-social/indigo/tree/main/cmd/tap).
 
 ## Available Scripts
 

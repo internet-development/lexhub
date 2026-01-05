@@ -14,7 +14,6 @@ services:
       - '10000:10000'
     environment:
       - NODE_ENV=production
-      - TAP_URL=http://tap:2480
       - DATABASE_URL=postgresql://lexhub:lexhub_password@postgres:5432/lexhub
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
