@@ -7,7 +7,7 @@ import type {
   TdHTMLAttributes,
   ReactNode,
 } from 'react'
-import clsx from '@/common/clsx'
+import clsx from '@/util/clsx'
 
 export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
   children: ReactNode

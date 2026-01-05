@@ -1,7 +1,7 @@
 import styles from '@/components/Button.module.css'
 
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
-import clsx from '@/common/clsx'
+import clsx from '@/util/clsx'
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost'

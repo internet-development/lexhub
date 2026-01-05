@@ -1,6 +1,6 @@
 import type { SVGProps } from 'react'
 import iconStyles from '@/components/Icon.module.css'
-import clsx from '@/common/clsx'
+import clsx from '@/util/clsx'
 
 export interface IconProps extends SVGProps<SVGSVGElement> {
   size?: number

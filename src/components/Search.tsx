@@ -1,4 +1,4 @@
-import clsx from '@/common/clsx'
+import clsx from '@/util/clsx'
 import styles from '@/components/Search.module.css'
 import { useSearchSuggestions } from '@/components/useSearchSuggestions'
 import { useRouter } from 'next/navigation'

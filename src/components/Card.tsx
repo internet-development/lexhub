@@ -1,7 +1,7 @@
 import styles from '@/components/Card.module.css'
 
 import type { HTMLAttributes, ReactNode } from 'react'
-import clsx from '@/common/clsx'
+import clsx from '@/util/clsx'
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   width?: 'auto' | 'full'

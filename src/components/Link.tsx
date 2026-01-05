@@ -2,7 +2,7 @@ import styles from '@/components/Link.module.css'
 
 import type { AnchorHTMLAttributes, ReactNode } from 'react'
 import NextLink from 'next/link'
-import clsx from '@/common/clsx'
+import clsx from '@/util/clsx'
 
 export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   href: string

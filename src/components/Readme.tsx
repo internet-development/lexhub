@@ -1,4 +1,4 @@
-import clsx from '@/common/clsx'
+import clsx from '@/util/clsx'
 import styles from '@/components/Readme.module.css'
 import { ReadmeBody } from '@/components/ReadmeBody'
 

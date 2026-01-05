@@ -1,7 +1,7 @@
 import styles from '@/components/Input.module.css'
 
 import type { InputHTMLAttributes } from 'react'
-import clsx from '@/common/clsx'
+import clsx from '@/util/clsx'
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: boolean
