@@ -51,6 +51,8 @@ This setup runs PostgreSQL and TAP in Docker while running the Next.js app local
 
    This starts PostgreSQL and TAP. The `compose.override.yaml` automatically disables the lexhub container and configures services for development.
 
+   > **Note for Linux users:** The default `TAP_WEBHOOK_URL` uses `host.docker.internal` which works on macOS/Windows. On Linux, edit `compose.override.yaml` and switch to the `localhost` URL instead (see comments in the file).
+
 5. **Run database migrations**
 
    ```bash

@@ -13,13 +13,17 @@ services:
 
   tap:
     restart: no
+    # Allows TAP to reach localhost on the host (required for Linux, ignored on macOS/Windows)
     network_mode: host
     ports: []
     volumes: []
     environment:
       # Debug logging for development
       - TAP_LOG_LEVEL=debug
+      # macOS/Windows: use host.docker.internal to reach the host machine
       - TAP_WEBHOOK_URL=http://host.docker.internal:10000/api/ingest
+      # Linux: uncomment the line below and comment out the line above
+      # - TAP_WEBHOOK_URL=http://localhost:10000/api/ingest
 
   postgres:
     restart: no
