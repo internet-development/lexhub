@@ -194,7 +194,7 @@ npm run db:migrate
 npm run db:studio
 ```
 
-This opens a web UI at `https://local.drizzle.studio` to browse and edit your database.
+This opens a web UI at `http://local.drizzle.studio` to browse and edit your database.
 
 ## Stopping Services
 
