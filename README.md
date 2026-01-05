@@ -129,8 +129,10 @@ docker build -t lexhub .
 | `DATABASE_URL`       | PostgreSQL connection string                            | `postgresql://lexhub:lexhub_password@localhost:5432/lexhub` |
 | `DATABASE_SSL`       | SSL mode override: `require` or `disable` (optional)    | Auto-detected (disabled for localhost, required otherwise)  |
 | `NODE_ENV`           | Environment: `development` or `production`              | `development`                                               |
-| `PORT`               | Port for the Next.js server                             | `10000`                                                     |
+| `PORT`               | Port for the Next.js server (production only)           | `10000`                                                     |
 | `TAP_ADMIN_PASSWORD` | Shared secret for TAP webhook authentication (optional) | -                                                           |
+
+> **Note:** The `PORT` environment variable only affects production mode (`npm run start`). In development, the port is hardcoded to `10000` in `package.json`.
 
 > **Note:** If you set `TAP_ADMIN_PASSWORD`, it must match the `TAP_ADMIN_PASSWORD` configured on the TAP service (see TAP Configuration below).
 
