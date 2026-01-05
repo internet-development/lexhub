@@ -132,19 +132,23 @@ docker build -t lexhub .
 | `PORT`               | Port for the Next.js server                             | `10000`                                                     |
 | `TAP_ADMIN_PASSWORD` | Shared secret for TAP webhook authentication (optional) | -                                                           |
 
+> **Note:** If you set `TAP_ADMIN_PASSWORD`, it must match the `TAP_ADMIN_PASSWORD` configured on the TAP service (see TAP Configuration below).
+
 ### TAP Configuration
 
 TAP must be configured to send webhooks to LexHub. The following environment variables configure TAP (set in `compose.yaml`):
 
-| Variable                 | Description                              | Required Value                   |
-| ------------------------ | ---------------------------------------- | -------------------------------- |
-| `TAP_WEBHOOK_URL`        | URL where TAP sends lexicon events       | `http://lexhub:10000/api/ingest` |
-| `TAP_SIGNAL_COLLECTION`  | Collection type to signal interest in    | `com.atproto.lexicon.schema`     |
-| `TAP_COLLECTION_FILTERS` | Collection types to filter and deliver   | `com.atproto.lexicon.schema`     |
-| `TAP_ADMIN_PASSWORD`     | Shared secret for webhook authentication | -                                |
-| `TAP_LOG_LEVEL`          | Log verbosity (debug, info, warn, error) | `info`                           |
+| Variable                 | Description                                                  | Required Value                   |
+| ------------------------ | ------------------------------------------------------------ | -------------------------------- |
+| `TAP_WEBHOOK_URL`        | URL where TAP sends lexicon events                           | `http://lexhub:10000/api/ingest` |
+| `TAP_SIGNAL_COLLECTION`  | Collection type to signal interest in                        | `com.atproto.lexicon.schema`     |
+| `TAP_COLLECTION_FILTERS` | Collection types to filter and deliver                       | `com.atproto.lexicon.schema`     |
+| `TAP_ADMIN_PASSWORD`     | Shared secret for webhook authentication (must match LexHub) | -                                |
+| `TAP_LOG_LEVEL`          | Log verbosity (debug, info, warn, error)                     | `info`                           |
 
 > **Important:** `TAP_SIGNAL_COLLECTION` and `TAP_COLLECTION_FILTERS` must be set to `com.atproto.lexicon.schema` for LexHub to receive lexicon records.
+
+> **Note:** To enable webhook authentication, set `TAP_ADMIN_PASSWORD` to the same value on both the TAP and LexHub services. See `compose.yaml` for commented examples.
 
 For a complete list of TAP options, see the [TAP documentation](https://github.com/bluesky-social/indigo/tree/main/cmd/tap).
 

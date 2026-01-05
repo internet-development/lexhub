@@ -20,6 +20,8 @@ services:
       - POSTGRES_USER=lexhub
       - POSTGRES_PASSWORD=lexhub_password
       - POSTGRES_DB=lexhub
+      # Optional: shared secret for TAP webhook authentication (must match TAP service)
+      # - TAP_ADMIN_PASSWORD=your_secure_password
 
   tap:
     image: ghcr.io/bluesky-social/indigo/tap:latest
@@ -37,6 +39,8 @@ services:
 
       # Delivery options
       - TAP_WEBHOOK_URL=http://lexhub:10000/api/ingest
+      # Optional: shared secret for webhook authentication (must match LexHub service)
+      # - TAP_ADMIN_PASSWORD=your_secure_password
 
   postgres:
     image: postgres:18-alpine
