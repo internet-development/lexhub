@@ -1,6 +1,6 @@
 import Link from '@/components/Link'
 import { Card } from '@/components/Card'
-import CubeIcon from '@/components/CubeIcon'
+import CubeIcon from '@/components/icons/CubeIcon'
 import { VersionDropdown } from '@/components/VersionDropdown'
 import { Readme } from '@/components/Readme'
 import styles from './NamespacePage.module.css'

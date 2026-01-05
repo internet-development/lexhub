@@ -1,5 +1,5 @@
 import type { SVGProps } from 'react'
-import iconStyles from '@/components/Icon.module.css'
+import iconStyles from './Icon.module.css'
 import clsx from '@/util/clsx'
 
 export interface IconProps extends SVGProps<SVGSVGElement> {

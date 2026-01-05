@@ -1,8 +1,8 @@
 import styles from '@/components/NamespaceIdentifier.module.css'
 
-import BlueskyIcon from '@/components/BlueskyIcon'
-import GlobeIcon from '@/components/GlobeIcon'
-import AtIcon from '@/components/AtIcon'
+import BlueskyIcon from '@/components/icons/BlueskyIcon'
+import GlobeIcon from '@/components/icons/GlobeIcon'
+import AtIcon from '@/components/icons/AtIcon'
 
 export type IconType = 'bluesky' | 'globe' | 'at'
 

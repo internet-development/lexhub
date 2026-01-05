@@ -1,5 +1,5 @@
 import Link from '@/components/Link'
-import CubeIcon from '@/components/CubeIcon'
+import CubeIcon from '@/components/icons/CubeIcon'
 import type { TreeData, TreeNode } from '@/app/[id]/data'
 import styles from './NamespaceTree.module.css'
 
