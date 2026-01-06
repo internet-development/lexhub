@@ -31,7 +31,7 @@ export default function NamespaceTabs(props: NamespaceTabsProps) {
   const namespaces = activeTab === 'featured' ? featured : recent
 
   return (
-    <Card className={styles.fullHeightCard}>
+    <Card height="full">
       <CardHeader>
         <h3 className={cardStyles.title}>Namespaces</h3>
         <div className={styles.tabs}>
@@ -55,7 +55,6 @@ export default function NamespaceTabs(props: NamespaceTabsProps) {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead># of Lexicons</TableHead>
-              <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
