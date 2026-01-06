@@ -84,16 +84,26 @@
 }
 
 .searchContainer {
-  max-width: var(--container-lg);
+  width: 100%;
+  max-width: var(--container-sm);
   margin: 0 auto;
   padding: 0 var(--space-4);
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-12);
+
+  @media (min-width: 70rem) {
+    margin-bottom: var(--space-16);
+  }
 }
 
 .main {
-  max-width: var(--container-lg);
+  width: 100%;
+  max-width: var(--container-sm);
   margin: 0 auto;
   padding: 0 var(--space-4) var(--space-8);
+
+  @media (min-width: 70rem) {
+    max-width: var(--container-lg);
+  }
 }
 
 .grid {
