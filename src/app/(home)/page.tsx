@@ -74,8 +74,8 @@ export default async function HomePage() {
 
       <main className={styles.main}>
         <div className={styles.grid}>
-          <GetStartedCard />
           <NamespaceTabs featured={featured} recent={recent} />
+          <GetStartedCard />
         </div>
       </main>
 

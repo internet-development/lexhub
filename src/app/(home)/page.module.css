@@ -108,15 +108,13 @@
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: auto;
   gap: var(--space-8);
   width: 100%;
   align-items: start;
-}
 
-@media (min-width: 70rem) {
-  .grid {
-    grid-template-columns: 1fr auto;
+  @media (min-width: 70rem) {
+    grid-template-columns: auto 1fr;
   }
 }
 
