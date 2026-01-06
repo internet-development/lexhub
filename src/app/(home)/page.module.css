@@ -72,7 +72,6 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-6);
-  margin-bottom: var(--space-8);
 }
 
 .heroLink {
@@ -85,8 +84,7 @@
 }
 
 .searchContainer {
-  max-width: var(--container-sm);
-  margin: 0 auto;
+  margin-bottom: var(--space-8);
 }
 
 .main {
@@ -103,9 +101,9 @@
   align-items: start;
 }
 
-@media (min-width: 64rem) {
+@media (min-width: 70rem) {
   .grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr auto;
   }
 }
 

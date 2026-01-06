@@ -65,14 +65,13 @@ export default async function HomePage() {
               Documentation
             </Link>
           </div>
-
-          <div className={styles.searchContainer}>
-            <Search />
-          </div>
         </div>
       </section>
 
       <main className={styles.main}>
+        <div className={styles.searchContainer}>
+          <Search />
+        </div>
         <div className={styles.grid}>
           <GetStartedCard />
           <NamespaceTabs featured={featured} recent={recent} />
