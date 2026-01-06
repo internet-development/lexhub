@@ -1,22 +1,10 @@
-import type { LexObject } from '@atproto/lexicon'
-import type { FieldInfo, LexProperty } from './types'
+import type {
+  LexObject,
+  LexXrpcBody,
+  LexXrpcParameters,
+} from '@atproto/lexicon'
+import type { FieldInfo } from './types'
 import { getConstraints } from './constraints'
-
-type LexParams = {
-  properties?: Record<string, LexProperty>
-  required?: string[]
-}
-
-type LexBody = {
-  schema?:
-    | {
-        type: 'object'
-        properties?: LexObject['properties']
-        required?: string[]
-        nullable?: string[]
-      }
-    | { type: 'ref' | 'union' }
-}
 
 export function extractObjectFields(
   properties: LexObject['properties'] | undefined,
@@ -38,7 +26,9 @@ export function extractObjectFields(
   }))
 }
 
-export function extractParamFields(params: LexParams | undefined): FieldInfo[] {
+export function extractParamFields(
+  params: LexXrpcParameters | undefined,
+): FieldInfo[] {
   if (!params?.properties) return []
 
   const requiredSet = new Set(params.required ?? [])
@@ -53,7 +43,7 @@ export function extractParamFields(params: LexParams | undefined): FieldInfo[] {
   }))
 }
 
-export function extractBodyFields(body: LexBody | undefined): FieldInfo[] {
+export function extractBodyFields(body: LexXrpcBody | undefined): FieldInfo[] {
   if (
     !body?.schema ||
     body.schema.type !== 'object' ||
