@@ -103,3 +103,67 @@ export async function getNamespaceChildren(
     description: row.description,
   }))
 }
+
+export interface RootNamespace {
+  prefix: string
+  lexiconCount: number
+  latestUpdate: Date
+}
+
+const FEATURED_NAMESPACES = [
+  'app.bsky',
+  'chat.bsky',
+  'com.atproto',
+  'tools.ozone',
+  'xyz.statusphere',
+  'org.robocracy',
+  'com.atprofile',
+  'uk.skyblur',
+]
+
+/**
+ * Gets root-level namespaces (2-segment prefixes like "app.bsky")
+ * with lexicon counts and latest update times.
+ */
+export async function getRootNamespaces(options?: {
+  sortBy?: 'featured' | 'lexiconCount' | 'recentlyUpdated'
+  limit?: number
+}): Promise<RootNamespace[]> {
+  const { sortBy = 'featured', limit = 20 } = options ?? {}
+
+  const orderClause =
+    sortBy === 'recentlyUpdated'
+      ? sql`latest_update DESC`
+      : sql`lexicon_count DESC`
+
+  const result: Array<{
+    prefix: string
+    lexicon_count: number
+    latest_update: Date
+  }> = await db.execute(sql`
+    SELECT 
+      SPLIT_PART(nsid, '.', 1) || '.' || SPLIT_PART(nsid, '.', 2) as prefix,
+      COUNT(DISTINCT nsid)::int as lexicon_count,
+      MAX(ingested_at) as latest_update
+    FROM valid_lexicons
+    GROUP BY prefix
+    ORDER BY ${orderClause}
+    LIMIT ${limit}
+  `)
+
+  let namespaces = result.map((row) => ({
+    prefix: row.prefix,
+    lexiconCount: row.lexicon_count,
+    latestUpdate: row.latest_update,
+  }))
+
+  // For featured, filter to known namespaces and preserve order
+  if (sortBy === 'featured') {
+    const namespaceMap = new Map(namespaces.map((n) => [n.prefix, n]))
+    namespaces = FEATURED_NAMESPACES.map((prefix) =>
+      namespaceMap.get(prefix),
+    ).filter((n): n is RootNamespace => n !== undefined)
+  }
+
+  return namespaces
+}
