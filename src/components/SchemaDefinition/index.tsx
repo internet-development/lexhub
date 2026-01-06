@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from 'react'
 import styles from './SchemaDefinition.module.css'
 
 // Views
-import { JsonView } from './views/JsonView'
 import { ObjectTypeView } from './views/ObjectTypeView'
 import {
   QueryTypeView,
@@ -102,6 +101,10 @@ export function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
       </details>
     </li>
   )
+}
+
+function JsonView({ def }: { def: LexUserType }) {
+  return <pre className={styles.schema}>{JSON.stringify(def, null, 2)}</pre>
 }
 
 function NiceView({ def }: { def: LexUserType }) {
