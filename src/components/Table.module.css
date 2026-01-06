@@ -37,7 +37,7 @@
 }
 
 .head {
-  padding: var(--space-3) var(--space-6);
+  padding: var(--space-3) var(--space-4);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
@@ -46,17 +46,12 @@
   min-width: 0;
 }
 
-.head:first-child {
-  padding-left: var(--space-6);
-}
-
 .head:last-child {
-  padding-right: var(--space-6);
   justify-content: flex-end;
 }
 
 .cell {
-  padding: var(--space-4) var(--space-6);
+  padding: var(--space-4);
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
   display: flex;
@@ -64,12 +59,7 @@
   min-width: 0;
 }
 
-.cell:first-child {
-  padding-left: var(--space-6);
-}
-
 .cell:last-child {
-  padding-right: var(--space-6);
   justify-content: flex-end;
 }
 

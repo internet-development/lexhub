@@ -1,3 +1,5 @@
+'use client'
+
 import clsx from '@/util/clsx'
 import styles from './Search.module.css'
 import { useSearchSuggestions } from './useSearchSuggestions'
