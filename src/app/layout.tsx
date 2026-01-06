@@ -2,7 +2,6 @@ import './reset.css'
 import './globals.css'
 
 import type { Metadata } from 'next'
-import Footer from '@/components/Footer'
 
 export const metadata: Metadata = {
   title: 'LexHub - Explore ideas. Remix code. Build amazing protocols.',
@@ -27,12 +26,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body
-        style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}
-      >
-        <div style={{ flex: 1 }}>{children}</div>
-        <Footer />
-      </body>
+      <body>{children}</body>
     </html>
   )
 }

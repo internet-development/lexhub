@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-import styles from '@/app/page.module.css'
+import styles from '@/app/(home)/page.module.css'
 import cardStyles from '@/components/Card.module.css'
 
 import { Card, CardHeader, CardBody } from '@/components/Card'
