@@ -1,6 +1,7 @@
 import { db } from '@/db'
-import { valid_lexicons } from '@/db/schema'
+import { valid_lexicons, invalid_lexicons } from '@/db/schema'
 import { desc, eq, sql } from 'drizzle-orm'
+import { union } from 'drizzle-orm/pg-core'
 import type { LexiconDoc } from '@atproto/lexicon'
 
 /**
@@ -166,4 +167,34 @@ export async function getRootNamespaces(options?: {
   }
 
   return namespaces
+}
+
+export interface Stats {
+  uniqueLexicons: number
+  uniqueRepositories: number
+}
+
+/**
+ * Gets basic stats for the homepage
+ */
+export async function getStats(): Promise<Stats> {
+  const combinedNsids = union(
+    db.select({ nsid: valid_lexicons.nsid }).from(valid_lexicons),
+    db.select({ nsid: invalid_lexicons.nsid }).from(invalid_lexicons),
+  ).as('combined_nsids')
+
+  const combinedRepos = union(
+    db.select({ repoDid: valid_lexicons.repoDid }).from(valid_lexicons),
+    db.select({ repoDid: invalid_lexicons.repoDid }).from(invalid_lexicons),
+  ).as('combined_repos')
+
+  const [nsidResult, repoResult] = await Promise.all([
+    db.select({ count: sql<number>`count(*)`.as('count') }).from(combinedNsids),
+    db.select({ count: sql<number>`count(*)`.as('count') }).from(combinedRepos),
+  ])
+
+  return {
+    uniqueLexicons: nsidResult[0].count,
+    uniqueRepositories: repoResult[0].count,
+  }
 }

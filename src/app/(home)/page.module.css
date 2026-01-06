@@ -72,6 +72,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-6);
+  margin-bottom: var(--space-6);
 }
 
 .heroLink {
@@ -81,6 +82,16 @@
   font-family: var(--font-family-sans);
   font-weight: var(--font-weight-normal);
   font-size: var(--font-size-lg);
+}
+
+.heroStats {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.statNumber {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
 }
 
 .searchContainer {

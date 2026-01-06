@@ -11,12 +11,13 @@ import Logo from '@/components/Logo'
 import NamespaceTabs from '@/components/NamespaceTabs'
 import Search from '@/components/Search'
 
-import { getRootNamespaces } from '@/db/queries'
+import { getRootNamespaces, getStats } from '@/db/queries'
 
 export default async function HomePage() {
-  const [featured, recent] = await Promise.all([
+  const [featured, recent, stats] = await Promise.all([
     getRootNamespaces({ sortBy: 'featured' }),
     getRootNamespaces({ sortBy: 'recentlyUpdated', limit: 20 }),
+    getStats(),
   ])
 
   return (
@@ -65,6 +66,17 @@ export default async function HomePage() {
               Documentation
             </Link>
           </div>
+
+          <p className={styles.heroStats}>
+            <span className={styles.statNumber}>
+              {stats.uniqueLexicons.toLocaleString()}
+            </span>{' '}
+            lexicons indexed from{' '}
+            <span className={styles.statNumber}>
+              {stats.uniqueRepositories.toLocaleString()}
+            </span>{' '}
+            repositories
+          </p>
         </div>
       </section>
 
