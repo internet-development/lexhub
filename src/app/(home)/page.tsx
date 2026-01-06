@@ -13,6 +13,8 @@ import Search from '@/components/Search'
 
 import { getRootNamespaces, getStats } from '@/db/queries'
 
+export const revalidate = 300 // Revalidate this page every 5 minutes
+
 export default async function HomePage() {
   const [featured, recent, stats] = await Promise.all([
     getRootNamespaces({ sortBy: 'featured' }),
