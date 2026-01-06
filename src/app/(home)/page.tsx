@@ -1,15 +1,15 @@
-import styles from './page.module.css'
 import cardStyles from '@/components/Card.module.css'
+import styles from './page.module.css'
 
-import { Card, CardHeader, CardBody } from '@/components/Card'
-import Link from '@/components/Link'
-import Search from '@/components/Search'
-import NamespaceTabs from '@/components/NamespaceTabs'
-import BlueskyIcon from '@/components/icons/BlueskyIcon'
-import GitHubIcon from '@/components/icons/GitHubIcon'
+import { Card, CardBody, CardHeader } from '@/components/Card'
 import AtIcon from '@/components/icons/AtIcon'
+import BlueskyIcon from '@/components/icons/BlueskyIcon'
 import DocumentIcon from '@/components/icons/DocumentIcon'
+import GitHubIcon from '@/components/icons/GitHubIcon'
+import Link from '@/components/Link'
 import Logo from '@/components/Logo'
+import NamespaceTabs from '@/components/NamespaceTabs'
+import Search from '@/components/Search'
 
 import { getRootNamespaces } from '@/db/queries'
 
@@ -74,49 +74,8 @@ export default async function HomePage() {
 
       <main className={styles.main}>
         <div className={styles.grid}>
+          <GetStartedCard />
           <NamespaceTabs featured={featured} recent={recent} />
-
-          <Card className={styles.fullHeightCard}>
-            <CardHeader>
-              <h3 className={cardStyles.title}>Get started</h3>
-            </CardHeader>
-            <CardBody>
-              <p className={styles.getStartedText}>
-                Install the schemas you want to build with:
-              </p>
-
-              <div className={styles.codeBlock}>
-                <code className={styles.code}>
-                  $ npx @atproto/lex install app.bsky.actor.getProfile
-                </code>
-              </div>
-
-              <p className={styles.getStartedText}>And start building:</p>
-
-              <div className={styles.codeBlock}>
-                <pre className={styles.codeMultiline}>
-                  <code>{`import { Client } from '@atproto/lex'
-import * as app from './lexicons/app.js'
-
-// Create a client instance
-const client = new Client('https://public.api.bsky.app')
-
-// Start making requests using generated schemas
-const response = await client.call(app.bsky.actor.getProfile, {
-  actor: 'pfrazee.com',
-})`}</code>
-                </pre>
-              </div>
-
-              <Link href="#docs" variant="primary" style={{ fontSize: '14px' }}>
-                Read the docs
-              </Link>
-              <span className={styles.getStartedText}>
-                {' '}
-                for other languages and to learn more.
-              </span>
-            </CardBody>
-          </Card>
         </div>
       </main>
 
@@ -135,5 +94,51 @@ const response = await client.call(app.bsky.actor.getProfile, {
         </div>
       </footer>
     </div>
+  )
+}
+
+function GetStartedCard() {
+  return (
+    <Card className={styles.fullHeightCard}>
+      <CardHeader>
+        <h3 className={cardStyles.title}>Get started</h3>
+      </CardHeader>
+      <CardBody>
+        <p className={styles.getStartedText}>
+          Install the schemas you want to build with:
+        </p>
+
+        <div className={styles.codeBlock}>
+          <code className={styles.code}>
+            $ npx @atproto/lex install app.bsky.actor.getProfile
+          </code>
+        </div>
+
+        <p className={styles.getStartedText}>And start building:</p>
+
+        <div className={styles.codeBlock}>
+          <pre className={styles.codeMultiline}>
+            <code>{`import { Client } from '@atproto/lex'
+import * as app from './lexicons/app.js'
+
+// Create a client instance
+const client = new Client('https://public.api.bsky.app')
+
+// Start making requests using generated schemas
+const response = await client.call(app.bsky.actor.getProfile, {
+  actor: 'pfrazee.com',
+})`}</code>
+          </pre>
+        </div>
+
+        <Link href="#docs" variant="primary" style={{ fontSize: '14px' }}>
+          Read the docs
+        </Link>
+        <span className={styles.getStartedText}>
+          {' '}
+          for other languages and to learn more.
+        </span>
+      </CardBody>
+    </Card>
   )
 }

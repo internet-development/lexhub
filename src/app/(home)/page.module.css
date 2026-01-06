@@ -97,7 +97,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: auto auto;
   gap: var(--space-8);
   width: 100%;
   align-items: start;
@@ -106,10 +106,6 @@
 .grid > * {
   width: 100%;
   min-width: 0;
-}
-
-.fullHeightCard {
-  height: 100%;
 }
 
 .tabs {
