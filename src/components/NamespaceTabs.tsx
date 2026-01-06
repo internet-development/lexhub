@@ -7,7 +7,6 @@ import cardStyles from '@/components/Card.module.css'
 
 import { Card, CardBody, CardHeader } from '@/components/Card'
 import Link from '@/components/Link'
-import NamespaceIdentifier from '@/components/NamespaceIdentifier'
 import {
   Table,
   TableBody,
@@ -71,7 +70,7 @@ function NamespaceTableRow(namespace: RootNamespace) {
     <TableRow key={namespace.prefix}>
       <TableCell>
         <Link variant="primary" href={`/${namespace.prefix}`}>
-          <NamespaceIdentifier name={namespace.prefix} />
+          {namespace.prefix}
         </Link>
       </TableCell>
       <TableCell>{namespace.lexiconCount.toLocaleString()}</TableCell>
