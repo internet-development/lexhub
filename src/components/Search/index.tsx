@@ -1,6 +1,6 @@
 import clsx from '@/util/clsx'
-import styles from '@/components/Search.module.css'
-import { useSearchSuggestions } from '@/components/useSearchSuggestions'
+import styles from './Search.module.css'
+import { useSearchSuggestions } from './useSearchSuggestions'
 import { useRouter } from 'next/navigation'
 
 import { useEffect, useId, useReducer, useRef, useState } from 'react'
