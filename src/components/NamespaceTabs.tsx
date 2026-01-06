@@ -58,7 +58,9 @@ export default function NamespaceTabs(props: NamespaceTabsProps) {
               <TableHead># of Lexicons</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>{namespaces.map(NamespaceTableRow)}</TableBody>
+          <TableBody>
+            {namespaces.slice(0, 10).map(NamespaceTableRow)}
+          </TableBody>
         </Table>
       </CardBody>
     </Card>
