@@ -7,30 +7,29 @@
 .table {
   width: 100%;
   display: table;
+  border-collapse: collapse;
 }
 
 .header {
   background-color: var(--color-background-subtle);
+  border-radius: var(--radius-md);
 }
 
 .body {
   background-color: var(--color-background);
 }
 
-.body tr {
+.row {
+  transition: background-color var(--transition-fast);
   border-bottom: 0.0625rem solid var(--color-border);
 }
 
-.body tr:hover {
-  background-color: var(--color-background-subtle);
-}
-
-.body tr:last-child {
+.row:last-child {
   border-bottom: none;
 }
 
-.row {
-  transition: background-color var(--transition-fast);
+.row:hover {
+  background-color: var(--color-background-subtle);
 }
 
 .head {
@@ -55,8 +54,4 @@
 
 .cell:last-child {
   text-align: right;
-}
-
-.body tr:last-child .cell {
-  padding-bottom: var(--space-4);
 }
