@@ -6,7 +6,7 @@ import clsx from '@/util/clsx'
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   width?: 'auto' | 'full'
   height?: 'auto' | 'full'
-  children: ReactNode
+  children?: ReactNode
 }
 
 export function Card(props: CardProps) {
