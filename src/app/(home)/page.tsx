@@ -10,6 +10,7 @@ import Link from '@/components/Link'
 import Logo from '@/components/Logo'
 import NamespaceTabs from '@/components/NamespaceTabs'
 import Search from '@/components/Search'
+import StatsCard from '@/components/StatsCard'
 import { getRootNamespaces, getStats } from '@/db/queries'
 
 export const revalidate = 300 // Revalidate this page every 5 minutes
@@ -67,17 +68,6 @@ export default async function HomePage() {
               Documentation
             </Link>
           </div>
-
-          <p className={styles.heroStats}>
-            <span className={styles.statNumber}>
-              {stats.uniqueLexicons.toLocaleString()}
-            </span>
-            <span> lexicons indexed from </span>
-            <span className={styles.statNumber}>
-              {stats.uniqueRepositories.toLocaleString()}
-            </span>
-            <span> repositories</span>
-          </p>
         </div>
       </section>
 
@@ -88,6 +78,7 @@ export default async function HomePage() {
       <main className={styles.main}>
         <div className={styles.grid}>
           <NamespaceTabs featured={featured} recent={recent} />
+          <StatsCard stats={stats} />
           <GetStartedCard />
         </div>
       </main>
