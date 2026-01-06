@@ -10,7 +10,6 @@ import Link from '@/components/Link'
 import Logo from '@/components/Logo'
 import NamespaceTabs from '@/components/NamespaceTabs'
 import Search from '@/components/Search'
-
 import { getRootNamespaces, getStats } from '@/db/queries'
 
 export const revalidate = 300 // Revalidate this page every 5 minutes
@@ -72,12 +71,12 @@ export default async function HomePage() {
           <p className={styles.heroStats}>
             <span className={styles.statNumber}>
               {stats.uniqueLexicons.toLocaleString()}
-            </span>{' '}
-            lexicons indexed from{' '}
+            </span>
+            <span> lexicons indexed from </span>
             <span className={styles.statNumber}>
               {stats.uniqueRepositories.toLocaleString()}
-            </span>{' '}
-            repositories
+            </span>
+            <span> repositories</span>
           </p>
         </div>
       </section>
