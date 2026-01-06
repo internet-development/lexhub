@@ -31,9 +31,6 @@
 
 .row {
   transition: background-color var(--transition-fast);
-  display: grid;
-  grid-template-columns: 2fr 1fr auto;
-  width: 100%;
 }
 
 .head {
@@ -41,26 +38,23 @@
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
-  display: flex;
-  align-items: center;
-  min-width: 0;
+  text-align: left;
+  white-space: nowrap;
 }
 
 .head:last-child {
-  justify-content: flex-end;
+  text-align: right;
 }
 
 .cell {
   padding: var(--space-4);
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
-  display: flex;
-  align-items: center;
-  min-width: 0;
+  vertical-align: middle;
 }
 
 .cell:last-child {
-  justify-content: flex-end;
+  text-align: right;
 }
 
 .body tr:last-child .cell {

@@ -97,10 +97,16 @@
 
 .grid {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: 1fr;
   gap: var(--space-8);
   width: 100%;
   align-items: start;
+}
+
+@media (min-width: 64rem) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .grid > * {
@@ -114,6 +120,7 @@
   background-color: var(--color-background-muted);
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-sm);
+  flex-shrink: 0;
 }
 
 .tab {
