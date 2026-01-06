@@ -68,10 +68,11 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <div className={styles.searchContainer}>
+        <Search />
+      </div>
+
       <main className={styles.main}>
-        <div className={styles.searchContainer}>
-          <Search />
-        </div>
         <div className={styles.grid}>
           <GetStartedCard />
           <NamespaceTabs featured={featured} recent={recent} />

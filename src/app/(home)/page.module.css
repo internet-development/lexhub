@@ -32,7 +32,7 @@
 }
 
 .hero {
-  padding: var(--space-16) 0;
+  padding: var(--space-12) 0 var(--space-8);
 }
 
 .heroContent {
@@ -59,7 +59,7 @@
 
 .heroDescription {
   color: var(--color-text-tertiary);
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-6);
   max-width: 43.75rem;
   margin-left: auto;
   margin-right: auto;
@@ -84,6 +84,9 @@
 }
 
 .searchContainer {
+  max-width: var(--container-lg);
+  margin: 0 auto;
+  padding: 0 var(--space-4);
   margin-bottom: var(--space-8);
 }
 
