@@ -32,7 +32,7 @@
 .row {
   transition: background-color var(--transition-fast);
   display: grid;
-  grid-template-columns: 2.2fr 1.8fr 6fr 1fr;
+  grid-template-columns: 2fr 1fr auto;
   width: 100%;
 }
 
