@@ -1,91 +1,23 @@
-'use client'
-
 import styles from './page.module.css'
 import cardStyles from '@/components/Card.module.css'
 
-import { useState } from 'react'
-
 import { Card, CardHeader, CardBody } from '@/components/Card'
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-} from '@/components/Table'
 import Link from '@/components/Link'
 import Search from '@/components/Search'
-import NamespaceTableRow from '@/components/NamespaceTableRow'
+import NamespaceTabs from '@/components/NamespaceTabs'
 import BlueskyIcon from '@/components/icons/BlueskyIcon'
 import GitHubIcon from '@/components/icons/GitHubIcon'
 import AtIcon from '@/components/icons/AtIcon'
 import DocumentIcon from '@/components/icons/DocumentIcon'
 import Logo from '@/components/Logo'
 
-type TabType = 'featured' | 'recent' | 'viewed'
+import { getRootNamespaces } from '@/db/queries'
 
-interface Namespace {
-  name: string
-  icon: 'bluesky' | 'globe' | 'at'
-  lexicons: number
-  description: string
-}
-
-const namespaces: Namespace[] = [
-  {
-    name: 'app.bsky',
-    icon: 'bluesky',
-    lexicons: 4827,
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
-  },
-  {
-    name: 'chat.bsky',
-    icon: 'bluesky',
-    lexicons: 1394,
-    description:
-      'Curabitur fringilla erat a leo imperdiet, vitae vehicula erat vehicula...',
-  },
-  {
-    name: 'com.atproto',
-    icon: 'bluesky',
-    lexicons: 7502,
-    description:
-      'Suspendisse quis orci nec velit pretium tempor et sit amet tellus',
-  },
-  {
-    name: 'tools.ozone',
-    icon: 'at',
-    lexicons: 9041,
-    description: 'Maecenas congue diam eget mi posuere vestibulum',
-  },
-  {
-    name: 'xyz.statusphere',
-    icon: 'at',
-    lexicons: 2678,
-    description: 'Cras nec ligula consequat, tristique eros ac, euismod enim',
-  },
-  {
-    name: 'org.robocracy',
-    icon: 'at',
-    lexicons: 5180,
-    description: 'Donec venenatis dolor ut quam pretium sodales',
-  },
-  {
-    name: 'com.atprofile',
-    icon: 'globe',
-    lexicons: 3409,
-    description: 'Aenean consectetur orci vitae orci semper eleifend',
-  },
-  {
-    name: 'uk.skyblur',
-    icon: 'globe',
-    lexicons: 7713,
-    description: 'Aenean ut nisi a augue venenatis egestas',
-  },
-]
-
-export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<TabType>('featured')
+export default async function HomePage() {
+  const [featured, recent] = await Promise.all([
+    getRootNamespaces({ sortBy: 'featured' }),
+    getRootNamespaces({ sortBy: 'recentlyUpdated', limit: 20 }),
+  ])
 
   return (
     <div className={styles.container}>
@@ -142,55 +74,7 @@ export default function HomePage() {
 
       <main className={styles.main}>
         <div className={styles.grid}>
-          <Card className={styles.fullHeightCard}>
-            <CardHeader>
-              <h3 className={cardStyles.title}>Namespaces</h3>
-              <div className={styles.tabs}>
-                <button
-                  onClick={() => setActiveTab('featured')}
-                  className={`${styles.tab} ${activeTab === 'featured' ? styles.active : ''}`}
-                >
-                  Featured
-                </button>
-                <button
-                  onClick={() => setActiveTab('recent')}
-                  className={`${styles.tab} ${activeTab === 'recent' ? styles.active : ''}`}
-                >
-                  Recently Updated
-                </button>
-                <button
-                  onClick={() => setActiveTab('viewed')}
-                  className={`${styles.tab} ${activeTab === 'viewed' ? styles.active : ''}`}
-                >
-                  Most Viewed
-                </button>
-              </div>
-            </CardHeader>
-            <CardBody className={cardStyles.bodyNoPadding}>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead># of Lexicons</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {namespaces.map((namespace, index) => (
-                    <NamespaceTableRow
-                      key={index}
-                      icon={namespace.icon}
-                      name={namespace.name}
-                      lexicons={namespace.lexicons}
-                      description={namespace.description}
-                      href={`/${namespace.name}`}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </CardBody>
-          </Card>
+          <NamespaceTabs featured={featured} recent={recent} />
 
           <Card className={styles.fullHeightCard}>
             <CardHeader>
