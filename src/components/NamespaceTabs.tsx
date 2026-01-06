@@ -5,15 +5,17 @@ import { useState } from 'react'
 import styles from '@/app/(home)/page.module.css'
 import cardStyles from '@/components/Card.module.css'
 
-import { Card, CardHeader, CardBody } from '@/components/Card'
+import { Card, CardBody, CardHeader } from '@/components/Card'
+import Link from '@/components/Link'
+import NamespaceIdentifier from '@/components/NamespaceIdentifier'
 import {
   Table,
-  TableHeader,
   TableBody,
-  TableRow,
+  TableCell,
   TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/Table'
-import NamespaceTableRow from '@/components/NamespaceTableRow'
 
 import type { RootNamespace } from '@/db/queries'
 
@@ -57,18 +59,22 @@ export default function NamespaceTabs(props: NamespaceTabsProps) {
               <TableHead># of Lexicons</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {namespaces.map((namespace) => (
-              <NamespaceTableRow
-                key={namespace.prefix}
-                name={namespace.prefix}
-                lexicons={namespace.lexiconCount}
-                href={`/${namespace.prefix}`}
-              />
-            ))}
-          </TableBody>
+          <TableBody>{namespaces.map(NamespaceTableRow)}</TableBody>
         </Table>
       </CardBody>
     </Card>
+  )
+}
+
+function NamespaceTableRow(namespace: RootNamespace) {
+  return (
+    <TableRow key={namespace.prefix}>
+      <TableCell>
+        <Link variant="primary" href={`/${namespace.prefix}`}>
+          <NamespaceIdentifier name={namespace.prefix} />
+        </Link>
+      </TableCell>
+      <TableCell>{namespace.lexiconCount.toLocaleString()}</TableCell>
+    </TableRow>
   )
 }
