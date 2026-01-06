@@ -1,11 +1,11 @@
 .root {
   font-family: var(--font-mono, monospace);
-  line-height: 1;
   overflow: hidden;
 }
 
 .header {
   margin: 0.5rem 0;
+  line-height: 1;
 }
 
 .headerName {

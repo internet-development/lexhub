@@ -1,6 +1,5 @@
 .link {
   transition: all var(--transition-fast);
-  border-radius: var(--radius-sm);
   outline: none;
   text-decoration: none;
 
