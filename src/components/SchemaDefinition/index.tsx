@@ -5,7 +5,6 @@ import type { LexUserType } from '@atproto/lexicon'
 import { useEffect, useRef, useState } from 'react'
 import styles from './SchemaDefinition.module.css'
 
-// Views
 import { ObjectTypeView } from './views/ObjectTypeView'
 import {
   QueryTypeView,
@@ -15,8 +14,6 @@ import {
 import { PermissionSetTypeView } from './views/PermissionSetTypeView'
 import { ScalarTypeView } from './views/ScalarTypeView'
 import { TokenTypeView } from './views/TokenTypeView'
-
-// Utils
 import type { TypeCategory } from './utils/types'
 
 export interface SchemaDefinitionProps {
@@ -36,7 +33,6 @@ export function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
         ? 'PERMISSIONS'
         : 'DATA FIELDS'
 
-  // Auto-open when URL hash matches this schema's name
   useEffect(() => {
     if (hash === name && detailsRef.current) {
       detailsRef.current.open = true

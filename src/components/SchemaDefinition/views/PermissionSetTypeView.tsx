@@ -1,7 +1,6 @@
 import type { LexPermission, LexPermissionSet } from '@atproto/lexicon'
 import styles from '../SchemaDefinition.module.css'
 
-/** Safely extract a string array from a permission record */
 function getPermissionStringArray(perm: LexPermission, key: string): string[] {
   const value = perm[key]
   if (Array.isArray(value)) {
@@ -10,7 +9,6 @@ function getPermissionStringArray(perm: LexPermission, key: string): string[] {
   return []
 }
 
-/** Extract display info from a repo permission */
 function getRepoPermissionInfo(perm: LexPermission): {
   collections: string[]
   actions: string[]
@@ -18,12 +16,11 @@ function getRepoPermissionInfo(perm: LexPermission): {
   const actions = getPermissionStringArray(perm, 'action')
   return {
     collections: getPermissionStringArray(perm, 'collection'),
-    // If no actions specified, all operations are allowed per spec
+    // Per spec: if no actions specified, all operations are allowed
     actions: actions.length > 0 ? actions : ['create', 'update', 'delete'],
   }
 }
 
-/** Extract display info from an RPC permission */
 function getRpcPermissionInfo(perm: LexPermission): {
   methods: string[]
   audience: string

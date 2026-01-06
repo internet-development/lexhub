@@ -15,7 +15,6 @@ function compactProperties(
   return items.filter((x): x is ScalarProperty => x !== null)
 }
 
-/** Return a property if value is defined, otherwise null */
 function property(
   name: string,
   value: unknown,

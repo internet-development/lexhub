@@ -1,6 +1,5 @@
 import type { FieldConstraint, LexProperty } from './types'
 
-/** Format a text constraint, or return null if value is undefined */
 export function constraint(
   label: string,
   value: unknown,
@@ -10,7 +9,6 @@ export function constraint(
   return { label, value: format(value as never) }
 }
 
-/** Filter out null values from constraint list */
 export function compactConstraints(
   ...items: (FieldConstraint | null)[]
 ): FieldConstraint[] {

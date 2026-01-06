@@ -2,10 +2,9 @@ import type { LexProperty } from './utils/types'
 import styles from './SchemaDefinition.module.css'
 
 /**
- * Convert a ref string to a URL href.
- * Refs can be:
- * - Full NSID with fragment: "app.bsky.actor.defs#profileView" -> "/app.bsky.actor.defs#profileView"
- * - Just a fragment (same lexicon): "#profileView" -> "#profileView"
+ * Converts a lexicon ref to a URL path.
+ * @example "app.bsky.actor.defs#profileView" -> "/app.bsky.actor.defs#profileView"
+ * @example "#profileView" -> "#profileView" (same-lexicon ref)
  */
 function refToHref(ref: string): string {
   if (ref.startsWith('#')) {
@@ -15,7 +14,6 @@ function refToHref(ref: string): string {
   return fragment ? `/${nsid}#${fragment}` : `/${nsid}`
 }
 
-/** Renders a type with linkable refs */
 export function TypeDisplay({ prop }: { prop: LexProperty }) {
   switch (prop.type) {
     case 'array':
