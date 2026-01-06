@@ -18,6 +18,8 @@ import {
 
 import type { RootNamespace } from '@/db/queries'
 
+const MAX_ROWS = 9
+
 type TabType = 'featured' | 'recent'
 
 export interface NamespaceTabsProps {
@@ -58,7 +60,9 @@ export default function NamespaceTabs(props: NamespaceTabsProps) {
               <TableHead># of Lexicons</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>{namespaces.slice(0, 9).map(NamespaceTableRow)}</TableBody>
+          <TableBody>
+            {namespaces.slice(0, MAX_ROWS).map(NamespaceTableRow)}
+          </TableBody>
         </Table>
       </CardBody>
     </Card>
