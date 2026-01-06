@@ -50,7 +50,7 @@ export default function NamespaceTabs(props: NamespaceTabsProps) {
           </button>
         </div>
       </CardHeader>
-      <CardBody className={cardStyles.bodyNoPadding}>
+      <CardBody>
         <Table>
           <TableHeader>
             <TableRow>

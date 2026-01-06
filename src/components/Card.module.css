@@ -40,10 +40,6 @@
   padding: var(--space-4) var(--space-6);
 }
 
-.bodyNoPadding {
-  padding: 0;
-}
-
 .footer {
   padding: var(--space-4) var(--space-6);
   border-top: 0.0625rem solid var(--color-border);
