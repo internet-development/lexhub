@@ -5,12 +5,20 @@
   box-shadow: var(--shadow-sm);
 }
 
-.auto {
+.w-auto {
   width: auto;
 }
 
-.full {
+.w-full {
   width: 100%;
+}
+
+.h-auto {
+  height: auto;
+}
+
+.h-full {
+  height: 100%;
 }
 
 .header {
