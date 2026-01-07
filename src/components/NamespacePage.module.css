@@ -6,13 +6,6 @@
   margin-bottom: var(--space-6);
 }
 
-.titleRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-  gap: var(--space-4);
-}
-
 .title {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-medium);

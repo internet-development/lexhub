@@ -1,7 +1,6 @@
 import Link from '@/components/Link'
 import { Card } from '@/components/Card'
 import CubeIcon from '@/components/icons/CubeIcon'
-import { VersionDropdown } from '@/components/VersionDropdown'
 import { Readme } from '@/components/Readme'
 import styles from './NamespacePage.module.css'
 
@@ -20,10 +19,7 @@ export function NamespacePage({ prefix, children }: NamespacePageProps) {
   return (
     <article className={styles.root}>
       <header className={styles.header}>
-        <div className={styles.titleRow}>
-          <span className={styles.title}>{prefix}</span>
-          <VersionDropdown />
-        </div>
+        <h1 className={styles.title}>{prefix}</h1>
       </header>
 
       <Card width="full" className={styles.card}>
