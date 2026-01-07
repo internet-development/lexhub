@@ -3,7 +3,7 @@
 }
 
 .header {
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-4);
 
   display: none;
   @media (min-width: 48rem) {
@@ -22,6 +22,7 @@
 
 .card {
   padding: var(--space-4);
+  border-radius: var(--radius-md);
 }
 
 .grid {
