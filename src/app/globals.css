@@ -107,6 +107,11 @@
 /*   } */
 /* } */
 
+:root {
+  --tree-line-color: #e0e0e0;
+  --tree-line-color-active: var(--color-text-tertiary);
+}
+
 body {
   background: var(--color-background);
   color: var(--color-text-primary);
