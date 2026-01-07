@@ -180,6 +180,12 @@
   margin-top: 0;
 }
 
+.fieldTableWrapper {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+}
+
 .fieldTable {
   width: 100%;
   margin-top: var(--space-4);

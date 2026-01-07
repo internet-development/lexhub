@@ -125,7 +125,10 @@
 
 /* Tables */
 .content table {
+  display: block;
   width: 100%;
+  min-width: 0;
+  overflow-x: auto;
   border-collapse: collapse;
   margin: var(--space-4) 0;
 }
