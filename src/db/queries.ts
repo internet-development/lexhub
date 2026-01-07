@@ -229,8 +229,8 @@ export async function getStats(): Promise<Stats> {
     totalLexicons: validCount + invalidCount,
     validLexicons: validCount,
     invalidLexicons: invalidCount,
-    uniqueNsids: nsidResult[0].count,
-    uniqueRepositories: repoResult[0].count,
+    uniqueNsids: nsidResult[0]?.count ?? 0,
+    uniqueRepositories: repoResult[0]?.count ?? 0,
     recentActivity: {
       last24h: {
         valid: valid24h,
