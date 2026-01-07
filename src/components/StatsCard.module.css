@@ -40,7 +40,7 @@
 
 .statBoxSub {
   font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   margin-top: var(--space-1);
 }
 
