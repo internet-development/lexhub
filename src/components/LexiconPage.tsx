@@ -30,7 +30,9 @@ export function LexiconPage({ lexicon }: LexiconPageProps) {
         <Readme type="lexicon" nsid={lexicon.id} className={styles.readme} />
         <ul className={styles.defList}>
           {defs.map(([name, def]) => (
-            <SchemaDefinition key={name} name={name} def={def} />
+            <li className={styles.defItem} id={name} key={name}>
+              <SchemaDefinition key={name} name={name} def={def} />
+            </li>
           ))}
         </ul>
       </Card>

@@ -46,5 +46,12 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  border-top: 0.0625rem solid var(--color-border);
+}
+
+.defItem {
+  border-bottom: 0.0625rem solid var(--color-border-strong);
+
+  &:last-child {
+    border-bottom: none;
+  }
 }

@@ -1,7 +1,3 @@
-.defItem {
-  border-bottom: 0.0625rem solid var(--color-border-strong);
-}
-
 .defDetails {
   transition: background-color var(--transition-fast);
 }
