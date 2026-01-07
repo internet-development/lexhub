@@ -25,16 +25,17 @@ type TabType = 'featured' | 'recent'
 export interface NamespaceTabsProps {
   featured: RootNamespace[]
   recent: RootNamespace[]
+  className?: string
 }
 
 export default function NamespaceTabs(props: NamespaceTabsProps) {
-  const { featured, recent } = props
+  const { featured, recent, className } = props
   const [activeTab, setActiveTab] = useState<TabType>('featured')
 
   const namespaces = activeTab === 'featured' ? featured : recent
 
   return (
-    <Card height="full">
+    <Card height="full" className={className}>
       <CardHeader>
         <h3 className={cardStyles.title}>Namespaces</h3>
         <div className={styles.tabs}>

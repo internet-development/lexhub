@@ -119,19 +119,26 @@
 
 .grid {
   display: grid;
-  grid-template-columns: auto;
+  grid-template-columns: 1fr;
   gap: var(--space-8);
   width: 100%;
   align-items: start;
 
   @media (min-width: 70rem) {
     grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
   }
 }
 
 .grid > * {
   width: 100%;
   min-width: 0;
+}
+
+.namespacesCard {
+  @media (min-width: 70rem) {
+    grid-row: span 2;
+  }
 }
 
 .tabs {
