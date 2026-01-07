@@ -75,6 +75,11 @@
   max-width: 100%;
 }
 
+.itemLabel[data-subject] {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+}
+
 .itemLabel > svg {
   display: inline-block;
   vertical-align: middle;
@@ -84,9 +89,4 @@
 a.itemLabel:hover {
   text-decoration: underline;
   color: var(--color-text-hover);
-}
-
-.itemLabel[data-subject] {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-primary);
 }
