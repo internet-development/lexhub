@@ -28,6 +28,7 @@
 }
 
 .title {
+  display: none;
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-medium);
   font-family: var(--font-family-sans);
@@ -35,6 +36,10 @@
   margin: 0;
   color: var(--color-text-primary);
   word-break: break-all;
+
+  @media (min-width: 64rem) {
+    display: block;
+  }
 }
 
 .readme {
