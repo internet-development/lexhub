@@ -211,7 +211,7 @@
 }
 
 .fieldTableCell {
-  padding: var(--space-3);
+  padding: var(--space-2);
   vertical-align: top;
   border-bottom: 0.0625rem solid var(--color-border);
 }
