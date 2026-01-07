@@ -1,5 +1,5 @@
 .card {
-  min-width: 24rem;
+  min-width: fit-content;
 }
 
 .section {
