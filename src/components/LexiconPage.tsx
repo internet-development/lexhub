@@ -40,7 +40,7 @@ export function LexiconPage({ lexicon }: LexiconPageProps) {
           <ul className={styles.defList}>
             {defs.map(([name, def]) => (
               <li className={styles.defItem} id={name} key={name}>
-                <SchemaDefinition key={name} name={name} def={def} />
+                <SchemaDefinition name={name} def={def} />
               </li>
             ))}
           </ul>
