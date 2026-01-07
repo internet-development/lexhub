@@ -1,13 +1,13 @@
-import type { LexiconDoc } from '@atproto/lexicon'
-import { Card, CardHeader } from '@/components/Card'
+import { Card } from '@/components/Card'
 import {
-  DetailsGroupProvider,
   DetailsGroupControls,
+  DetailsGroupProvider,
 } from '@/components/DetailsGroup'
-import { VersionDropdown } from '@/components/VersionDropdown'
 import { Readme } from '@/components/Readme'
 import { SchemaDefinition } from '@/components/SchemaDefinition'
+import { VersionDropdown } from '@/components/VersionDropdown'
 import { compareDefNames } from '@/util/sort'
+import type { LexiconDoc } from '@atproto/lexicon'
 import styles from './LexiconPage.module.css'
 
 export interface LexiconPageProps {
