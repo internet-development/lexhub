@@ -16,6 +16,10 @@
   min-width: 0;
 }
 
+.breadcrumbs {
+  margin-bottom: var(--space-2);
+}
+
 @media (min-width: 64rem) {
   .layout {
     display: grid;
@@ -28,5 +32,9 @@
     display: block;
     min-width: 0;
     overflow: hidden;
+  }
+
+  .breadcrumbs {
+    display: none;
   }
 }

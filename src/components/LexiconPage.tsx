@@ -1,5 +1,4 @@
 import type { LexiconDoc } from '@atproto/lexicon'
-import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Card, CardHeader } from '@/components/Card'
 import {
   DetailsGroupProvider,
@@ -23,7 +22,6 @@ export function LexiconPage({ lexicon }: LexiconPageProps) {
   return (
     <article className={styles.root}>
       <header className={styles.header}>
-        <Breadcrumbs path={lexicon.id} className={styles.breadcrumbs} />
         <div className={styles.titleRow}>
           <h1 className={styles.title}>{lexicon.id}</h1>
           <VersionDropdown />

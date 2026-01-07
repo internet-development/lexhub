@@ -15,10 +15,6 @@
   margin-bottom: var(--space-6);
 }
 
-.breadcrumbs {
-  margin-bottom: var(--space-2);
-}
-
 .titleRow {
   display: flex;
   justify-content: space-between;

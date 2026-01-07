@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { getPageData, type PageData } from './data'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
 import Header from '@/components/Header'
 import { LexiconPage } from '@/components/LexiconPage'
 import { NamespacePage } from '@/components/NamespacePage'
@@ -36,6 +37,8 @@ function PageLayout({
   data: PageData
   children: React.ReactNode
 }) {
+  const path = data.type === 'lexicon' ? data.lexicon.id : data.prefix
+
   return (
     <div className={styles.page}>
       <Header />
@@ -43,7 +46,10 @@ function PageLayout({
         <aside className={styles.sidebar}>
           <NamespaceTree {...data.treeData} />
         </aside>
-        <main className={styles.main}>{children}</main>
+        <main className={styles.main}>
+          <Breadcrumbs path={path} className={styles.breadcrumbs} />
+          {children}
+        </main>
       </div>
     </div>
   )

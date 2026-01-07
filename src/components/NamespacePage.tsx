@@ -1,4 +1,3 @@
-import { Breadcrumbs } from '@/components/Breadcrumbs'
 import Link from '@/components/Link'
 import { Card } from '@/components/Card'
 import CubeIcon from '@/components/icons/CubeIcon'
@@ -21,7 +20,6 @@ export function NamespacePage({ prefix, children }: NamespacePageProps) {
   return (
     <article className={styles.root}>
       <header className={styles.header}>
-        <Breadcrumbs path={prefix} className={styles.breadcrumbs} />
         <div className={styles.titleRow}>
           <span className={styles.title}>{prefix}</span>
           <VersionDropdown />
