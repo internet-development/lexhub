@@ -38,7 +38,7 @@ export default function NamespaceTabs(props: NamespaceTabsProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>Namespace</TableHead>
-                <TableHead>Lexicons</TableHead>
+                <TableHead># of Lexicons</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>{featured.map(NamespaceTableRow)}</TableBody>
@@ -51,7 +51,7 @@ export default function NamespaceTabs(props: NamespaceTabsProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>Namespace</TableHead>
-                <TableHead>Lexicons</TableHead>
+                <TableHead># of Lexicons</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

@@ -33,7 +33,6 @@
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
   text-align: left;
-  text-transform: uppercase;
   border-bottom: 0.0625rem solid var(--color-border);
 }
 
