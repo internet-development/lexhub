@@ -5,9 +5,7 @@
   background: linear-gradient(
     to bottom,
     var(--color-background-accent) 0%,
-    var(--color-background) 20%,
-    var(--color-background) 80%,
-    var(--color-background-accent) 100%
+    var(--color-background) 20%
   );
   font-family: var(--font-family-sans);
 }
