@@ -35,12 +35,8 @@
 .defName {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
-  color: var(--color-text-tertiary);
-  transition: color var(--transition-fast);
-}
-
-.defDetails[open] .defName {
   color: var(--color-text-primary);
+  transition: color var(--transition-fast);
 }
 
 .defType {
@@ -50,10 +46,6 @@
   letter-spacing: 0.05em;
   user-select: none;
   transition: color var(--transition-fast);
-}
-
-.defDetails[open] .defType {
-  color: var(--color-text-primary);
 }
 
 .chevron {
