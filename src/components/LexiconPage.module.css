@@ -7,10 +7,18 @@
 }
 
 .header {
+  margin-bottom: var(--space-6);
+}
+
+.breadcrumbs {
+  margin-bottom: var(--space-2);
+}
+
+.titleRow {
   display: flex;
   justify-content: space-between;
   align-items: start;
-  margin-bottom: var(--space-6);
+  gap: var(--space-4);
 }
 
 .title {

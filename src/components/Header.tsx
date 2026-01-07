@@ -1,7 +1,5 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Logo from '@/components/Logo'
 import Search from '@/components/Search'
 import BlueskyIcon from '@/components/icons/BlueskyIcon'
@@ -16,6 +14,26 @@ export default function Header() {
         <Link href="/" variant="default">
           <Logo />
         </Link>
+        <div className={styles.mobileIcons}>
+          <a
+            href="https://bsky.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Bluesky"
+            className={styles.iconLink}
+          >
+            <BlueskyIcon size={18} variant="interactive" />
+          </a>
+          <a
+            href="https://github.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub"
+            className={styles.iconLink}
+          >
+            <GitHubIcon size={18} variant="interactive" />
+          </a>
+        </div>
       </div>
 
       <div className={styles.rightSection}>
