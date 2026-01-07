@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useDetailsGroup } from './DetailsGroupContext'
+import ChevronIcon from '@/components/icons/ChevronIcon'
 import styles from './DetailsGroupControls.module.css'
 
 interface DetailsGroupControlsProps {
@@ -33,20 +34,7 @@ export function DetailsGroupControls({ className }: DetailsGroupControlsProps) {
       aria-expanded={expanded}
     >
       {expanded ? 'Collapse All' : 'Expand All'}
-      <svg
-        className={styles.chevron}
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <polyline points="6 9 12 15 18 9" />
-      </svg>
+      <ChevronIcon size={20} className={styles.chevron} aria-hidden="true" />
     </button>
   )
 }

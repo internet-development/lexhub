@@ -4,6 +4,7 @@ import { useHash } from '@/util/useHash'
 import type { LexUserType } from '@atproto/lexicon'
 import { useEffect, useState } from 'react'
 import { useDetailsRef } from '@/components/DetailsGroup'
+import ChevronIcon from '@/components/icons/ChevronIcon'
 import styles from './SchemaDefinition.module.css'
 
 import { ObjectTypeView } from './views/ObjectTypeView'
@@ -52,19 +53,7 @@ export function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
         <span className={styles.defName}>{name}</span>
         <div className={styles.defHeaderRight}>
           <span className={styles.defType}>{def.type.toUpperCase()}</span>
-          <svg
-            className={styles.chevron}
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
+          <ChevronIcon size={20} className={styles.chevron} />
         </div>
       </summary>
       <div className={styles.defContent}>
