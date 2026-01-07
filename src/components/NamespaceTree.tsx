@@ -2,6 +2,8 @@ import Link from '@/components/Link'
 import CubeIcon from '@/components/icons/CubeIcon'
 import type { TreeData, TreeNode } from '@/app/(app)/[id]/data'
 import styles from './NamespaceTree.module.css'
+import { varbinary } from 'drizzle-orm/mysql-core'
+import { de } from 'zod/locales'
 
 export type NamespaceTreeProps = TreeData
 
@@ -90,33 +92,22 @@ function ConnectorPath({
 }
 
 function ItemPrefix({ node }: { node: TreeNode }) {
-  if (node.isLexicon) {
-    return <CubeIcon size={14} />
-  }
+  if (node.isLexicon) return <CubeIcon size={14} />
   if (node.isSchemaDefinition) return '#'
   return null
 }
 
-function ItemLabel({ node }: { node: TreeNode }) {
+function ItemLabel({ node, depth }: { node: TreeNode; depth: number }) {
   const style = { marginLeft: LABEL_GAP }
-  const variant =
-    node.isSubject || node.children.length > 0 ? 'default' : 'muted'
-
-  if (node.isSubject) {
-    return (
-      <span className={styles.itemLabel} style={style} data-subject>
-        <ItemPrefix node={node} />
-        {node.segment}
-      </span>
-    )
-  }
+  const variant = node.isSubject ? 'primary' : depth === 0 ? 'muted' : 'subtle'
 
   return (
     <Link
       href={`/${node.fullPath}`}
-      variant={variant}
       className={styles.itemLabel}
       style={style}
+      variant={variant}
+      inert={node.isSubject}
     >
       <ItemPrefix node={node} />
       {node.segment}
@@ -171,17 +162,9 @@ export function NamespaceTree({
   return (
     <nav className={styles.root} aria-label="Namespace navigation">
       <div className={styles.header}>
-        {isRootNamespace ? (
-          <span className={styles.headerName}>{subjectPath}</span>
-        ) : (
-          <Link
-            href={`/${parent}`}
-            variant="primary"
-            className={styles.headerLink}
-          >
-            {parent}
-          </Link>
-        )}
+        <Link href={`/${parent}`} variant="default" inert={isRootNamespace}>
+          {isRootNamespace ? subjectPath : parent}
+        </Link>
       </div>
 
       <div className={styles.treeContainer}>
@@ -200,13 +183,13 @@ export function NamespaceTree({
         </svg>
 
         <ul className={styles.tree}>
-          {items.map(({ node, itemX }) => (
+          {items.map(({ node, itemX, depth }) => (
             <li
               key={node.fullPath}
               className={styles.item}
               style={{ paddingLeft: itemX }}
             >
-              <ItemLabel node={node} />
+              <ItemLabel node={node} depth={depth} />
             </li>
           ))}
         </ul>

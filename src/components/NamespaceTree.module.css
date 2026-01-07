@@ -8,11 +8,6 @@
   line-height: 1;
 }
 
-.headerName {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-primary);
-}
-
 .headerLink {
   font-weight: var(--font-weight-medium);
 }
@@ -32,7 +27,7 @@
 
 .connector {
   fill: none;
-  stroke: var(--tree-line-color, #e0e0e0);
+  stroke: var(--tree-line-color);
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -40,7 +35,7 @@
 
 .connectorActive {
   fill: none;
-  stroke: var(--tree-line-color-active, #888);
+  stroke: var(--tree-line-color-active);
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -80,6 +75,11 @@
   max-width: 100%;
 }
 
+.itemLabel[data-subject] {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+}
+
 .itemLabel > svg {
   display: inline-block;
   vertical-align: middle;
@@ -89,9 +89,4 @@
 a.itemLabel:hover {
   text-decoration: underline;
   color: var(--color-text-hover);
-}
-
-.itemLabel[data-subject] {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-primary);
 }

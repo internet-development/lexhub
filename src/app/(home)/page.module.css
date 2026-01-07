@@ -101,7 +101,7 @@
   padding: 0 var(--space-4);
   margin-bottom: var(--space-12);
 
-  @media (min-width: 70rem) {
+  @media (min-width: 80rem) {
     margin-bottom: var(--space-16);
   }
 }
@@ -112,7 +112,7 @@
   margin: 0 auto;
   padding: 0 var(--space-4) var(--space-8);
 
-  @media (min-width: 70rem) {
+  @media (min-width: 80rem) {
     max-width: var(--container-lg);
   }
 }
@@ -124,7 +124,7 @@
   width: 100%;
   align-items: start;
 
-  @media (min-width: 70rem) {
+  @media (min-width: 80rem) {
     grid-template-columns: auto 1fr;
     grid-template-rows: auto auto;
   }
@@ -136,7 +136,7 @@
 }
 
 .namespacesCard {
-  @media (min-width: 70rem) {
+  @media (min-width: 80rem) {
     grid-row: span 2;
   }
 }

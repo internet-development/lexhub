@@ -1,6 +1,7 @@
 .page {
-  max-width: 1440px;
+  max-width: 90rem;
   margin: 0 auto;
+  container-type: inline-size;
 }
 
 .layout {
@@ -20,7 +21,7 @@
   margin-bottom: var(--space-4);
 }
 
-@media (min-width: 64rem) {
+@container (min-width: 48rem) {
   .layout {
     display: grid;
     grid-template-columns: 1fr 3fr;
@@ -30,8 +31,8 @@
 
   .sidebar {
     display: block;
-    min-width: 0;
     overflow: hidden;
+    word-break: break-word;
   }
 
   .breadcrumbs {

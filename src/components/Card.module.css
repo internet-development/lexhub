@@ -33,7 +33,7 @@
     align-items: center;
   }
 
-  @media (min-width: 64rem) {
+  @media (min-width: 48rem) {
     padding: var(--space-6) var(--space-6) 0 var(--space-6);
   }
 }
@@ -41,7 +41,7 @@
 .body {
   padding: var(--space-4);
 
-  @media (min-width: 64rem) {
+  @media (min-width: 48rem) {
     padding: var(--space-6);
   }
 }
@@ -50,7 +50,7 @@
   padding: var(--space-4);
   border-top: 0.0625rem solid var(--color-border);
 
-  @media (min-width: 64rem) {
+  @media (min-width: 48rem) {
     padding: var(--space-6);
   }
 }
