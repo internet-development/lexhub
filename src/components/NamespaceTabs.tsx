@@ -15,6 +15,8 @@ import {
 import type { RootNamespace } from '@/db/queries'
 import clsx from '@/util/clsx'
 
+const MAX_RECENT_NAMESPACES = 11
+
 export interface NamespaceTabsProps {
   featured: RootNamespace[]
   recent: RootNamespace[]
@@ -52,7 +54,9 @@ export default function NamespaceTabs(props: NamespaceTabsProps) {
                 <TableHead>Lexicons</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>{recent.slice(0, 11).map(NamespaceTableRow)}</TableBody>
+            <TableBody>
+              {recent.slice(0, MAX_RECENT_NAMESPACES).map(NamespaceTableRow)}
+            </TableBody>
           </Table>
         </section>
       </CardBody>
