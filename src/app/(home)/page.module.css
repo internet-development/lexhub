@@ -141,39 +141,6 @@
   }
 }
 
-.tabs {
-  display: flex;
-  gap: var(--space-4);
-  background-color: var(--color-background-muted);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-}
-
-.tab {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: color var(--transition-fast);
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 0;
-}
-
-.tab.active {
-  color: var(--color-text-primary);
-}
-
-.tab:not(.active) {
-  color: var(--color-text-muted);
-}
-
-.tab:not(.active):hover {
-  color: var(--color-text-hover);
-}
-
 .codeBlock {
   background-color: var(--color-background-muted);
   border-radius: var(--radius-md);

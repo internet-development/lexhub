@@ -1,9 +1,5 @@
-'use client'
-
-import { useState } from 'react'
-
-import styles from '@/app/(home)/page.module.css'
 import cardStyles from '@/components/Card.module.css'
+import styles from './NamespaceTabs.module.css'
 
 import { Card, CardBody, CardHeader } from '@/components/Card'
 import Link from '@/components/Link'
@@ -17,10 +13,7 @@ import {
 } from '@/components/Table'
 
 import type { RootNamespace } from '@/db/queries'
-
-const MAX_ROWS = 9
-
-type TabType = 'featured' | 'recent'
+import clsx from '@/util/clsx'
 
 export interface NamespaceTabsProps {
   featured: RootNamespace[]
@@ -30,41 +23,38 @@ export interface NamespaceTabsProps {
 
 export default function NamespaceTabs(props: NamespaceTabsProps) {
   const { featured, recent, className } = props
-  const [activeTab, setActiveTab] = useState<TabType>('featured')
-
-  const namespaces = activeTab === 'featured' ? featured : recent
 
   return (
-    <Card height="full" className={className}>
+    <Card className={clsx(styles.card, className)}>
       <CardHeader>
         <h3 className={cardStyles.title}>Namespaces</h3>
-        <div className={styles.tabs}>
-          <button
-            onClick={() => setActiveTab('featured')}
-            className={`${styles.tab} ${activeTab === 'featured' ? styles.active : ''}`}
-          >
-            Featured
-          </button>
-          <button
-            onClick={() => setActiveTab('recent')}
-            className={`${styles.tab} ${activeTab === 'recent' ? styles.active : ''}`}
-          >
-            Recently Updated
-          </button>
-        </div>
       </CardHeader>
       <CardBody>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead># of Lexicons</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {namespaces.slice(0, MAX_ROWS).map(NamespaceTableRow)}
-          </TableBody>
-        </Table>
+        <section className={styles.section}>
+          <h4 className={styles.sectionTitle}>Featured</h4>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Namespace</TableHead>
+                <TableHead>Lexicons</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>{featured.map(NamespaceTableRow)}</TableBody>
+          </Table>
+        </section>
+
+        <section className={styles.section}>
+          <h4 className={styles.sectionTitle}>Recently Updated</h4>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Namespace</TableHead>
+                <TableHead>Lexicons</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>{recent.slice(0, 11).map(NamespaceTableRow)}</TableBody>
+          </Table>
+        </section>
       </CardBody>
     </Card>
   )
