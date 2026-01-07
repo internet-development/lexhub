@@ -6,7 +6,7 @@
   overflow: hidden;
   padding: 0;
 
-  @media (min-width: 64rem) {
+  @media (min-width: 48rem) {
     padding: var(--space-4);
   }
 }
@@ -18,10 +18,11 @@
 .titleRow {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: var(--space-4);
+  flex-wrap: wrap;
 
-  @media (min-width: 64rem) {
+  @media (min-width: 48rem) {
+    align-items: center;
     flex-direction: row;
     justify-content: space-between;
   }
@@ -37,7 +38,7 @@
   color: var(--color-text-primary);
   word-break: break-all;
 
-  @media (min-width: 64rem) {
+  @media (min-width: 48rem) {
     display: block;
   }
 }
@@ -53,7 +54,7 @@
   padding: var(--space-3) var(--space-4);
   background-color: var(--color-background-muted);
 
-  @media (min-width: 64rem) {
+  @media (min-width: 48rem) {
     border-radius: var(--radius-sm);
   }
 }
