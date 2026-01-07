@@ -1,6 +1,6 @@
 import type { LexiconDoc } from '@atproto/lexicon'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { Card } from '@/components/Card'
+import { Card, CardHeader } from '@/components/Card'
 import {
   DetailsGroupProvider,
   DetailsGroupControls,

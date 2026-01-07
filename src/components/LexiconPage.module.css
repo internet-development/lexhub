@@ -45,8 +45,11 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-3) var(--space-4);
-  border-bottom: 0.0625rem solid var(--color-border);
-  background-color: var(--color-background-subtle);
+  background-color: var(--color-background-muted);
+
+  @media (min-width: 64rem) {
+    border-radius: var(--radius-sm);
+  }
 }
 
 .defCount {
