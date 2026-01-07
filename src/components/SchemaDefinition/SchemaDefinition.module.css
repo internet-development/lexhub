@@ -331,9 +331,11 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  overflow-x: auto;
 }
 
 .permissionItem {
   font-size: var(--font-size-sm);
   font-family: var(--font-family-mono);
+  white-space: nowrap;
 }
