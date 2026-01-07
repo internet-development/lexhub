@@ -2,7 +2,8 @@
 
 import { useHash } from '@/util/useHash'
 import type { LexUserType } from '@atproto/lexicon'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useDetailsRef } from '@/components/DetailsGroup'
 import styles from './SchemaDefinition.module.css'
 
 import { ObjectTypeView } from './views/ObjectTypeView'
@@ -23,7 +24,7 @@ export interface SchemaDefinitionProps {
 
 export function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
   const [activeTab, setActiveTab] = useState<'fields' | 'json'>('fields')
-  const detailsRef = useRef<HTMLDetailsElement>(null)
+  const detailsRef = useDetailsRef()
   const hash = useHash()
   const category = getTypeCategory(def)
   const fieldsTabLabel =

@@ -40,6 +40,21 @@
   margin-bottom: var(--space-8);
 }
 
+.defListHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 0.0625rem solid var(--color-border);
+  background-color: var(--color-background-subtle);
+}
+
+.defCount {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
 .defList {
   list-style: none;
   padding: 0;

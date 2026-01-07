@@ -1,6 +1,10 @@
 import type { LexiconDoc } from '@atproto/lexicon'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Card } from '@/components/Card'
+import {
+  DetailsGroupProvider,
+  DetailsGroupControls,
+} from '@/components/DetailsGroup'
 import { VersionDropdown } from '@/components/VersionDropdown'
 import { Readme } from '@/components/Readme'
 import { SchemaDefinition } from '@/components/SchemaDefinition'
@@ -28,13 +32,21 @@ export function LexiconPage({ lexicon }: LexiconPageProps) {
 
       <Card width="full" className={styles.card}>
         <Readme type="lexicon" nsid={lexicon.id} className={styles.readme} />
-        <ul className={styles.defList}>
-          {defs.map(([name, def]) => (
-            <li className={styles.defItem} id={name} key={name}>
-              <SchemaDefinition key={name} name={name} def={def} />
-            </li>
-          ))}
-        </ul>
+        <DetailsGroupProvider>
+          <div className={styles.defListHeader}>
+            <span className={styles.defCount}>
+              {defs.length} definition{defs.length !== 1 ? 's' : ''}
+            </span>
+            <DetailsGroupControls />
+          </div>
+          <ul className={styles.defList}>
+            {defs.map(([name, def]) => (
+              <li className={styles.defItem} id={name} key={name}>
+                <SchemaDefinition key={name} name={name} def={def} />
+              </li>
+            ))}
+          </ul>
+        </DetailsGroupProvider>
       </Card>
     </article>
   )
