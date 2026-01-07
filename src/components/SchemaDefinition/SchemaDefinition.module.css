@@ -102,7 +102,7 @@
 }
 
 .tabActive {
-  color: var(--color-text-primary);
+  color: var(--color-text-secondary);
 }
 
 .tabActive::after {
@@ -112,7 +112,7 @@
   left: 0;
   right: 0;
   height: 0.1875rem;
-  background-color: var(--color-text-primary);
+  background-color: var(--color-text-secondary);
 }
 
 .schema {
@@ -216,8 +216,7 @@
 }
 
 .fieldName {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
 }
 
 .fieldRequired {
