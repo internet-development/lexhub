@@ -1,0 +1,11 @@
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.divider {
+  width: 1px;
+  height: 1rem;
+  background-color: var(--color-border);
+}
