@@ -1,0 +1,27 @@
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.toggle:hover {
+  color: var(--color-text-primary);
+}
+
+.chevron {
+  transition: transform var(--transition-fast);
+  transform: rotate(-90deg);
+}
+
+.toggle[aria-expanded='true'] .chevron {
+  transform: rotate(0deg);
+}

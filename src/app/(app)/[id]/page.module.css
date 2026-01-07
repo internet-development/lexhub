@@ -4,18 +4,37 @@
 }
 
 .layout {
-  display: grid;
-  grid-template-columns: 1fr 3fr;
-  padding: 2rem;
-  padding-top: 0;
-  gap: 1rem;
+  display: block;
+  padding: 0 var(--space-4) var(--space-8);
 }
 
 .sidebar {
-  min-width: 0;
-  overflow: hidden;
+  display: none;
 }
 
 .main {
   min-width: 0;
+}
+
+.breadcrumbs {
+  margin-bottom: var(--space-4);
+}
+
+@media (min-width: 64rem) {
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    padding: 0 var(--space-8) var(--space-8);
+    gap: var(--space-4);
+  }
+
+  .sidebar {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .breadcrumbs {
+    display: none;
+  }
 }

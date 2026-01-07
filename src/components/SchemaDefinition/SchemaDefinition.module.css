@@ -1,7 +1,3 @@
-.defItem {
-  border-bottom: 0.0625rem solid var(--color-border-strong);
-}
-
 .defDetails {
   transition: background-color var(--transition-fast);
 }
@@ -63,11 +59,12 @@
 .chevron {
   color: var(--color-text-tertiary);
   transition: transform var(--transition-fast);
+  transform: rotate(-90deg);
   flex-shrink: 0;
 }
 
 .defDetails[open] .chevron {
-  transform: rotate(-180deg);
+  transform: rotate(0deg);
 }
 
 .defContent {
@@ -178,6 +175,12 @@
 
 .fieldSection .fieldTable {
   margin-top: 0;
+}
+
+.fieldTableWrapper {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
 }
 
 .fieldTable {
@@ -328,9 +331,11 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  overflow-x: auto;
 }
 
 .permissionItem {
   font-size: var(--font-size-sm);
   font-family: var(--font-family-mono);
+  white-space: nowrap;
 }

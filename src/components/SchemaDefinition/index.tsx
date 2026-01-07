@@ -2,7 +2,9 @@
 
 import { useHash } from '@/util/useHash'
 import type { LexUserType } from '@atproto/lexicon'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useDetailsRef } from '@/components/DetailsGroup'
+import ChevronIcon from '@/components/icons/ChevronIcon'
 import styles from './SchemaDefinition.module.css'
 
 import { ObjectTypeView } from './views/ObjectTypeView'
@@ -23,7 +25,7 @@ export interface SchemaDefinitionProps {
 
 export function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
   const [activeTab, setActiveTab] = useState<'fields' | 'json'>('fields')
-  const detailsRef = useRef<HTMLDetailsElement>(null)
+  const detailsRef = useDetailsRef()
   const hash = useHash()
   const category = getTypeCategory(def)
   const fieldsTabLabel =
@@ -46,56 +48,42 @@ export function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
   }, [hash, name])
 
   return (
-    <li className={styles.defItem} id={name}>
-      <details ref={detailsRef} className={styles.defDetails} open>
-        <summary className={styles.defHeader}>
-          <span className={styles.defName}>{name}</span>
-          <div className={styles.defHeaderRight}>
-            <span className={styles.defType}>{def.type.toUpperCase()}</span>
-            <svg
-              className={styles.chevron}
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </div>
-        </summary>
-        <div className={styles.defContent}>
-          {def.description && (
-            <div className={styles.defDescriptionSection}>
-              <span className={styles.defDescriptionLabel}>DESCRIPTION</span>
-              <p className={styles.defDescription}>{def.description}</p>
-            </div>
-          )}
-          <div className={styles.tabs}>
-            <button
-              className={`${styles.tab} ${activeTab === 'fields' ? styles.tabActive : ''}`}
-              onClick={() => setActiveTab('fields')}
-            >
-              {fieldsTabLabel}
-            </button>
-            <button
-              className={`${styles.tab} ${activeTab === 'json' ? styles.tabActive : ''}`}
-              onClick={() => setActiveTab('json')}
-            >
-              JSON
-            </button>
-          </div>
-          {activeTab === 'fields' ? (
-            <NiceView def={def} />
-          ) : (
-            <JsonView def={def} />
-          )}
+    <details ref={detailsRef} className={styles.defDetails} open>
+      <summary className={styles.defHeader}>
+        <span className={styles.defName}>{name}</span>
+        <div className={styles.defHeaderRight}>
+          <span className={styles.defType}>{def.type.toUpperCase()}</span>
+          <ChevronIcon size={20} className={styles.chevron} />
         </div>
-      </details>
-    </li>
+      </summary>
+      <div className={styles.defContent}>
+        {def.description && (
+          <div className={styles.defDescriptionSection}>
+            <span className={styles.defDescriptionLabel}>DESCRIPTION</span>
+            <p className={styles.defDescription}>{def.description}</p>
+          </div>
+        )}
+        <div className={styles.tabs}>
+          <button
+            className={`${styles.tab} ${activeTab === 'fields' ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab('fields')}
+          >
+            {fieldsTabLabel}
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'json' ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab('json')}
+          >
+            JSON
+          </button>
+        </div>
+        {activeTab === 'fields' ? (
+          <NiceView def={def} />
+        ) : (
+          <JsonView def={def} />
+        )}
+      </div>
+    </details>
   )
 }
 

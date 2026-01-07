@@ -1,9 +1,13 @@
-import type { LexiconDoc } from '@atproto/lexicon'
 import { Card } from '@/components/Card'
-import { VersionDropdown } from '@/components/VersionDropdown'
+import {
+  DetailsGroupControls,
+  DetailsGroupProvider,
+} from '@/components/DetailsGroup'
 import { Readme } from '@/components/Readme'
 import { SchemaDefinition } from '@/components/SchemaDefinition'
+import { VersionDropdown } from '@/components/VersionDropdown'
 import { compareDefNames } from '@/util/sort'
+import type { LexiconDoc } from '@atproto/lexicon'
 import styles from './LexiconPage.module.css'
 
 export interface LexiconPageProps {
@@ -18,17 +22,29 @@ export function LexiconPage({ lexicon }: LexiconPageProps) {
   return (
     <article className={styles.root}>
       <header className={styles.header}>
-        <h1 className={styles.title}>{lexicon.id}</h1>
-        <VersionDropdown />
+        <div className={styles.titleRow}>
+          <h1 className={styles.title}>{lexicon.id}</h1>
+          <VersionDropdown />
+        </div>
       </header>
 
       <Card width="full" className={styles.card}>
         <Readme type="lexicon" nsid={lexicon.id} className={styles.readme} />
-        <ul className={styles.defList}>
-          {defs.map(([name, def]) => (
-            <SchemaDefinition key={name} name={name} def={def} />
-          ))}
-        </ul>
+        <DetailsGroupProvider>
+          <div className={styles.defListHeader}>
+            <span className={styles.defCount}>
+              {defs.length} definition{defs.length !== 1 ? 's' : ''}
+            </span>
+            <DetailsGroupControls />
+          </div>
+          <ul className={styles.defList}>
+            {defs.map(([name, def]) => (
+              <li className={styles.defItem} id={name} key={name}>
+                <SchemaDefinition name={name} def={def} />
+              </li>
+            ))}
+          </ul>
+        </DetailsGroupProvider>
       </Card>
     </article>
   )
