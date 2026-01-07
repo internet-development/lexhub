@@ -13,6 +13,8 @@ interface DetailsGroupContextValue {
   expandAll: () => void
   /** Collapse all registered details elements */
   collapseAll: () => void
+  /** Check if all registered details elements are expanded */
+  areAllExpanded: () => boolean
   /** Register a details element, returns unregister function */
   register: (element: HTMLDetailsElement) => () => void
 }
@@ -55,8 +57,16 @@ export function DetailsGroupProvider({ children }: DetailsGroupProviderProps) {
     })
   }, [])
 
+  const areAllExpanded = useCallback(() => {
+    const elements = elementsRef.current
+    if (elements.size === 0) return true
+    return Array.from(elements).every((el) => el.open)
+  }, [])
+
   return (
-    <DetailsGroupContext.Provider value={{ expandAll, collapseAll, register }}>
+    <DetailsGroupContext.Provider
+      value={{ expandAll, collapseAll, areAllExpanded, register }}
+    >
       {children}
     </DetailsGroupContext.Provider>
   )

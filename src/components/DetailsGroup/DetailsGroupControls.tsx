@@ -1,6 +1,6 @@
 'use client'
 
-import Button from '@/components/Button'
+import { useState, useEffect } from 'react'
 import { useDetailsGroup } from './DetailsGroupContext'
 import styles from './DetailsGroupControls.module.css'
 
@@ -9,17 +9,44 @@ interface DetailsGroupControlsProps {
 }
 
 export function DetailsGroupControls({ className }: DetailsGroupControlsProps) {
-  const { expandAll, collapseAll } = useDetailsGroup()
+  const { expandAll, collapseAll, areAllExpanded } = useDetailsGroup()
+  const [expanded, setExpanded] = useState(true)
+
+  // Check initial state on mount
+  useEffect(() => {
+    setExpanded(areAllExpanded())
+  }, [areAllExpanded])
+
+  const toggle = () => {
+    if (expanded) {
+      collapseAll()
+    } else {
+      expandAll()
+    }
+    setExpanded(!expanded)
+  }
 
   return (
-    <div className={`${styles.controls} ${className ?? ''}`}>
-      <Button variant="ghost" size="sm" onClick={expandAll}>
-        Expand All
-      </Button>
-      <span className={styles.divider} aria-hidden="true" />
-      <Button variant="ghost" size="sm" onClick={collapseAll}>
-        Collapse All
-      </Button>
-    </div>
+    <button
+      className={`${styles.toggle} ${className ?? ''}`}
+      onClick={toggle}
+      aria-expanded={expanded}
+    >
+      {expanded ? 'Collapse All' : 'Expand All'}
+      <svg
+        className={styles.chevron}
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <polyline points="6 9 12 15 18 9" />
+      </svg>
+    </button>
   )
 }
