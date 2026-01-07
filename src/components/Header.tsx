@@ -37,9 +37,7 @@ export default function Header() {
       </div>
 
       <div className={styles.rightSection}>
-        <div className={styles.search}>
-          <Search />
-        </div>
+        <Search />
 
         <div className={styles.icons}>
           <a

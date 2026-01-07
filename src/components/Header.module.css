@@ -1,6 +1,7 @@
 .container {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: var(--space-4);
   padding: var(--space-4);
   margin-bottom: var(--space-4);
@@ -13,15 +14,11 @@
 }
 
 .rightSection {
+  flex: 1 1 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-}
-
-.search {
-  flex: 1;
-  min-width: 0;
 }
 
 .icons {
@@ -41,11 +38,38 @@
   color: inherit;
 }
 
-@media (min-width: 48rem) {
+/* Small: single row (logo | search | icons) */
+@container (min-width: 30rem) {
+  .container {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .logo {
+    flex-shrink: 0;
+  }
+
+  .search {
+    flex: 1;
+  }
+
+  .icons {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    flex-shrink: 0;
+  }
+
+  .mobileIcons {
+    display: none;
+  }
+}
+
+/* Desktop: grid layout matching sidebar */
+@container (min-width: 48rem) {
   .container {
     display: grid;
     grid-template-columns: 1fr 3fr;
-    align-items: center;
     gap: var(--space-4);
     padding: var(--space-4) var(--space-8);
     margin-bottom: var(--space-8);
@@ -56,18 +80,10 @@
   }
 
   .search {
-    max-width: 40rem;
     width: 100%;
   }
 
   .icons {
-    display: flex;
-    align-items: center;
     justify-content: flex-end;
-    gap: var(--space-4);
-  }
-
-  .mobileIcons {
-    display: none;
   }
 }
