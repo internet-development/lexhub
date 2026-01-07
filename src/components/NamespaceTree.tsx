@@ -171,17 +171,9 @@ export function NamespaceTree({
   return (
     <nav className={styles.root} aria-label="Namespace navigation">
       <div className={styles.header}>
-        {isRootNamespace ? (
-          <span className={styles.headerName}>{subjectPath}</span>
-        ) : (
-          <Link
-            href={`/${parent}`}
-            variant="primary"
-            className={styles.headerLink}
-          >
-            {parent}
-          </Link>
-        )}
+        <Link href={`/${parent}`} variant="default" inert={isRootNamespace}>
+          {isRootNamespace ? subjectPath : parent}
+        </Link>
       </div>
 
       <div className={styles.treeContainer}>
