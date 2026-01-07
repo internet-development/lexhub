@@ -59,11 +59,12 @@
 .chevron {
   color: var(--color-text-tertiary);
   transition: transform var(--transition-fast);
+  transform: rotate(-90deg);
   flex-shrink: 0;
 }
 
 .defDetails[open] .chevron {
-  transform: rotate(-180deg);
+  transform: rotate(0deg);
 }
 
 .defContent {

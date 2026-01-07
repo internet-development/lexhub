@@ -19,8 +19,9 @@
 
 .chevron {
   transition: transform var(--transition-fast);
+  transform: rotate(-90deg);
 }
 
 .toggle[aria-expanded='true'] .chevron {
-  transform: rotate(-180deg);
+  transform: rotate(0deg);
 }
