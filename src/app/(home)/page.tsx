@@ -13,7 +13,7 @@ import Search from '@/components/Search'
 import StatsCard from '@/components/StatsCard'
 import { getRootNamespaces, getStats } from '@/db/queries'
 
-export const revalidate = 300 // Revalidate this page every 5 minutes
+export const revalidate = 60 // Cache the page for 60 seconds
 
 export default async function HomePage() {
   const [featured, recent, stats] = await Promise.all([
