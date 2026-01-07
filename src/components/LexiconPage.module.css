@@ -3,7 +3,12 @@
 }
 
 .card {
-  padding: var(--space-6);
+  overflow: hidden;
+  padding: 0;
+
+  @media (min-width: 64rem) {
+    padding: var(--space-4);
+  }
 }
 
 .header {
