@@ -5,29 +5,39 @@
   box-shadow: var(--shadow-sm);
 }
 
-.auto {
+.w-auto {
   width: auto;
 }
 
-.full {
+.w-full {
   width: 100%;
+}
+
+.h-auto {
+  height: auto;
+}
+
+.h-full {
+  height: 100%;
 }
 
 .header {
   padding: var(--space-6) var(--space-6) var(--space-3) var(--space-6);
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   gap: var(--space-4);
+}
+
+@media (min-width: 30rem) {
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 
 .body {
   padding: var(--space-4) var(--space-6);
-}
-
-.bodyNoPadding {
-  padding: 0;
 }
 
 .footer {

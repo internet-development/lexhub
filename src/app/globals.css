@@ -1,10 +1,6 @@
 :root {
   font-size: 16px;
   font-variant-numeric: tabular-nums;
-
-  @media (max-width: 768px) {
-    font-size: 12px;
-  }
 }
 
 :root {
@@ -23,6 +19,7 @@
   --color-background-subtle: #f9fafb;
   --color-background-muted: #f3f4f6;
   --color-background-accent: #eff6ff;
+  --color-success: #16a34a;
 
   /* Typography */
   --font-family-sans:

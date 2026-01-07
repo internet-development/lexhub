@@ -1,6 +1,7 @@
 import { db } from '@/db'
-import { valid_lexicons } from '@/db/schema'
-import { desc, eq, sql } from 'drizzle-orm'
+import { valid_lexicons, invalid_lexicons } from '@/db/schema'
+import { desc, eq, gte, sql } from 'drizzle-orm'
+import { union } from 'drizzle-orm/pg-core'
 import type { LexiconDoc } from '@atproto/lexicon'
 
 /**
@@ -166,4 +167,81 @@ export async function getRootNamespaces(options?: {
   }
 
   return namespaces
+}
+
+export interface RecentActivity {
+  valid: number
+  invalid: number
+  total: number
+}
+
+export interface Stats {
+  totalLexicons: number
+  validLexicons: number
+  invalidLexicons: number
+  uniqueNsids: number
+  uniqueRepositories: number
+  recentActivity: {
+    last24h: RecentActivity
+    last7d: RecentActivity
+  }
+}
+
+/**
+ * Gets comprehensive stats for the homepage
+ */
+export async function getStats(): Promise<Stats> {
+  const combinedNsids = union(
+    db.select({ nsid: valid_lexicons.nsid }).from(valid_lexicons),
+    db.select({ nsid: invalid_lexicons.nsid }).from(invalid_lexicons),
+  ).as('combined_nsids')
+
+  const combinedRepos = union(
+    db.select({ repoDid: valid_lexicons.repoDid }).from(valid_lexicons),
+    db.select({ repoDid: invalid_lexicons.repoDid }).from(invalid_lexicons),
+  ).as('combined_repos')
+
+  const now = new Date()
+  const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+  const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+
+  const [
+    validCount,
+    invalidCount,
+    nsidResult,
+    repoResult,
+    valid24h,
+    invalid24h,
+    valid7d,
+    invalid7d,
+  ] = await Promise.all([
+    db.$count(valid_lexicons),
+    db.$count(invalid_lexicons),
+    db.select({ count: sql<number>`count(*)`.as('count') }).from(combinedNsids),
+    db.select({ count: sql<number>`count(*)`.as('count') }).from(combinedRepos),
+    db.$count(valid_lexicons, gte(valid_lexicons.ingestedAt, last24h)),
+    db.$count(invalid_lexicons, gte(invalid_lexicons.ingestedAt, last24h)),
+    db.$count(valid_lexicons, gte(valid_lexicons.ingestedAt, last7d)),
+    db.$count(invalid_lexicons, gte(invalid_lexicons.ingestedAt, last7d)),
+  ])
+
+  return {
+    totalLexicons: validCount + invalidCount,
+    validLexicons: validCount,
+    invalidLexicons: invalidCount,
+    uniqueNsids: nsidResult[0]?.count ?? 0,
+    uniqueRepositories: repoResult[0]?.count ?? 0,
+    recentActivity: {
+      last24h: {
+        valid: valid24h,
+        invalid: invalid24h,
+        total: valid24h + invalid24h,
+      },
+      last7d: {
+        valid: valid7d,
+        invalid: invalid7d,
+        total: valid7d + invalid7d,
+      },
+    },
+  }
 }

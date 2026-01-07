@@ -5,13 +5,25 @@ import clsx from '@/util/clsx'
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   width?: 'auto' | 'full'
-  children: ReactNode
+  height?: 'auto' | 'full'
+  children?: ReactNode
 }
 
 export function Card(props: CardProps) {
-  const { width = 'auto', className = '', children, ...restProps } = props
+  const {
+    width = 'auto',
+    height = 'auto',
+    className = '',
+    children,
+    ...restProps
+  } = props
 
-  const classes = clsx(styles.card, styles[width], className)
+  const classes = clsx(
+    styles.card,
+    styles['w-' + width],
+    styles['h-' + height],
+    className,
+  )
 
   return (
     <div className={classes} {...restProps}>

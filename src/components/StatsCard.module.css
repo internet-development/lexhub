@@ -1,0 +1,85 @@
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+
+  @media (min-width: 30rem) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.statBox {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+  background-color: var(--color-background-muted);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.statBoxValue {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: 1;
+  margin-bottom: var(--space-2);
+
+  @media (min-width: 30rem) {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+.statBoxLabel {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+}
+
+.statBoxSub {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+}
+
+.recentActivity {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+}
+
+.recentActivityTitle {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--space-3);
+}
+
+.activityGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+.activityBox {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3);
+  background-color: var(--color-background-muted);
+  border-radius: var(--radius-md);
+}
+
+.activityPeriod {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.activityValue {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-success);
+}

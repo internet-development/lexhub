@@ -1,4 +1,6 @@
 .container {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background: linear-gradient(
     to bottom,
@@ -30,7 +32,7 @@
 }
 
 .hero {
-  padding: var(--space-16) 0;
+  padding: var(--space-12) 0 var(--space-8);
 }
 
 .heroContent {
@@ -57,7 +59,7 @@
 
 .heroDescription {
   color: var(--color-text-tertiary);
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-6);
   max-width: 43.75rem;
   margin-left: auto;
   margin-right: auto;
@@ -70,7 +72,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-6);
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-6);
 }
 
 .heroLink {
@@ -82,23 +84,50 @@
   font-size: var(--font-size-lg);
 }
 
+.heroStats {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.statNumber {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
 .searchContainer {
+  width: 100%;
   max-width: var(--container-sm);
   margin: 0 auto;
+  padding: 0 var(--space-4);
+  margin-bottom: var(--space-12);
+
+  @media (min-width: 70rem) {
+    margin-bottom: var(--space-16);
+  }
 }
 
 .main {
-  max-width: var(--container-lg);
+  width: 100%;
+  max-width: var(--container-sm);
   margin: 0 auto;
   padding: 0 var(--space-4) var(--space-8);
+
+  @media (min-width: 70rem) {
+    max-width: var(--container-lg);
+  }
 }
 
 .grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr;
   gap: var(--space-8);
   width: 100%;
   align-items: start;
+
+  @media (min-width: 70rem) {
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+  }
 }
 
 .grid > * {
@@ -106,40 +135,10 @@
   min-width: 0;
 }
 
-.fullHeightCard {
-  height: 100%;
-}
-
-.tabs {
-  display: flex;
-  gap: var(--space-4);
-  background-color: var(--color-background-muted);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-sm);
-}
-
-.tab {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: color var(--transition-fast);
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 0;
-}
-
-.tab.active {
-  color: var(--color-text-primary);
-}
-
-.tab:not(.active) {
-  color: var(--color-text-muted);
-}
-
-.tab:not(.active):hover {
-  color: var(--color-text-hover);
+.namespacesCard {
+  @media (min-width: 70rem) {
+    grid-row: span 2;
+  }
 }
 
 .codeBlock {
@@ -173,6 +172,8 @@
 
 .footer {
   padding: var(--space-6) 0;
+  flex-grow: 1;
+  align-content: end;
 }
 
 .footerContent {
