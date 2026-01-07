@@ -15,7 +15,7 @@
 }
 
 .link {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
 }
 
 .link:hover {
@@ -24,11 +24,11 @@
 
 .separator {
   color: var(--color-text-tertiary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
 }
 
 .current {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
 }
