@@ -59,7 +59,6 @@ export function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
       <div className={styles.defContent}>
         {def.description && (
           <div className={styles.defDescriptionSection}>
-            <span className={styles.defDescriptionLabel}>DESCRIPTION</span>
             <p className={styles.defDescription}>{def.description}</p>
           </div>
         )}
