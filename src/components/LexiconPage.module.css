@@ -23,7 +23,7 @@
   flex-wrap: wrap;
 
   @media (min-width: 48rem) {
-    align-items: center;
+    align-items: top;
     flex-direction: row;
     justify-content: space-between;
   }
