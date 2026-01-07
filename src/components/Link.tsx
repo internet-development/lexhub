@@ -6,7 +6,7 @@ import clsx from '@/util/clsx'
 
 export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   href: string
-  variant?: 'default' | 'primary' | 'muted'
+  variant?: 'default' | 'primary' | 'subtle' | 'muted'
   children: ReactNode
   external?: boolean
 }

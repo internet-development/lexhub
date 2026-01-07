@@ -16,6 +16,10 @@
   color: var(--color-primary);
 }
 
+.subtle {
+  color: var(--color-text-secondary);
+}
+
 .muted {
   color: var(--color-text-tertiary);
 }
