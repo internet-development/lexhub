@@ -2,6 +2,7 @@ import type { TreeData, TreeNode } from '@/app/(app)/[id]/data'
 import Link from '@/components/Link'
 import CubeIcon from '@/components/icons/CubeIcon'
 import HashIcon from '@/components/icons/HashIcon'
+import NamespaceIcon from '@/components/icons/GridIcon'
 import styles from './NamespaceTree.module.css'
 
 export type NamespaceTreeProps = TreeData
@@ -93,7 +94,7 @@ function ConnectorPath({
 function ItemPrefix({ node }: { node: TreeNode }) {
   if (node.isLexicon) return <CubeIcon size={14} />
   if (node.isSchemaDefinition) return <HashIcon size={14} />
-  return null
+  return <NamespaceIcon size={14} />
 }
 
 function ItemLabel({ node, depth }: { node: TreeNode; depth: number }) {
