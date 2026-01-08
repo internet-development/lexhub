@@ -72,7 +72,7 @@ export default async function HomePage() {
       </section>
 
       <div className={styles.searchContainer}>
-        <Search />
+        <Search alwaysActive />
       </div>
 
       <main className={styles.main}>

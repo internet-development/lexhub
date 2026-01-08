@@ -3,6 +3,7 @@ import { Card } from '@/components/Card'
 import CubeIcon from '@/components/icons/CubeIcon'
 import { Readme } from '@/components/Readme'
 import styles from './NamespacePage.module.css'
+import GridIcon from './icons/GridIcon'
 
 export interface NamespacePageProps {
   prefix: string
@@ -32,7 +33,7 @@ export function NamespacePage({ prefix, children }: NamespacePageProps) {
               className={styles.gridItem}
             >
               <div className={styles.itemLeft}>
-                <CubeIcon size={18} className={styles.itemIcon} />
+                <Icon isLexicon={child.isLexicon} />
                 <span className={styles.itemName}>{child.segment}</span>
               </div>
               <span className={styles.itemType}>
@@ -46,4 +47,9 @@ export function NamespacePage({ prefix, children }: NamespacePageProps) {
       </Card>
     </article>
   )
+}
+
+function Icon({ isLexicon }: { isLexicon: boolean }) {
+  const Comp = isLexicon ? CubeIcon : GridIcon
+  return <Comp size={16} className={styles.itemIcon} />
 }

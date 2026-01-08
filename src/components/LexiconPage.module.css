@@ -78,5 +78,10 @@
 
   &:last-child {
     border-bottom: none;
+    padding-bottom: var(--space-4);
+  }
+
+  &:not(:last-child) details[open] {
+    padding-bottom: var(--space-8);
   }
 }

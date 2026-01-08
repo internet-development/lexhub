@@ -11,9 +11,7 @@ export default function Header() {
   return (
     <header className={styles.container}>
       <div className={styles.logo}>
-        <Link href="/" variant="default">
-          <Logo />
-        </Link>
+        <Logo />
         <div className={styles.mobileIcons}>
           <a
             href="https://bsky.app"

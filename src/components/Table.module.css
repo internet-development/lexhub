@@ -12,7 +12,7 @@
 }
 
 .header {
-  background-color: var(--color-border);
+  background-color: var(--color-background-muted);
 }
 
 .body {
@@ -33,7 +33,6 @@
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
   text-align: left;
-  border-bottom: 0.0625rem solid var(--color-border);
 }
 
 .head:first-child {

@@ -22,7 +22,6 @@
 
 .card {
   padding: var(--space-4);
-  border-radius: var(--radius-md);
 }
 
 .grid {

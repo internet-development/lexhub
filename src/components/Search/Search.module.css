@@ -1,29 +1,39 @@
 .container {
   position: relative;
   flex: 1 0 auto;
+
+  @media (min-width: 64rem) {
+    max-width: var(--container-sm);
+  }
 }
 
 .wrapper {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: var(--space-2);
   background-color: var(--color-background);
   border: 0.0625rem solid var(--color-border);
   border-radius: var(--radius-sm);
   box-shadow: none;
+  min-height: 2.5rem;
   padding: var(--space-1);
 
-  transition: border-radius var(--transition-fast);
+  transition:
+    border-radius var(--transition-fast),
+    border-color var(--transition-fast);
 
   &.wrapperOpen {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
   }
+
+  &.wrapperActive {
+    border-color: var(--color-border-strong);
+  }
 }
 
 .input {
   flex: 1;
-  padding: var(--space-1) 0;
   margin-left: var(--space-2);
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
@@ -37,7 +47,7 @@
 }
 
 .button {
-  padding: var(--space-1) var(--space-6);
+  padding: var(--space-1) var(--space-4);
   background-color: var(--color-primary);
   color: var(--color-background);
   font-size: var(--font-size-sm);
@@ -47,6 +57,22 @@
   cursor: pointer;
   transition: background-color var(--transition-fast);
   white-space: nowrap;
+  min-width: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.buttonInactive {
+    background-color: var(--color-button-inactive);
+  }
+
+  &.buttonInactive:hover {
+    background-color: color-mix(
+      in srgb,
+      var(--color-button-inactive) 85%,
+      black
+    );
+  }
 }
 
 .button:hover {
@@ -58,12 +84,14 @@
   left: 0;
   right: 0;
   top: 100%;
+  max-height: 20rem;
+  overflow-y: auto;
   background: var(--color-background);
-  border: 0.0625rem solid var(--color-border);
+  border: 0.0625rem solid var(--color-border-strong);
   border-top: none;
   border-radius: 0 0 var(--radius-sm) var(--radius-sm);
   box-shadow: var(--shadow-md);
-  padding: 0 var(--space-4);
+  padding: 0 var(--space-3);
   z-index: 10;
 }
 
@@ -75,7 +103,7 @@
   background: transparent;
   cursor: pointer;
   color: var(--color-text-primary);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
 
   &:not(:last-child) {
     border-bottom: 0.0625rem solid var(--color-border);
@@ -84,11 +112,11 @@
 
 .suggestion:hover,
 .suggestionActive {
-  text-decoration: underline;
+  color: var(--color-primary);
 }
 
 .statusRow {
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) 0;
   color: var(--color-text-tertiary);
   font-size: var(--font-size-sm);
 }

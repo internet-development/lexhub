@@ -20,6 +20,7 @@
   --color-background-muted: #f3f4f6;
   --color-background-accent: #eff6ff;
   --color-success: #16a34a;
+  --color-button-inactive: #d4d4d4;
 
   /* Typography */
   --font-family-sans:
@@ -39,6 +40,7 @@
   --font-size-xl: 1.5rem;
   --font-size-2xl: 2.5rem;
   --font-size-3xl: 3rem;
+  --font-size-4xl: 4rem;
 
   /* Font Weights */
   --font-weight-light: 300;

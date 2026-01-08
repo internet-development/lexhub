@@ -4,6 +4,7 @@ import clsx from '@/util/clsx'
 import styles from './Search.module.css'
 import { useSearchSuggestions } from './useSearchSuggestions'
 import { useRouter } from 'next/navigation'
+import Spinner from '@/components/Spinner'
 
 import { useEffect, useId, useReducer, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
@@ -54,6 +55,7 @@ export interface SearchProps {
   onSearch?: (value: string) => void
   placeholder?: string
   buttonText?: string
+  alwaysActive?: boolean
 }
 
 export default function Search(props: SearchProps) {
@@ -62,6 +64,7 @@ export default function Search(props: SearchProps) {
     onSearch,
     placeholder = 'Search Lexicons, Namespaces...',
     buttonText = 'Search',
+    alwaysActive = false,
   } = props
 
   const router = useRouter()
@@ -70,6 +73,7 @@ export default function Search(props: SearchProps) {
   const inputRef = useRef<HTMLInputElement | null>(null)
 
   const [value, setValue] = useState('')
+  const [isFocused, setIsFocused] = useState(false)
   const [state, dispatch] = useReducer(reducer, initialState)
   const close = () => dispatch({ type: 'close' })
   const open = () => dispatch({ type: 'open' })
@@ -77,6 +81,16 @@ export default function Search(props: SearchProps) {
   useEffect(() => {
     dispatch({ type: 'resetActive' })
   }, [value])
+
+  // Scroll active suggestion into view when navigating with arrow keys
+  useEffect(() => {
+    if (state.activeIndex >= 0) {
+      const activeElement = document.getElementById(
+        `${listboxId}-${state.activeIndex}`,
+      )
+      activeElement?.scrollIntoView({ block: 'nearest' })
+    }
+  }, [state.activeIndex, listboxId])
 
   const handleChange = (next: string) => {
     setValue(next)
@@ -91,19 +105,27 @@ export default function Search(props: SearchProps) {
     }
   }
 
+  const inputHasValue = value.trim().length > 0
+
   const { suggestions, isLoading, error } = useSearchSuggestions(value, {
-    enabled: state.isOpen,
+    enabled: state.isOpen && inputHasValue,
     limit: 20,
   })
 
   const commitSelection = (next: string) => {
     handleChange(next)
     close()
-    inputRef.current?.focus()
+    // Navigate immediately when selecting a suggestion
+    if (onSearch) {
+      onSearch(next)
+    } else {
+      router.push(`/${next}`)
+    }
   }
 
-  const inputHasValue = value.trim().length > 0
   const showPopup = state.isOpen && inputHasValue
+  const isActive = alwaysActive || isFocused || inputHasValue
+  const showLoading = isActive && isLoading && inputHasValue
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     switch (e.key) {
@@ -152,7 +174,13 @@ export default function Search(props: SearchProps) {
         handleSearch()
       }}
     >
-      <div className={clsx(styles.wrapper, showPopup && styles.wrapperOpen)}>
+      <div
+        className={clsx(
+          styles.wrapper,
+          showPopup && styles.wrapperOpen,
+          isActive && styles.wrapperActive,
+        )}
+      >
         <input
           ref={inputRef}
           type="text"
@@ -172,15 +200,24 @@ export default function Search(props: SearchProps) {
             handleChange(e.target.value)
             open()
           }}
-          onFocus={open}
-          onBlur={close}
+          onFocus={() => {
+            setIsFocused(true)
+            open()
+          }}
+          onBlur={() => {
+            setIsFocused(false)
+            close()
+          }}
           onKeyDown={handleKeyDown}
           className={styles.input}
           autoComplete="off"
           spellCheck={false}
         />
-        <button className={styles.button} type="submit">
-          {buttonText}
+        <button
+          className={clsx(styles.button, !isActive && styles.buttonInactive)}
+          type="submit"
+        >
+          {showLoading ? <Spinner size={16} /> : buttonText}
         </button>
       </div>
 
