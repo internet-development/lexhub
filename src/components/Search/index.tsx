@@ -115,7 +115,12 @@ export default function Search(props: SearchProps) {
   const commitSelection = (next: string) => {
     handleChange(next)
     close()
-    inputRef.current?.focus()
+    // Navigate immediately when selecting a suggestion
+    if (onSearch) {
+      onSearch(next)
+    } else {
+      router.push(`/${next}`)
+    }
   }
 
   const showPopup = state.isOpen && inputHasValue
