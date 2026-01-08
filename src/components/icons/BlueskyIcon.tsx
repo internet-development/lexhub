@@ -5,17 +5,12 @@ import clsx from '@/util/clsx'
 export interface IconProps extends SVGProps<SVGSVGElement> {
   size?: number
   className?: string
-  variant?: 'default' | 'interactive'
 }
 
 export default function BlueskyIcon(props: IconProps) {
-  const { size = 24, className = '', variant = 'default', ...restProps } = props
+  const { size = 24, className = '', ...restProps } = props
 
-  const classes = clsx(
-    iconStyles.icon,
-    variant === 'interactive' && iconStyles.interactiveBlue,
-    className,
-  )
+  const classes = clsx(iconStyles.animate, className)
 
   return (
     <svg

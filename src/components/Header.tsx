@@ -1,11 +1,10 @@
 'use client'
 
+import styles from './Header.module.css'
+
 import Logo from '@/components/Logo'
 import Search from '@/components/Search'
-import BlueskyIcon from '@/components/icons/BlueskyIcon'
-import GitHubIcon from '@/components/icons/GitHubIcon'
-import Link from '@/components/Link'
-import styles from './Header.module.css'
+import SocialLinks from '@/components/SocialLinks'
 
 export default function Header() {
   return (
@@ -13,24 +12,7 @@ export default function Header() {
       <div className={styles.logo}>
         <Logo />
         <div className={styles.mobileIcons}>
-          <a
-            href="https://bsky.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Bluesky"
-            className={styles.iconLink}
-          >
-            <BlueskyIcon size={18} variant="interactive" />
-          </a>
-          <a
-            href="https://github.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="GitHub"
-            className={styles.iconLink}
-          >
-            <GitHubIcon size={18} variant="interactive" />
-          </a>
+          <SocialLinks />
         </div>
       </div>
 
@@ -38,24 +20,7 @@ export default function Header() {
         <Search />
 
         <div className={styles.icons}>
-          <a
-            href="https://bsky.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Bluesky"
-            className={styles.iconLink}
-          >
-            <BlueskyIcon size={18} variant="interactive" />
-          </a>
-          <a
-            href="https://github.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="GitHub"
-            className={styles.iconLink}
-          >
-            <GitHubIcon size={18} variant="interactive" />
-          </a>
+          <SocialLinks />
         </div>
       </div>
     </header>

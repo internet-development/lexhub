@@ -1,20 +1,7 @@
-.icon {
+.animate {
   transition: all 0.2s;
-}
 
-.interactive {
-  cursor: pointer;
-}
-
-.interactive:hover {
-  opacity: 0.8;
-}
-
-.interactiveBlue {
-  cursor: pointer;
-}
-
-.interactiveBlue:hover {
-  fill: #2d68f8;
-  stroke: #2d68f8;
+  &:hover {
+    transform: scale(1.1);
+  }
 }

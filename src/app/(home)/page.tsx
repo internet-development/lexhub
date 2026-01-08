@@ -3,13 +3,12 @@ import styles from './page.module.css'
 
 import { Card, CardBody, CardHeader } from '@/components/Card'
 import AtIcon from '@/components/icons/AtIcon'
-import BlueskyIcon from '@/components/icons/BlueskyIcon'
 import DocumentIcon from '@/components/icons/DocumentIcon'
-import GitHubIcon from '@/components/icons/GitHubIcon'
 import Link from '@/components/Link'
 import Logo from '@/components/Logo'
 import NamespaceTabs from '@/components/NamespaceTabs'
 import Search from '@/components/Search'
+import SocialLinks from '@/components/SocialLinks'
 import StatsCard from '@/components/StatsCard'
 import { getRootNamespaces, getStats } from '@/db/queries'
 
@@ -28,20 +27,7 @@ export default async function HomePage() {
         <div className={styles.headerContent}>
           <Logo />
           <div className={styles.socialLinks}>
-            <a
-              href="https://bsky.app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <BlueskyIcon size={20} variant="interactive" />
-            </a>
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <GitHubIcon size={20} variant="interactive" />
-            </a>
+            <SocialLinks />
           </div>
         </div>
       </header>
