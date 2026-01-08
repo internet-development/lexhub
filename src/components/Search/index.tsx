@@ -105,8 +105,10 @@ export default function Search(props: SearchProps) {
     }
   }
 
+  const inputHasValue = value.trim().length > 0
+
   const { suggestions, isLoading, error } = useSearchSuggestions(value, {
-    enabled: state.isOpen,
+    enabled: state.isOpen && inputHasValue,
     limit: 20,
   })
 
@@ -116,7 +118,6 @@ export default function Search(props: SearchProps) {
     inputRef.current?.focus()
   }
 
-  const inputHasValue = value.trim().length > 0
   const showPopup = state.isOpen && inputHasValue
   const isActive = alwaysActive || isFocused || inputHasValue
   const showLoading = isActive && isLoading && inputHasValue
