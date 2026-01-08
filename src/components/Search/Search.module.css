@@ -87,11 +87,11 @@
   max-height: 20rem;
   overflow-y: auto;
   background: var(--color-background);
-  border: 0.0625rem solid var(--color-border);
+  border: 0.0625rem solid var(--color-border-strong);
   border-top: none;
   border-radius: 0 0 var(--radius-sm) var(--radius-sm);
   box-shadow: var(--shadow-md);
-  padding: 0 var(--space-4);
+  padding: 0 var(--space-3);
   z-index: 10;
 }
 
@@ -116,7 +116,7 @@
 }
 
 .statusRow {
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) 0;
   color: var(--color-text-tertiary);
   font-size: var(--font-size-sm);
 }
