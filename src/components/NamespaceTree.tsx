@@ -1,9 +1,8 @@
+import type { TreeData, TreeNode } from '@/app/(app)/[id]/data'
 import Link from '@/components/Link'
 import CubeIcon from '@/components/icons/CubeIcon'
-import type { TreeData, TreeNode } from '@/app/(app)/[id]/data'
+import HashIcon from '@/components/icons/HashIcon'
 import styles from './NamespaceTree.module.css'
-import { varbinary } from 'drizzle-orm/mysql-core'
-import { de } from 'zod/locales'
 
 export type NamespaceTreeProps = TreeData
 
@@ -93,7 +92,7 @@ function ConnectorPath({
 
 function ItemPrefix({ node }: { node: TreeNode }) {
   if (node.isLexicon) return <CubeIcon size={14} />
-  if (node.isSchemaDefinition) return '#'
+  if (node.isSchemaDefinition) return <HashIcon size={14} />
   return null
 }
 
