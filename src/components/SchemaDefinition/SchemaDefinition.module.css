@@ -181,6 +181,7 @@
   color: var(--color-text-secondary);
   text-transform: uppercase;
   background-color: var(--color-background-subtle);
+  white-space: nowrap;
 }
 
 .fieldTableHead:first-child {
@@ -198,20 +199,14 @@
     color-mix(in srgb, var(--color-border) 50%, transparent);
 }
 
+.fieldTableCell:first-child,
+.fieldTableCell:nth-child(2) {
+  width: 20%;
+  white-space: nowrap;
+}
+
 .fieldTableRow:last-child .fieldTableCell {
   border-bottom: none;
-}
-
-.fieldTableCell:first-child {
-  width: 20%;
-}
-
-.fieldTableCell:nth-child(2) {
-  width: 25%;
-}
-
-.fieldTableCell:last-child {
-  width: 55%;
 }
 
 .fieldName {
