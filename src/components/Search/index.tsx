@@ -82,6 +82,16 @@ export default function Search(props: SearchProps) {
     dispatch({ type: 'resetActive' })
   }, [value])
 
+  // Scroll active suggestion into view when navigating with arrow keys
+  useEffect(() => {
+    if (state.activeIndex >= 0) {
+      const activeElement = document.getElementById(
+        `${listboxId}-${state.activeIndex}`,
+      )
+      activeElement?.scrollIntoView({ block: 'nearest' })
+    }
+  }, [state.activeIndex, listboxId])
+
   const handleChange = (next: string) => {
     setValue(next)
     onChange?.(next)
