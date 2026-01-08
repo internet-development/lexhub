@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 function useDebouncedValue(value: string, delayMs: number): string {
   const [debounced, setDebounced] = useState(value)
@@ -33,11 +33,23 @@ export function useSearchSuggestions(
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Track the last successfully fetched query to avoid re-fetching
+  const lastFetchedQuery = useRef<string | null>(null)
+
   useEffect(() => {
     if (!enabled || !debounced) {
-      setSuggestions([])
+      // Don't clear suggestions when just disabled - keep them for when re-enabled
+      if (!debounced) {
+        setSuggestions([])
+        lastFetchedQuery.current = null
+      }
       setIsLoading(false)
       setError(null)
+      return
+    }
+
+    // Skip fetch if we already have results for this query
+    if (lastFetchedQuery.current === debounced) {
       return
     }
 
@@ -56,12 +68,14 @@ export function useSearchSuggestions(
       .then((json) => {
         setSuggestions(json.data)
         setIsLoading(false)
+        lastFetchedQuery.current = debounced
       })
       .catch((e) => {
         if (controller.signal.aborted) return
         setError(e instanceof Error ? e.message : 'Failed to load suggestions')
         setSuggestions([])
         setIsLoading(false)
+        lastFetchedQuery.current = null
       })
 
     return () => controller.abort()
