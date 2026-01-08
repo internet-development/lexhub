@@ -103,7 +103,7 @@
   background: transparent;
   cursor: pointer;
   color: var(--color-text-primary);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
 
   &:not(:last-child) {
     border-bottom: 0.0625rem solid var(--color-border);
@@ -112,7 +112,7 @@
 
 .suggestion:hover,
 .suggestionActive {
-  text-decoration: underline;
+  color: var(--color-primary);
 }
 
 .statusRow {
