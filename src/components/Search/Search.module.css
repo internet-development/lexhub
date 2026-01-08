@@ -1,6 +1,10 @@
 .container {
   position: relative;
   flex: 1 0 auto;
+
+  @media (min-width: 64rem) {
+    max-width: var(--container-sm);
+  }
 }
 
 .wrapper {
