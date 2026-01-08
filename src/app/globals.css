@@ -20,6 +20,7 @@
   --color-background-muted: #f3f4f6;
   --color-background-accent: #eff6ff;
   --color-success: #16a34a;
+  --color-button-inactive: #d4d4d4;
 
   /* Typography */
   --font-family-sans:

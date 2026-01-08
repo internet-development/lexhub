@@ -17,11 +17,17 @@
   box-shadow: none;
   padding: var(--space-1);
 
-  transition: border-radius var(--transition-fast);
+  transition:
+    border-radius var(--transition-fast),
+    border-color var(--transition-fast);
 
   &.wrapperOpen {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
+  }
+
+  &.wrapperActive {
+    border-color: var(--color-border-strong);
   }
 }
 
@@ -51,6 +57,22 @@
   cursor: pointer;
   transition: background-color var(--transition-fast);
   white-space: nowrap;
+  min-width: 5.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.buttonInactive {
+    background-color: var(--color-button-inactive);
+  }
+
+  &.buttonInactive:hover {
+    background-color: color-mix(
+      in srgb,
+      var(--color-button-inactive) 85%,
+      black
+    );
+  }
 }
 
 .button:hover {
@@ -62,6 +84,8 @@
   left: 0;
   right: 0;
   top: 100%;
+  max-height: 20rem;
+  overflow-y: auto;
   background: var(--color-background);
   border: 0.0625rem solid var(--color-border);
   border-top: none;
