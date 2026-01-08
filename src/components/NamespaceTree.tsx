@@ -92,9 +92,9 @@ function ConnectorPath({
 }
 
 function ItemPrefix({ node }: { node: TreeNode }) {
-  if (node.isLexicon) return <CubeIcon size={14} />
-  if (node.isSchemaDefinition) return <HashIcon size={14} />
-  return <NamespaceIcon size={14} />
+  if (node.isLexicon) return <CubeIcon size={16} />
+  if (node.isSchemaDefinition) return <HashIcon size={16} />
+  return <NamespaceIcon size={16} />
 }
 
 function ItemLabel({ node, depth }: { node: TreeNode; depth: number }) {
