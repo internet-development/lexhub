@@ -9,12 +9,13 @@
 
 .wrapper {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: var(--space-2);
   background-color: var(--color-background);
   border: 0.0625rem solid var(--color-border);
   border-radius: var(--radius-sm);
   box-shadow: none;
+  min-height: 2.5rem;
   padding: var(--space-1);
 
   transition:
@@ -33,7 +34,6 @@
 
 .input {
   flex: 1;
-  padding: var(--space-1) 0;
   margin-left: var(--space-2);
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
@@ -47,7 +47,7 @@
 }
 
 .button {
-  padding: var(--space-1) var(--space-6);
+  padding: var(--space-1) var(--space-4);
   background-color: var(--color-primary);
   color: var(--color-background);
   font-size: var(--font-size-sm);
@@ -57,7 +57,7 @@
   cursor: pointer;
   transition: background-color var(--transition-fast);
   white-space: nowrap;
-  min-width: 5.75rem;
+  min-width: 5rem;
   display: flex;
   align-items: center;
   justify-content: center;
