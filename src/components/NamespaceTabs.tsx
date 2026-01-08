@@ -27,7 +27,7 @@ export default function NamespaceTabs(props: NamespaceTabsProps) {
   const { featured, recent, className } = props
 
   return (
-    <Card className={clsx(styles.card, className)}>
+    <Card height="full" className={clsx(styles.card, className)}>
       <CardHeader>
         <h3 className={cardStyles.title}>Namespaces</h3>
       </CardHeader>
