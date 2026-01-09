@@ -19,6 +19,7 @@
     "@atproto/lexicon-resolver": "^0.2.4",
     "@atproto/syntax": "^0.4.2",
     "@atproto/tap": "^0.0.2",
+    "date-fns": "^4.1.0",
     "drizzle-kit": "^0.31.7",
     "drizzle-orm": "^0.44.7",
     "next": "^16.0.7",
