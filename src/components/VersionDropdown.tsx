@@ -21,7 +21,7 @@ export function VersionDropdown({
     <details className={styles.root}>
       <summary className={styles.summary}>
         <span className={styles.summaryText}>
-          <span className={styles.cid}>{currentCid}</span>
+          <span className={styles.cid}>{formatCid(currentCid)}</span>
           {currentVersion && (
             <span
               className={styles.date}
@@ -30,7 +30,6 @@ export function VersionDropdown({
               {formatRelativeTime(currentVersion.ingestedAt)}
             </span>
           )}
-          {isLatest && <span className={styles.badge}>latest</span>}
         </span>
         <svg
           className={styles.chevron}
@@ -58,12 +57,15 @@ export function VersionDropdown({
               className={clsx(styles.item, isCurrent && styles.itemCurrent)}
             >
               <div className={styles.itemHeader}>
-                <span
+                <time
                   className={styles.itemDate}
-                  title={formatAbsoluteDate(version.ingestedAt)}
+                  dateTime={version.ingestedAt.toISOString()}
+                  title={version.ingestedAt.toISOString()}
                 >
-                  {formatRelativeTime(version.ingestedAt)}
-                </span>
+                  <span>{formatRelativeTime(version.ingestedAt)}</span>
+                  <span>&nbsp; - &nbsp;</span>
+                  <span>{formatAbsoluteDate(version.ingestedAt)}</span>
+                </time>
                 {isLatestVersion && (
                   <span className={styles.badge}>latest</span>
                 )}
@@ -89,22 +91,14 @@ export function VersionDropdown({
 }
 
 /**
- * Formats a CID for display: first 3 chars + ... + last 6 chars
- * e.g., "bafyreib..." -> "baf...eib123"
+ * Formats a CID for display: first 5 chars + ... + last 10 chars
+ * e.g., "bafyreib..." -> "bafyr...eib123"
  */
 function formatCid(cid: string): string {
-  if (cid.length <= 12) return cid
-  return `${cid.slice(0, 3)}...${cid.slice(-6)}`
+  if (cid.length <= 18) return cid
+  return `${cid.slice(0, 5)}...${cid.slice(-10)}`
 }
 
-/**
- * Formats a DID for display: removes prefix and shows first 8 chars
- * e.g., "did:plc:abc123xyz" -> "abc123xy..."
- */
-function formatDid(did: string): string {
-  const short = did.replace(/^did:(plc|web):/, '')
-  return short.length > 8 ? `${short.slice(0, 8)}...` : short
-}
 /**
  * Formats a date as relative time
  * e.g., "2 days ago", "about 1 month ago"
@@ -118,5 +112,5 @@ function formatRelativeTime(date: Date): string {
  * e.g., "Jan 8, 2026"
  */
 function formatAbsoluteDate(date: Date): string {
-  return format(date, 'MMM d, yyyy')
+  return format(date, 'PPpp')
 }
