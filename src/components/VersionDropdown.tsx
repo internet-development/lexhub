@@ -9,40 +9,6 @@ export interface VersionDropdownProps {
   versions: LexiconVersion[]
 }
 
-/**
- * Formats a CID for display: first 3 chars + ... + last 6 chars
- * e.g., "bafyreib..." -> "baf...eib123"
- */
-function formatCid(cid: string): string {
-  if (cid.length <= 12) return cid
-  return `${cid.slice(0, 3)}...${cid.slice(-6)}`
-}
-
-/**
- * Formats a DID for display: removes prefix and shows first 8 chars
- * e.g., "did:plc:abc123xyz" -> "abc123xy..."
- */
-function formatDid(did: string): string {
-  const short = did.replace(/^did:(plc|web):/, '')
-  return short.length > 8 ? `${short.slice(0, 8)}...` : short
-}
-
-/**
- * Formats a date as relative time
- * e.g., "2 days ago", "about 1 month ago"
- */
-function formatRelativeTime(date: Date): string {
-  return formatDistanceToNow(date, { addSuffix: true })
-}
-
-/**
- * Formats a date as absolute
- * e.g., "Jan 8, 2026"
- */
-function formatAbsoluteDate(date: Date): string {
-  return format(date, 'MMM d, yyyy')
-}
-
 export function VersionDropdown({
   nsid,
   currentCid,
@@ -84,15 +50,11 @@ export function VersionDropdown({
         {versions.map((version, index) => {
           const isCurrent = version.cid === currentCid
           const isLatestVersion = index === 0
-          // For latest version, link without query param; otherwise include cid
-          const href = isLatestVersion
-            ? `/${nsid}`
-            : `/${nsid}?cid=${version.cid}`
 
           return (
             <a
               key={version.cid}
-              href={href}
+              href={`/${nsid}?cid=${version.cid}`}
               className={clsx(styles.item, isCurrent && styles.itemCurrent)}
             >
               <span className={styles.itemCid}>{formatCid(version.cid)}</span>
@@ -112,4 +74,38 @@ export function VersionDropdown({
       </div>
     </details>
   )
+}
+
+/**
+ * Formats a CID for display: first 3 chars + ... + last 6 chars
+ * e.g., "bafyreib..." -> "baf...eib123"
+ */
+function formatCid(cid: string): string {
+  if (cid.length <= 12) return cid
+  return `${cid.slice(0, 3)}...${cid.slice(-6)}`
+}
+
+/**
+ * Formats a DID for display: removes prefix and shows first 8 chars
+ * e.g., "did:plc:abc123xyz" -> "abc123xy..."
+ */
+function formatDid(did: string): string {
+  const short = did.replace(/^did:(plc|web):/, '')
+  return short.length > 8 ? `${short.slice(0, 8)}...` : short
+}
+
+/**
+ * Formats a date as relative time
+ * e.g., "2 days ago", "about 1 month ago"
+ */
+function formatRelativeTime(date: Date): string {
+  return formatDistanceToNow(date, { addSuffix: true })
+}
+
+/**
+ * Formats a date as absolute
+ * e.g., "Jan 8, 2026"
+ */
+function formatAbsoluteDate(date: Date): string {
+  return format(date, 'MMM d, yyyy')
 }
