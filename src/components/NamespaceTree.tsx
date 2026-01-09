@@ -101,9 +101,15 @@ function ItemLabel({ node, depth }: { node: TreeNode; depth: number }) {
   const style = { marginLeft: LABEL_GAP }
   const variant = node.isSubject ? 'primary' : depth === 0 ? 'muted' : 'subtle'
 
+  // For schema definitions (fragments), use just the hash to scroll without navigation
+  // This preserves query params like ?cid=xxx
+  const href = node.isSchemaDefinition
+    ? `#${node.segment}`
+    : `/${node.fullPath}`
+
   return (
     <Link
-      href={`/${node.fullPath}`}
+      href={href}
       className={styles.itemLabel}
       style={style}
       variant={variant}
