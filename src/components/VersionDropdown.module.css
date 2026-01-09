@@ -34,18 +34,26 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  min-width: 0;
+  overflow: hidden;
 }
 
 .cid {
   font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
   color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .date {
   color: var(--color-text-tertiary);
+  white-space: nowrap;
 }
 
 .chevron {
+  flex-shrink: 0;
   transition: transform var(--transition-fast);
 
   details[open] & {
@@ -64,7 +72,7 @@
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-md);
   z-index: 10;
-  max-height: 20rem;
+  max-height: 24rem;
   overflow-y: auto;
 
   /* On larger screens, allow menu to expand beyond parent width */
@@ -72,14 +80,15 @@
     left: auto;
     min-width: 100%;
     width: max-content;
+    max-width: 36rem;
   }
 }
 
 .item {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
   text-decoration: none;
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
@@ -97,20 +106,35 @@
   background: var(--color-background-muted);
 }
 
-.itemCid {
-  font-family: var(--font-family-mono);
-  color: var(--color-text-primary);
+.itemHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
 }
 
 .itemDate {
-  color: var(--color-text-tertiary);
-  text-wrap: nowrap;
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
-.itemDid {
-  color: var(--color-text-tertiary);
+.itemRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);
+}
+
+.label {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+  min-width: 2rem;
+}
+
+.value {
+  color: var(--color-text-secondary);
+  word-break: break-all;
 }
 
 .badge {
@@ -118,6 +142,7 @@
   background: var(--color-primary);
   color: var(--color-background);
   border-radius: var(--radius-xs);
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
 }

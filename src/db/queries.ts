@@ -41,6 +41,7 @@ export async function getLexiconByCid(
 export interface LexiconVersion {
   cid: string
   repoDid: string
+  repoRev: string
   ingestedAt: Date
 }
 
@@ -54,6 +55,7 @@ export async function getVersionsForNsid(
     .select({
       cid: valid_lexicons.cid,
       repoDid: valid_lexicons.repoDid,
+      repoRev: valid_lexicons.repoRev,
       ingestedAt: valid_lexicons.ingestedAt,
     })
     .from(valid_lexicons)
