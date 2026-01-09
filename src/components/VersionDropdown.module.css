@@ -78,7 +78,7 @@
   overflow-y: auto;
 
   /* On larger screens, allow menu to expand beyond parent width */
-  @media (min-width: 64rem) {
+  @media (min-width: 48rem) {
     left: auto;
     min-width: 100%;
     width: max-content;
