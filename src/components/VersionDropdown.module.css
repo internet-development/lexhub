@@ -53,12 +53,14 @@
 }
 
 .chevron {
+  color: var(--color-text-tertiary);
   flex-shrink: 0;
   transition: transform var(--transition-fast);
+  transform: rotate(-90deg);
+}
 
-  details[open] & {
-    transform: rotate(180deg);
-  }
+.root[open] .chevron {
+  transform: rotate(0deg);
 }
 
 .menu {

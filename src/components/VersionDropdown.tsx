@@ -1,5 +1,6 @@
 import { formatDistanceToNow, format } from 'date-fns'
 import type { LexiconVersion } from '@/db/queries'
+import ChevronIcon from '@/components/icons/ChevronIcon'
 import clsx from '@/util/clsx'
 import styles from './VersionDropdown.module.css'
 
@@ -31,19 +32,7 @@ export function VersionDropdown({
             </span>
           )}
         </span>
-        <svg
-          className={styles.chevron}
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
+        <ChevronIcon size={16} className={styles.chevron} />
       </summary>
       <div className={styles.menu}>
         {versions.map((version, index) => {
