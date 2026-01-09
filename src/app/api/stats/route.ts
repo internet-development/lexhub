@@ -3,7 +3,7 @@ import { valid_lexicons, invalid_lexicons } from '@/db/schema'
 import { gte, sql } from 'drizzle-orm'
 import { union } from 'drizzle-orm/pg-core'
 
-export const revalidate = 60 // Cache the stats for 60 seconds
+export const dynamic = 'force-dynamic'
 
 async function fetchTotalCounts() {
   const [valid, invalid] = await Promise.all([

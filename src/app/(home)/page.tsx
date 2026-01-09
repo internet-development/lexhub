@@ -10,15 +10,15 @@ import NamespaceTabs from '@/components/NamespaceTabs'
 import Search from '@/components/Search'
 import SocialLinks from '@/components/SocialLinks'
 import StatsCard from '@/components/StatsCard'
-import { getRootNamespaces, getStats } from '@/db/queries'
+import { getCachedRootNamespaces, getCachedStats } from '@/db/queries'
 
-export const revalidate = 60 // Cache the page for 60 seconds
+export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
   const [featured, recent, stats] = await Promise.all([
-    getRootNamespaces({ sortBy: 'featured' }),
-    getRootNamespaces({ sortBy: 'recentlyUpdated', limit: 20 }),
-    getStats(),
+    getCachedRootNamespaces('featured'),
+    getCachedRootNamespaces('recentlyUpdated', 20),
+    getCachedStats(),
   ])
 
   return (

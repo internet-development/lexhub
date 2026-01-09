@@ -2,6 +2,7 @@ import { db } from '@/db'
 import { valid_lexicons, invalid_lexicons } from '@/db/schema'
 import { and, desc, eq, gte, sql } from 'drizzle-orm'
 import { union } from 'drizzle-orm/pg-core'
+import { unstable_cache } from 'next/cache'
 import type { LexiconDoc } from '@atproto/lexicon'
 
 /**
@@ -289,3 +290,22 @@ export async function getStats(): Promise<Stats> {
     },
   }
 }
+
+/**
+ * Cached version of getRootNamespaces for use in pages with force-dynamic
+ */
+export const getCachedRootNamespaces = unstable_cache(
+  async (
+    sortBy: 'featured' | 'lexiconCount' | 'recentlyUpdated' = 'featured',
+    limit: number = 20,
+  ) => getRootNamespaces({ sortBy, limit }),
+  ['root-namespaces'],
+  { revalidate: 60 },
+)
+
+/**
+ * Cached version of getStats for use in pages with force-dynamic
+ */
+export const getCachedStats = unstable_cache(getStats, ['stats'], {
+  revalidate: 60,
+})
