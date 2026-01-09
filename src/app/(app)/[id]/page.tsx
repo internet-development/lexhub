@@ -9,11 +9,13 @@ import styles from './page.module.css'
 
 interface PageProps {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ cid?: string }>
 }
 
-export default async function Page({ params }: PageProps) {
+export default async function Page({ params, searchParams }: PageProps) {
   const { id } = await params
-  const data = await getPageData(id)
+  const { cid } = await searchParams
+  const data = await getPageData(id, cid)
 
   if (!data) {
     notFound()
@@ -22,7 +24,11 @@ export default async function Page({ params }: PageProps) {
   return (
     <PageLayout data={data}>
       {data.type === 'lexicon' ? (
-        <LexiconPage lexicon={data.lexicon} />
+        <LexiconPage
+          lexicon={data.lexicon}
+          currentCid={data.currentCid}
+          versions={data.versions}
+        />
       ) : (
         <NamespacePage prefix={data.prefix} children={data.children} />
       )}

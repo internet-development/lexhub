@@ -8,13 +8,20 @@ import { SchemaDefinition } from '@/components/SchemaDefinition'
 import { VersionDropdown } from '@/components/VersionDropdown'
 import { compareDefNames } from '@/util/sort'
 import type { LexiconDoc } from '@atproto/lexicon'
+import type { LexiconVersion } from '@/db/queries'
 import styles from './LexiconPage.module.css'
 
 export interface LexiconPageProps {
   lexicon: LexiconDoc
+  currentCid: string
+  versions: LexiconVersion[]
 }
 
-export function LexiconPage({ lexicon }: LexiconPageProps) {
+export function LexiconPage({
+  lexicon,
+  currentCid,
+  versions,
+}: LexiconPageProps) {
   const defs = Object.entries(lexicon.defs ?? {}).sort(([a], [b]) =>
     compareDefNames(a, b),
   )
@@ -24,7 +31,11 @@ export function LexiconPage({ lexicon }: LexiconPageProps) {
       <header className={styles.header}>
         <div className={styles.titleRow}>
           <h1 className={styles.title}>{lexicon.id}</h1>
-          <VersionDropdown />
+          <VersionDropdown
+            nsid={lexicon.id}
+            currentCid={currentCid}
+            versions={versions}
+          />
         </div>
       </header>
 
