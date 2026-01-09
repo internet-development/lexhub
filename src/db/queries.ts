@@ -1,6 +1,6 @@
 import { db } from '@/db'
 import { valid_lexicons, invalid_lexicons } from '@/db/schema'
-import { desc, eq, gte, sql } from 'drizzle-orm'
+import { and, desc, eq, gte, sql } from 'drizzle-orm'
 import { union } from 'drizzle-orm/pg-core'
 import type { LexiconDoc } from '@atproto/lexicon'
 
@@ -19,6 +19,48 @@ export async function getLexiconByNsid(
 
   if (result.length === 0) return null
   return result[0].data as LexiconDoc
+}
+
+/**
+ * Fetches a specific lexicon version by NSID and CID
+ */
+export async function getLexiconByCid(
+  nsid: string,
+  cid: string,
+): Promise<LexiconDoc | null> {
+  const result = await db
+    .select({ data: valid_lexicons.data })
+    .from(valid_lexicons)
+    .where(and(eq(valid_lexicons.nsid, nsid), eq(valid_lexicons.cid, cid)))
+    .limit(1)
+
+  if (result.length === 0) return null
+  return result[0].data as LexiconDoc
+}
+
+export interface LexiconVersion {
+  cid: string
+  repoDid: string
+  ingestedAt: Date
+}
+
+/**
+ * Fetches all versions of a lexicon by NSID, sorted by most recent first
+ */
+export async function getVersionsForNsid(
+  nsid: string,
+): Promise<LexiconVersion[]> {
+  const result = await db
+    .select({
+      cid: valid_lexicons.cid,
+      repoDid: valid_lexicons.repoDid,
+      ingestedAt: valid_lexicons.ingestedAt,
+    })
+    .from(valid_lexicons)
+    .where(eq(valid_lexicons.nsid, nsid))
+    .orderBy(desc(valid_lexicons.ingestedAt))
+
+  return result
 }
 
 /**
