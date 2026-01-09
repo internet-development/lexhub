@@ -25,6 +25,9 @@
   &.wrapperOpen {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
+
+    /* Instant change when opening - no transition */
+    transition: border-radius 0s;
   }
 
   &.wrapperActive {
