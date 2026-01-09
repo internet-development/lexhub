@@ -97,6 +97,7 @@
 
 .itemDate {
   color: var(--color-text-tertiary);
+  text-wrap: nowrap;
 }
 
 .itemDid {
