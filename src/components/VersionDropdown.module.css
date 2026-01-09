@@ -1,4 +1,13 @@
 .root {
+  position: relative;
+  flex-grow: 1;
+
+  @media (min-width: 64rem) {
+    flex-grow: 0;
+  }
+}
+
+.summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -10,13 +19,97 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   background: var(--color-background);
-  flex-grow: 1;
+  list-style: none;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &:hover {
+    background: var(--color-background-subtle);
+  }
+}
+
+.summaryText {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.cid {
+  font-family: var(--font-family-mono);
+  color: var(--color-text-primary);
+}
+
+.date {
+  color: var(--color-text-tertiary);
+}
+
+.chevron {
+  transition: transform var(--transition-fast);
+
+  details[open] & {
+    transform: rotate(180deg);
+  }
+}
+
+.menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: var(--space-1);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  z-index: 10;
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  text-decoration: none;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
 
   &:hover {
     background: var(--color-background-subtle);
   }
 
-  @media (min-width: 64rem) {
-    flex-grow: 0;
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--color-border);
   }
+}
+
+.itemCurrent {
+  background: var(--color-background-muted);
+}
+
+.itemCid {
+  font-family: var(--font-family-mono);
+  color: var(--color-text-primary);
+}
+
+.itemDate {
+  color: var(--color-text-tertiary);
+}
+
+.itemDid {
+  color: var(--color-text-tertiary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+}
+
+.badge {
+  padding: var(--space-0-5) var(--space-2);
+  background: var(--color-primary);
+  color: var(--color-background);
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
 }

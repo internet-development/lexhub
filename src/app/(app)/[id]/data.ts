@@ -2,8 +2,11 @@ import type { LexiconDoc } from '@atproto/lexicon'
 import { isValidNsid } from '@atproto/syntax'
 import {
   getLexiconByNsid,
+  getLexiconByCid,
+  getVersionsForNsid,
   getDirectChildren,
   getNamespaceChildren,
+  type LexiconVersion,
   type NamespaceChild,
 } from '@/db/queries'
 import { getParentPath, isValidNamespacePrefix } from '@/util/nsid'
@@ -135,6 +138,8 @@ export type LexiconPageData = {
   type: 'lexicon'
   treeData: TreeData
   lexicon: LexiconDoc
+  currentCid: string
+  versions: LexiconVersion[]
 }
 
 export type NamespacePageData = {
@@ -149,14 +154,30 @@ export type PageData = LexiconPageData | NamespacePageData
 /**
  * Gets all data needed to render a page for a given path.
  * Returns null if the path is invalid or has no content.
+ *
+ * @param path - The NSID or namespace prefix to fetch
+ * @param cid - Optional CID to fetch a specific version (lexicon pages only)
  */
-export async function getPageData(path: string): Promise<PageData | null> {
+export async function getPageData(
+  path: string,
+  cid?: string,
+): Promise<PageData | null> {
   // Check for lexicon document first
   if (isValidNsid(path)) {
-    const lexicon = await getLexiconByNsid(path)
-    if (lexicon) {
+    // Fetch versions list and lexicon in parallel
+    const [versions, lexicon] = await Promise.all([
+      getVersionsForNsid(path),
+      cid ? getLexiconByCid(path, cid) : getLexiconByNsid(path),
+    ])
+
+    // If CID was specified but not found, return null (triggers 404)
+    if (cid && !lexicon) return null
+
+    if (lexicon && versions.length > 0) {
       const treeData = await getTreeData(path, lexicon)
-      return { type: 'lexicon', treeData, lexicon }
+      // Use explicit CID or fall back to latest version's CID
+      const currentCid = cid ?? versions[0].cid
+      return { type: 'lexicon', treeData, lexicon, currentCid, versions }
     }
   }
 
