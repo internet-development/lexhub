@@ -45,18 +45,22 @@ export async function GET(request: NextRequest) {
     // 0 = prefix match (query%)
     // 1 = exact segment match (%.query or %.query.%)
     // 2 = contains match (%query%)
+    // 3 = fuzzy match (word_similarity >= 0.3)
     // Within each rank, shorter NSIDs appear first
     // Note: UNION already deduplicates, so no need for DISTINCT
     const rows = await db
       .select({ value: combinedNsids.nsid })
       .from(combinedNsids)
-      .where(sql`${combinedNsids.nsid} ilike ${'%' + query + '%'}`)
+      .where(
+        sql`${combinedNsids.nsid} ilike ${'%' + query + '%'} OR word_similarity(${query}, ${combinedNsids.nsid}) >= 0.3`,
+      )
       .orderBy(
         sql`CASE
           WHEN ${combinedNsids.nsid} ilike ${query + '%'} THEN 0
           WHEN ${combinedNsids.nsid} ilike ${'%.' + query} THEN 1
           WHEN ${combinedNsids.nsid} ilike ${'%.' + query + '.%'} THEN 1
-          ELSE 2
+          WHEN ${combinedNsids.nsid} ilike ${'%' + query + '%'} THEN 2
+          ELSE 3
         END`,
         sql`length(${combinedNsids.nsid})`,
         combinedNsids.nsid,
