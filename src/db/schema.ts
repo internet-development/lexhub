@@ -70,6 +70,10 @@ export const valid_lexicons = pgTable(
 
     // JSONB GIN index for efficient querying within lexicon content
     index('valid_lexicons_data_gin_idx').using('gin', table.data),
+
+    // GIN trigram index for fast ILIKE and fuzzy search (requires pg_trgm extension)
+    index('valid_lexicons_nsid_trgm_idx')
+      .using('gin', sql`${table.nsid} gin_trgm_ops`),
   ],
 )
 
@@ -142,6 +146,10 @@ export const invalid_lexicons = pgTable(
 
     // Ensure reasons array is not empty
     check('reasons_not_empty', sql`jsonb_array_length(${table.reasons}) > 0`),
+
+    // GIN trigram index for fast ILIKE and fuzzy search (requires pg_trgm extension)
+    index('invalid_lexicons_nsid_trgm_idx')
+      .using('gin', sql`${table.nsid} gin_trgm_ops`),
   ],
 )
 

@@ -1,0 +1,285 @@
+{
+  "id": "b61fb1de-d22a-41a5-8f3e-e173bdb41148",
+  "prevId": "c1f00b27-49e4-47bf-ac81-bee9b74f067f",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.invalid_lexicons": {
+      "name": "invalid_lexicons",
+      "schema": "",
+      "columns": {
+        "nsid": {
+          "name": "nsid",
+          "type": "varchar(317)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cid": {
+          "name": "cid",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "repo_did": {
+          "name": "repo_did",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "repo_rev": {
+          "name": "repo_rev",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "raw_data": {
+          "name": "raw_data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reasons": {
+          "name": "reasons",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ingested_at": {
+          "name": "ingested_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "invalid_lexicons_nsid_idx": {
+          "name": "invalid_lexicons_nsid_idx",
+          "columns": [
+            {
+              "expression": "nsid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "invalid_lexicons_repo_did_idx": {
+          "name": "invalid_lexicons_repo_did_idx",
+          "columns": [
+            {
+              "expression": "repo_did",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "invalid_lexicons_raw_data_gin_idx": {
+          "name": "invalid_lexicons_raw_data_gin_idx",
+          "columns": [
+            {
+              "expression": "raw_data",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        },
+        "invalid_lexicons_reasons_gin_idx": {
+          "name": "invalid_lexicons_reasons_gin_idx",
+          "columns": [
+            {
+              "expression": "reasons",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        },
+        "invalid_lexicons_nsid_trgm_idx": {
+          "name": "invalid_lexicons_nsid_trgm_idx",
+          "columns": [
+            {
+              "expression": "\"nsid\" gin_trgm_ops",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "invalid_lexicons_nsid_cid_repo_did_pk": {
+          "name": "invalid_lexicons_nsid_cid_repo_did_pk",
+          "columns": [
+            "nsid",
+            "cid",
+            "repo_did"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "reasons_not_empty": {
+          "name": "reasons_not_empty",
+          "value": "jsonb_array_length(\"invalid_lexicons\".\"reasons\") > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.valid_lexicons": {
+      "name": "valid_lexicons",
+      "schema": "",
+      "columns": {
+        "nsid": {
+          "name": "nsid",
+          "type": "varchar(317)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cid": {
+          "name": "cid",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "repo_did": {
+          "name": "repo_did",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "repo_rev": {
+          "name": "repo_rev",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ingested_at": {
+          "name": "ingested_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "valid_lexicons_nsid_idx": {
+          "name": "valid_lexicons_nsid_idx",
+          "columns": [
+            {
+              "expression": "nsid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "valid_lexicons_repo_did_idx": {
+          "name": "valid_lexicons_repo_did_idx",
+          "columns": [
+            {
+              "expression": "repo_did",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "valid_lexicons_data_gin_idx": {
+          "name": "valid_lexicons_data_gin_idx",
+          "columns": [
+            {
+              "expression": "data",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        },
+        "valid_lexicons_nsid_trgm_idx": {
+          "name": "valid_lexicons_nsid_trgm_idx",
+          "columns": [
+            {
+              "expression": "\"nsid\" gin_trgm_ops",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "valid_lexicons_nsid_cid_repo_did_pk": {
+          "name": "valid_lexicons_nsid_cid_repo_did_pk",
+          "columns": [
+            "nsid",
+            "cid",
+            "repo_did"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

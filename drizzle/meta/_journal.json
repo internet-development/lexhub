@@ -12,8 +12,8 @@
     {
       "idx": 1,
       "version": "7",
-      "when": 1736459100000,
-      "tag": "0001_search_improvements",
+      "when": 1768002412627,
+      "tag": "0001_add_trgm_indexes",
       "breakpoints": true
     }
   ]
