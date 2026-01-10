@@ -21,9 +21,14 @@ import type { TypeCategory } from './utils/types'
 export interface SchemaDefinitionProps {
   name: string
   def: LexUserType
+  highlightedJson: string
 }
 
-export function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
+export function SchemaDefinition({
+  name,
+  def,
+  highlightedJson,
+}: SchemaDefinitionProps) {
   const [activeTab, setActiveTab] = useState<'fields' | 'json'>('fields')
   const detailsRef = useDetailsRef()
   const hash = useHash()
@@ -79,15 +84,20 @@ export function SchemaDefinition({ name, def }: SchemaDefinitionProps) {
         {activeTab === 'fields' ? (
           <NiceView def={def} />
         ) : (
-          <JsonView def={def} />
+          <JsonView highlightedJson={highlightedJson} />
         )}
       </div>
     </details>
   )
 }
 
-function JsonView({ def }: { def: LexUserType }) {
-  return <pre className={styles.schema}>{JSON.stringify(def, null, 2)}</pre>
+function JsonView({ highlightedJson }: { highlightedJson: string }) {
+  return (
+    <div
+      className={styles.schema}
+      dangerouslySetInnerHTML={{ __html: highlightedJson }}
+    />
+  )
 }
 
 function NiceView({ def }: { def: LexUserType }) {
