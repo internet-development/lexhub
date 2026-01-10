@@ -102,14 +102,14 @@ const client = new Client('https://public.api.bsky.app')
 
 // Start making requests using generated schemas
 const response = await client.call(app.bsky.actor.getProfile, {
-  actor: 'pfrazee.com',
+  actor: 'caidan.dev',
 })`
 
 async function GetStartedCard() {
   return (
     <Card className={styles.fullHeightCard}>
       <CardHeader>
-        <h3 className={cardStyles.title}>Get started</h3>
+        <h3 className={cardStyles.title}>Getting Started with JavaScript</h3>
       </CardHeader>
       <CardBody>
         <p className={styles.getStartedText}>
