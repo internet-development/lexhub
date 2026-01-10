@@ -1,0 +1,19 @@
+.codeBlock {
+  overflow-x: auto;
+}
+
+.codeBlock pre {
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background-muted) !important;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+.codeBlock code {
+  font-family: inherit;
+  font-size: inherit;
+  background: none;
+}

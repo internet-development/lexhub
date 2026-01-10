@@ -1,3 +1,4 @@
+import { codeToHtml } from 'shiki'
 import { Card } from '@/components/Card'
 import {
   DetailsGroupControls,
@@ -17,13 +18,24 @@ export interface LexiconPageProps {
   versions: LexiconVersion[]
 }
 
-export function LexiconPage({
+export async function LexiconPage({
   lexicon,
   currentCid,
   versions,
 }: LexiconPageProps) {
   const defs = Object.entries(lexicon.defs ?? {}).sort(([a], [b]) =>
     compareDefNames(a, b),
+  )
+
+  const highlightedDefs = await Promise.all(
+    defs.map(async ([name, def]) => {
+      const json = JSON.stringify(def, null, 2)
+      const highlighted = await codeToHtml(json, {
+        lang: 'json',
+        theme: 'github-light',
+      })
+      return { name, def, highlightedJson: highlighted }
+    }),
   )
 
   return (
@@ -49,9 +61,13 @@ export function LexiconPage({
             <DetailsGroupControls />
           </div>
           <ul className={styles.defList}>
-            {defs.map(([name, def]) => (
+            {highlightedDefs.map(({ name, def, highlightedJson }) => (
               <li className={styles.defItem} id={name} key={name}>
-                <SchemaDefinition name={name} def={def} />
+                <SchemaDefinition
+                  name={name}
+                  def={def}
+                  highlightedJson={highlightedJson}
+                />
               </li>
             ))}
           </ul>

@@ -116,13 +116,23 @@
 
 .schema {
   margin-top: var(--space-4);
-  padding: var(--space-4);
-  background-color: var(--color-background-subtle);
-  border-radius: var(--radius-md);
   overflow-x: auto;
+}
+
+.schema pre {
+  margin: 0;
+  padding: var(--space-4);
+  background-color: var(--color-background-subtle) !important;
+  border-radius: var(--radius-md);
   font-size: var(--font-size-xs);
   line-height: 1.5;
   font-family: var(--font-family-mono);
+}
+
+.schema code {
+  font-family: inherit;
+  font-size: inherit;
+  background: none;
 }
 
 .noFields {

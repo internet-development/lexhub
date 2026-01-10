@@ -2,6 +2,7 @@ import cardStyles from '@/components/Card.module.css'
 import styles from './page.module.css'
 
 import { Card, CardBody, CardHeader } from '@/components/Card'
+import { CodeBlock } from '@/components/CodeBlock'
 import AtIcon from '@/components/icons/AtIcon'
 import DocumentIcon from '@/components/icons/DocumentIcon'
 import Link from '@/components/Link'
@@ -91,7 +92,20 @@ export default async function HomePage() {
   )
 }
 
-function GetStartedCard() {
+const installCommand = `$ npx @atproto/lex install app.bsky.actor.getProfile`
+
+const exampleCode = `import { Client } from '@atproto/lex'
+import * as app from './lexicons/app.js'
+
+// Create a client instance
+const client = new Client('https://public.api.bsky.app')
+
+// Start making requests using generated schemas
+const response = await client.call(app.bsky.actor.getProfile, {
+  actor: 'pfrazee.com',
+})`
+
+async function GetStartedCard() {
   return (
     <Card className={styles.fullHeightCard}>
       <CardHeader>
@@ -102,28 +116,19 @@ function GetStartedCard() {
           Install the schemas you want to build with:
         </p>
 
-        <div className={styles.codeBlock}>
-          <code className={styles.code}>
-            $ npx @atproto/lex install app.bsky.actor.getProfile
-          </code>
-        </div>
+        <CodeBlock
+          code={installCommand}
+          lang="bash"
+          className={styles.codeBlockSpacing}
+        />
 
         <p className={styles.getStartedText}>And start building:</p>
 
-        <div className={styles.codeBlock}>
-          <pre className={styles.codeMultiline}>
-            <code>{`import { Client } from '@atproto/lex'
-import * as app from './lexicons/app.js'
-
-// Create a client instance
-const client = new Client('https://public.api.bsky.app')
-
-// Start making requests using generated schemas
-const response = await client.call(app.bsky.actor.getProfile, {
-  actor: 'pfrazee.com',
-})`}</code>
-          </pre>
-        </div>
+        <CodeBlock
+          code={exampleCode}
+          lang="javascript"
+          className={styles.codeBlockSpacing}
+        />
 
         <Link href="#docs" variant="primary" style={{ fontSize: '14px' }}>
           Read the docs

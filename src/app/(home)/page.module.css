@@ -137,27 +137,8 @@
   }
 }
 
-.codeBlock {
-  background-color: var(--color-background-muted);
-  border-radius: var(--radius-md);
-  padding: var(--space-4);
+.codeBlockSpacing {
   margin-bottom: var(--space-4);
-  overflow-x: auto;
-}
-
-.code {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-  white-space: nowrap;
-  font-family: var(--font-family-mono);
-}
-
-.codeMultiline {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-  font-family: var(--font-family-mono);
-  white-space: pre;
-  line-height: var(--line-height-relaxed);
 }
 
 .getStartedText {
