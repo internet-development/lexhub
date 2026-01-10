@@ -49,9 +49,13 @@ export async function GET(request: NextRequest) {
     )
     const whereClause = sql.join(whereConditions, sql` AND `)
 
-    // Build relevance score: sum of per-term scores
-    // Lower score = better match
-    // Per term: 0 = prefix, 1 = segment match, 2 = contains, 3 = fuzzy only
+    // Relevance ranking: sum of per-term scores (lower = better match)
+    // Per term scoring:
+    //   0 = prefix match (term%)
+    //   1 = exact segment match (%.term or %.term.%)
+    //   2 = contains match (%term%)
+    //   3 = fuzzy only (word_similarity >= 0.3)
+    // Within each score, shorter NSIDs appear first
     const scoreExpressions: SQL[] = terms.map(
       (term) =>
         sql`CASE
