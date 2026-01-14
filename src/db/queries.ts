@@ -85,7 +85,7 @@ export async function getDirectChildren(
       FROM valid_lexicons
       WHERE nsid LIKE ${prefix + '.%'}
         AND SPLIT_PART(nsid, '.', ${prefixDepth + 1}) != ''
-      ORDER BY segment
+      ORDER BY is_lexicon ASC, segment ASC
     `)
 
   return result.map((row) => ({
@@ -138,7 +138,7 @@ export async function getNamespaceChildren(
         ORDER BY ingested_at DESC LIMIT 1
       ) as description
     FROM child_segments cs
-    ORDER BY cs.segment
+    ORDER BY is_lexicon ASC, cs.segment ASC
   `)
 
   return result.map((row) => ({
